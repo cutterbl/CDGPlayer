@@ -1,0 +1,20 @@
+<cdg-controls>
+    <button class="playButton" disabled><i class="icofont-play-alt-1"></i></button>
+    <span class="timePlayed"></span>
+    <div class="progress-container">
+        <progress class="progressMeter"
+                  ng-disabled="$ctrls.loading"
+                  value="0"
+                  max="100"></progress>
+    </div>
+    <span class="trackLength"></span>
+    <span>
+        <input type="number"
+               class="pitch"
+               step="1"
+               min="-7"
+               max="7"
+               value="0"
+               disabled />
+    </span>
+</cdg-controls>

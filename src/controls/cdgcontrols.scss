@@ -1,0 +1,106 @@
+/*
+* @package IcoFont
+* @version 1.0.1
+* @author IcoFont https://icofont.com
+* @copyright Copyright (c) 2015 - 2018 IcoFont
+* @license - https://icofont.com/license/
+*/
+
+@font-face
+{
+
+  font-family: "IcoFont";
+  font-weight: normal;
+  font-style: normal;
+  src: inline("./fonts/icofont.woff2") format("woff2"),
+  inline("./fonts/icofont.woff") format("woff");
+}
+
+[class^="icofont-"], [class*=" icofont-"]
+{
+  font-family: 'IcoFont' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+.icofont-play-alt-1:before
+{
+  content: "\eca6";
+}
+
+.icofont-pause:before
+{
+  content: "\eca5";
+}
+
+.icofont-md
+{
+  font-size: 1.25em;
+}
+
+.icofont-fw
+{
+  text-align: center;
+  width: 1.25em;
+}
+
+cdg-controls {
+  position: relative;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  height: 40px;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-align-items: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 1.25em;
+  & > * {
+    margin: 3px 5px;
+    &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .playButton {
+    padding: 5px;
+    width: 34px;
+    height: 34px;
+    &>i {
+      @extend .icofont-fw;
+      @extend .icofont-md;
+    }
+  }
+  .pitch {
+    height: 28px;
+    font-size: .8em;
+    text-align: right;
+  }
+  .progress-container {
+    position: relative;
+    flex: 0 1 auto;
+    width: 100%;
+    display: inline-block;
+    progress {
+      width: 100%;
+    }
+  }
+}

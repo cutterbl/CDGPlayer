@@ -1,0 +1,28 @@
+$playerBaseWidth: 300px;
+$playerBaseHeight: 216px;
+
+@mixin playerDimensions($magnifier: 1) {
+  width: ($playerBaseWidth * $magnifier);
+  height: ($playerBaseHeight * $magnifier);
+}
+
+.cdg-video-wrapper {
+  position: relative;
+  text-align: center;
+  background-color: #000;
+  .cdg-video-player {
+    position: relative;
+    margin: 0 auto;
+    @include playerDimensions();
+    padding: 12px;
+    &.x2 {
+      @include playerDimensions(2);
+    }
+    &.x3 {
+      @include playerDimensions(3);
+    }
+    &.x4 {
+      @include playerDimensions(4);
+    }
+  }
+}

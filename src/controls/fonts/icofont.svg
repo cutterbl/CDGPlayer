@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg">
+<defs>
+<font id="icofont" horiz-adv-x="1000" >
+<font-face font-family="IcoFont" font-weight="400" font-style="Regular" units-per-em="1000" ascent="850" descent="-150" />
+<missing-glyph horiz-adv-x="1000" />
+<glyph glyph-name="play-alt-1" horiz-adv-x="1000" unicode="&#xeca6;" d="M0 350c-1-290 241-498 500-494 256-4 500 200 500 493 0 289-237 490-491 494-265 5-508-202-509-493z m407 228c114-69 226-138 340-208 19-12 19-41 0-53l-340-208c-20-13-47 2-47 26v417c0 24 27 39 47 26z" />
+<glyph glyph-name="pause" horiz-adv-x="1000" unicode="&#xeca5;" d="M500 850c-276 0-500-224-500-500s224-500 500-500 500 224 500 500-224 500-500 500z m-78-654c0-31-25-56-56-56s-56 25-56 56v310c0 31 25 56 56 56s56-25 56-56v-310z m260 0c0-31-25-56-56-56s-56 25-56 56v310c0 31 25 56 56 56s56-25 56-56v-310z" />
+</font>
+</defs>
+</svg>
