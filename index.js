@@ -6,5 +6,5 @@ import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
     const statusChanged = player.props.on('status', val => {
         console.log('Status: ', val);
     });
-    player.load('zipfiles/FTXC416-03 - Rascal Flatts - Changed.zip');
+    player.load('zipfiles/FTXC416-01 - Dierks Bentley - 5150.zip');
 })();

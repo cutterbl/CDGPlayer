@@ -88,19 +88,58 @@ cdg-controls {
       @extend .icofont-fw;
       @extend .icofont-md;
     }
+    &[disabled] {
+      cursor: not-allowed;
+    }
   }
   .pitch {
     height: 28px;
     font-size: .8em;
     text-align: right;
+    &[disabled] {
+      cursor: not-allowed;
+    }
   }
   .progress-container {
     position: relative;
     flex: 0 1 auto;
     width: 100%;
     display: inline-block;
+
     progress {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
+      height: 1em;
+      &::-webkit-progress-bar {
+        background-color: #eee;
+        border-radius: .5em;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+      }
+      &::-webkit-progress-value {
+        background-image:
+                -webkit-linear-gradient(-45deg,
+                        transparent 33%,
+                        rgba(0, 0, 0, -1) 33%,
+                        rgba(0, 0, 0, .1) 66%,
+                        transparent 66%),
+                -webkit-linear-gradient(top,
+                        rgba(255, 255, 255, .25),
+                        rgba(0, 0, 0, .25)),
+                -webkit-linear-gradient(left, #09c, #f44);
+        border-radius: .5em;
+        background-size: 35px 20px, 100% 100%, 100% 100%;
+        // -webkit-animation: animate-stripes 5s linear infinite;
+        // animation: animate-stripes 5s linear infinite;
+      }
     }
+    /* @-webkit-keyframes animate-stripes {
+      0% { background-position: 0px 0px, 0 0, 0 0; }
+      100% { background-position: -100px 0px, 0 0, 0 0; }
+    }
+    @keyframes animate-stripes {
+      0% { background-position: 0px 0px, 0 0, 0 0; }
+      100% { background-position: -100px 0px, 0 0, 0 0; }
+    } */
   }
 }

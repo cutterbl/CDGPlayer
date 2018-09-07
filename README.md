@@ -111,6 +111,24 @@ Changes the song key by semitones (half steps) up or down. Maintains the song te
 player.changeKey(-1); // takes it down half a step
 ```
 
+#### volume(Float - volume up or down, rounded to two decimal places)
+
+Changes the song volume up or down.
+
+```javascript
+player.volume(.5); // takes it up a few steps
+player.volume(-.5); // takes it down a few steps
+```
+
+### toggleMute()
+
+Toggles the "Mute". If volume is greater than 0 it will "Mute" the audio. If already "Mute"d it will put the volume
+back to it's previous value.
+
+```javascript
+player.toggleMute();
+```
+
 ### Video Methods
 
 #### changeSize([Integer - optional size multiplier (1 - 4)])
@@ -220,11 +238,15 @@ override the default display, write a css file that is appened to the **body** o
 * .playButton>i -- The icon in the play button
 * .playButton>i.icofont-play-alt-1 -- The icon when song not playing (play icon)
 * .playButton>i.icofont-pause -- The icon when song is playing (pause icon)
+* .playButton[disabled] -- change the cursor when disabled
 * .timePlayed -- The current playhead time position
 * .progress-meter -- Container for the meter
-* .progressMeter -- The actual `progress` HTML element
+* .progress -- The actual `progress` HTML element
+* .progress::-webkit-progress-bar -- Style the progress bar
+* .progress::-webkit-progress-value -- Style the "progress" of the progress bar
 * .trackLength -- The current song's track length
 * .pitch -- The key changer Number input
+* .pitch[disabled] -- change the cursor when disabled
 
 ### Running The Example
 

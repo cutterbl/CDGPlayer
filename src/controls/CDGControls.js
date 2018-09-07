@@ -1,8 +1,5 @@
 import ctrlTemplate from './cdgcontrols.html';
 import './cdgcontrols.scss';
-//import { icon } from '@fortawesome/fontawesome-svg-core';
-//import { faPlayCircle } from '@fortawesome/free-regular-svg-icons';
-//import { faPauseCircle } from '@fortawesome/free-regular-svg-icons';
 
 const playIcon = 'icofont-play-alt-1'; //icon(faPlayCircle, { title: 'Play', transform: { size: 24 } }).html;
 const pauseIcon = 'icofont-pause'; //icon(faPauseCircle, { title: 'Pause', transform: { size: 24 } }).html;
