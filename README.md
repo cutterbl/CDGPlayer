@@ -131,18 +131,8 @@ player.toggleMute();
 
 ### Video Methods
 
-#### changeSize([Integer - optional size multiplier (1 - 4)])
-
-Changes the class applied to the video wrapper, controlling it's overall size. Calling the method without a size
-multiplier will automatically add 1 multiplier. Passing in a value will change the class to the corresponding
-multiplier.
-
-**Note:** This method is automatically attached to the `doubleclick` event of the video wrapper at the time the
-component is instantiated.
-
-```javascript
-player.changeSize(3); // adds the 'x3' class to the video wrapper
-```
+None. Video is loaded with the file, and plays/pauses when the audio plays/pauses. Size of your overall video is
+controlled by how you size your 'player' container, and will automatically maintain it's aspect ratio of 300:216.
 
 ### Other Methods
 

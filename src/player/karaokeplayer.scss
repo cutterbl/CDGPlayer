@@ -1,28 +1,17 @@
 $playerBaseWidth: 300px;
 $playerBaseHeight: 216px;
 
-@mixin playerDimensions($magnifier: 1) {
-  width: ($playerBaseWidth * $magnifier);
-  height: ($playerBaseHeight * $magnifier);
-}
-
 .cdg-video-wrapper {
-  position: relative;
-  text-align: center;
+  height: 0;
+  overflow: hidden;
+  padding-top: $playerBaseHeight / $playerBaseWidth * 100%;
   background-color: #000;
+  position: relative;
   .cdg-video-player {
-    position: relative;
-    margin: 0 auto;
-    @include playerDimensions();
-    padding: 12px;
-    &.x2 {
-      @include playerDimensions(2);
-    }
-    &.x3 {
-      @include playerDimensions(3);
-    }
-    &.x4 {
-      @include playerDimensions(4);
-    }
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
   }
 }

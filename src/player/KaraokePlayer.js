@@ -94,14 +94,6 @@ const updatePlayPosition = function() {
   this.player.sync(this.shifter.timePlayed * 1000);
 };
 
-const setupListeners = function() {
-  this.wrapper.addEventListener('dblclick', () => this.changeSize());
-};
-
-const removeListeners = function() {
-  this.wrapper.removeListener('dblclick', () => this.changeSize());
-};
-
 export class KaraokePlayer {
   audio = null;
   gainNode = null;
@@ -137,7 +129,6 @@ export class KaraokePlayer {
       afterRender: context => copyContextToCanvas.call(this, context)
     });
     this.wrapper.appendChild(this.canvas);
-    setupListeners.call(this);
 
     this.audio = new (window.AudioContext || window.webkitAudioContext)();
     this.gainNode = this.audio.createGain();
@@ -145,7 +136,6 @@ export class KaraokePlayer {
   }
 
   destroy() {
-    removeListeners.call(this);
     this.wrapper.classList.remove('cdg-video-wrapper');
     this.stop();
     this.gainNode.disconnect();
@@ -154,25 +144,6 @@ export class KaraokePlayer {
     this.audio = null;
     this.canvas.remove();
     this.props.destroy = true;
-  }
-
-  changeSize(value = null) {
-    if (value === null) {
-      if (this.currentSize < 4) {
-        this.currentSize = this.currentSize + 1;
-      } else {
-        this.currentSize = 1;
-      }
-    } else {
-      if (isNaN(value)) {
-        throw new Error(`${value} is not a valid size (1 - 4)`);
-      }
-      this.currentSize = value < 1 ? 1 : value > 4 ? 4 : value;
-    }
-    this.canvas.classList.remove('x2', 'x3', 'x4');
-    if (this.currentSize > 1) {
-      this.canvas.classList.add(`x${this.currentSize}`);
-    }
   }
 
   load(filePath) {

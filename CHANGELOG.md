@@ -1,5 +1,11 @@
 # Change Log
 
+## Sep 10, 2018 - v0.0.4
+
+* Remove the changeSize() method from the CDGPlayer, and setup automatic ratio on resize via CSS
+* Update CDGControls SASS for spacing in the control bar.
+* Updated the example
+
 ## Sep 7, 2018 - v0.0.3
 
 * Updates to the CDGControls CSS

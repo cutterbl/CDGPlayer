@@ -5,15 +5,28 @@
         <title>CDGKaraoke Example</title>
         <script type="text/javascript" src="node_modules/jszip/dist/jszip.min.js"></script>
         <script type="text/javascript" src="node_modules/jszip-utils/dist/jszip-utils.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css">
         <style>
-            #app {
+            body {
                 text-align: center;
             }
-            .cdg-player {
+            #app {
                 display: inline-block;
                 margin: 0 auto;
+            }
+            .cdg-player {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
                 min-width: 440px;
-                min-height: 285px;
+                min-height: 366px;
+                margin: 0 auto;
+            }
+            #cdg_controls {
+                padding: 5px;
+            }
+            #cdg_wrapper {
+                flex: 0 1 auto;
             }
         </style>
     </head>

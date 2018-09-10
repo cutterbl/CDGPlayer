@@ -71,7 +71,9 @@ cdg-controls {
   justify-content: center;
   width: 100%;
   font-size: 1.25em;
-  & > * {
+  & > button,
+  & > span,
+  & > div {
     margin: 3px 5px;
     &:first-child {
       margin-left: 0;
