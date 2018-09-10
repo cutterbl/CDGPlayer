@@ -2,6 +2,7 @@
 //import * as JSZip from 'jszip';
 //import JSZipUtils from 'jszip-utils';
 import Deferred from '../utilities/deferred.js';
+// import jsmediatags from 'jsmediatags';
 
 const getDataFile = function(filePath) {
   const deferred = new Deferred();
@@ -24,13 +25,40 @@ const loadZipBuffer = function(fileBuffer) {
 const loadAudio = function(zipEntry) {
   return zipEntry
     .async('arraybuffer')
-    .catch(error => Promise.reject(new Error(`Unable to load the audio file`, error)));
+    .catch(() => Promise.reject(new Error(`Unable to load the audio file`)));
+};
+
+const getFallbackTagData = function(name) {
+  const parts = name.split(' - ');
+  const tag = { tags: {} };
+  // most downloaded cdgs have filenames 'album - artist - songtitle
+  tag.tags.album = parts[0].trim();
+  tag.tags.artist = parts[1] ? parts[1].trim() : tag.tags.album;
+  tag.tags.title = parts[2] ? parts[2].trim() : tag.tags.artist;
+  return tag;
+};
+
+const getTagData = function(zipEntry) {
+  return zipEntry
+    .async('blob')
+    .then(
+      buffer =>
+        new Promise(resolve => {
+          new jsmediatags.Reader(buffer)
+            .setTagsToRead(['title', 'artist', 'album', 'track', 'year', 'genre', 'picture'])
+            .read({
+              onSuccess: tag => resolve(tag),
+              onError: () => resolve(getFallbackTagData(zipEntry.name))
+            });
+        })
+    )
+    .catch(() => Promise.reject(new Error('Unable to parse tag data')));
 };
 
 const loadVideo = function(zipEntry) {
   return zipEntry
     .async('uint8array')
-    .catch(error => Promise.reject(new Error(`Unable to load the video file`, error)));
+    .catch(() => Promise.reject(new Error(`Unable to load the video file`)));
 };
 
 const getKaraokeFiles = function(zipFile) {
@@ -48,8 +76,9 @@ const processZip = function(entries) {
   if (audio.length && video.length) {
     process.push(loadAudio(audio[0]));
     process.push(loadVideo(video[0]));
-    return Promise.all(process).catch(error =>
-      Promise.reject(new Error(`Processing audio and video failed`, error))
+    process.push(getTagData(audio[0]));
+    return Promise.all(process).catch(() =>
+      Promise.reject(new Error(`Processing audio and video failed`))
     );
   }
   const errors = [];

@@ -11,12 +11,13 @@ testing for it.)
 
 ## External Dependencies
 
-The `CDGPlayer` requires that [JSZip](https://stuk.github.io/jszip/) and [JSZipUtils](https://stuk.github.io/jszip-utils/)
-be included in your html.
+The `CDGPlayer` requires that [JSZip](https://stuk.github.io/jszip/), [JSZipUtils](https://stuk.github.io/jszip-utils/)
+and [jsmediatags](https://github.com/aadsm/jsmediatags) be included in your html.
 
 ```html
 <script type="text/javascript" src="my/assets/jszip.min.js"></script>
 <script type="text/javascript" src="my/assets/jszip-utils.min.js"></script>
+<script type="text/javascript" src="my/assets/jsmediatags.min.js"></script>
 ```
 
 ## Usage

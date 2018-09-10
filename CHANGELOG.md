@@ -1,5 +1,10 @@
 # Change Log
 
+## Sep 10, 2018 - v0.0.5
+
+* Read ID3 tag from audio file in zip
+* Output 'title' and 'artist' from tag data to the canvas on file load
+
 ## Sep 10, 2018 - v0.0.4
 
 * Remove the changeSize() method from the CDGPlayer, and setup automatic ratio on resize via CSS

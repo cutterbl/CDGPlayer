@@ -16,9 +16,7 @@ const createDisplayCanvas = function(width, height) {
 
 const createCanvasContext = function(canvas) {
   const ctx = canvas.getContext('2d');
-  ctx.mozImageSmoothingEnabled = false;
   ctx.webkitImageSmoothingEnabled = false;
-  ctx.msImageSmoothingEnabled = false;
   ctx.imageSmoothingEnabled = false;
   return ctx;
 };
@@ -70,10 +68,52 @@ const loadVideo = function(buffer) {
   return deferred.promise;
 };
 
+const wrapText = function(context, text, x, y, maxWidth, lineHeight) {
+  var words = text.split(' ');
+  var line = '';
+
+  for (var n = 0; n < words.length; n++) {
+    var testLine = line + words[n] + ' ';
+    var metrics = context.measureText(testLine);
+    var testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      context.fillText(line.trim(), x, y);
+      line = words[n] + ' ';
+      y += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  context.fillText(line.trim(), x, y);
+};
+
+const drawTag = function() {
+  const ctx = this.ctx;
+  const cvs = this.canvas;
+  const maxWidth = cvs.width - 10;
+  let lineHeight = 30;
+  const x = maxWidth / 2;
+  let y = 30;
+  ctx.font = '30px sans-serif';
+  ctx.fillStyle = '#fff';
+  ctx.textAlign = 'center';
+  wrapText(ctx, this.tag.title, x, y, maxWidth, lineHeight);
+  ctx.font = '20px sans-serif';
+  y = cvs.height - 60;
+  wrapText(ctx, `by ${this.tag.artist}`, x, y, maxWidth, lineHeight);
+};
+
+const loadTag = function(tag) {
+  console.log('TAG: ', tag);
+  this.tag = tag.tags;
+  return drawTag.call(this);
+};
+
 const handleExtractedZip = function(responseArr) {
   const process = [];
   process.push(loadAudio.call(this, responseArr[0])); // audio is always first
-  process.push(loadVideo.call(this, responseArr[1])); // video is always last
+  process.push(loadVideo.call(this, responseArr[1])); // video is always second
+  process.push(loadTag.call(this, responseArr[2])); // mp3 tag data is always last
   return Promise.all(process)
     .then(() => {
       this.props.status = 'File Loaded';
@@ -178,6 +218,7 @@ export class KaraokePlayer {
   }
 
   start() {
+    clearCanvas.call(this, this.ctx, this.canvas);
     this.shifter.connect(this.gainNode);
     this.gainNode.connect(this.audio.destination);
     this.props.isPlaying = true;
@@ -199,6 +240,7 @@ export class KaraokePlayer {
     if (this.shifter) {
       this.pause();
       this.changePlayerPosition(0);
+      drawTag.call(this);
     }
   }
 

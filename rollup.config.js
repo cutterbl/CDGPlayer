@@ -10,13 +10,13 @@ import { terser } from 'rollup-plugin-terser';
 import pkg from './package.json';
 
 export default [
-    {
-        input: 'src/index.js',
-        output: [
-            {
-                file: pkg.module,
-                format: 'esm',
-                banner: `
+  {
+    input: 'src/index.js',
+    output: [
+      {
+        file: pkg.module,
+        format: 'esm',
+        banner: `
 /**
  *  @package CDGPlayer 
  *  @version ${pkg.version}
@@ -45,71 +45,72 @@ export default [
  *  (For the 'play' and 'pause' buttons, which are the only ones included)
  */
                 `,
-                sourcemap: true,
-                exports: 'named',
-                globals: {
-                    JSZip: 'JSZip',
-                    JSZipUtils: 'JSZipUtils'
-                }
+        sourcemap: true,
+        exports: 'named',
+        globals: {
+          JSZip: 'JSZip',
+          JSZipUtils: 'JSZipUtils',
+          jsmediatags: 'jsmediatags'
+        }
+      }
+    ],
+    external: ['JSZip', 'JSZipUtils', 'jsmediatags'],
+    plugins: [
+      clear({
+        targets: ['dist'],
+        watch: true
+      }),
+      postcss({
+        minimize: true,
+        config: {
+          path: './postcss.config.js'
+        }
+      }),
+      html({
+        htmlMinifierOptions: {
+          collapseWhitespace: true,
+          collapseBooleanAttributes: true,
+          conservativeCollapse: true
+        }
+      }),
+      eslint({
+        exclude: [/node_modules/, /jszip/, /\.scss/, /\.html/]
+      }),
+      babel({
+        babelrc: false,
+        plugins: ['external-helpers', 'babel-plugin-transform-class-properties'],
+        presets: [
+          [
+            'env',
+            {
+              modules: false,
+              targets: {
+                browsers: ['ie >= 10']
+              }
             }
-        ],
-        external: ['JSZip', 'JSZipUtils'],
-        plugins: [
-            clear({
-                targets: ['dist'],
-                watch: true
-            }),
-            postcss({
-                minimize: true,
-                config: {
-                    path: './postcss.config.js'
-                }
-            }),
-            html({
-                htmlMinifierOptions: {
-                    collapseWhitespace: true,
-                    collapseBooleanAttributes: true,
-                    conservativeCollapse: true
-                }
-            }),
-            eslint({
-                exclude: [/node_modules/, /jszip/, /\.scss/, /\.html/]
-            }),
-            babel({
-                babelrc: false,
-                plugins: ['external-helpers', 'babel-plugin-transform-class-properties'],
-                presets: [
-                    [
-                        'env',
-                        {
-                            modules: false,
-                            targets: {
-                                browsers: ['ie >= 10']
-                            }
-                        }
-                    ]
-                ]
-            }),
-            resolve({
-                browser: true
-            }),
-            commonjs({
-                includes: ['node_modules/proxy-observable/bin/proxy.observable.es6.js'],
-                namedExports: {
-                    'node_modules/proxy-observable/bin/proxy.observable.es6.js': 'observable'
-                }
-            }),
-            terser({
-                output: {
-                    comments: function(node, comment) {
-                        const { value, type } = comment;
-                        if (type === 'comment2') {
-                            return /@preserve|@license|@cc_on/i.test(value);
-                        }
-                    }
-                }
-            }),
-            cleanup()
+          ]
         ]
-    }
+      }),
+      resolve({
+        browser: true
+      }),
+      commonjs({
+        includes: ['node_modules/proxy-observable/bin/proxy.observable.es6.js'],
+        namedExports: {
+          'node_modules/proxy-observable/bin/proxy.observable.es6.js': 'observable'
+        }
+      }),
+      terser({
+        output: {
+          comments: function(node, comment) {
+            const { value, type } = comment;
+            if (type === 'comment2') {
+              return /@preserve|@license|@cc_on/i.test(value);
+            }
+          }
+        }
+      }),
+      cleanup()
+    ]
+  }
 ];

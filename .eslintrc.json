@@ -13,7 +13,8 @@
     },
     "globals": {
         "JSZip": true,
-        "JSZipUtils": true
+        "JSZipUtils": true,
+        "jsmediatags": true
     },
     "rules": {
         "array-callback-return": 0,
