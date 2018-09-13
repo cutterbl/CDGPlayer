@@ -18,10 +18,10 @@ export const BORDER_HEIGHT = TILE_HEIGHT * TILES_Y_BORDER;
 export const DISPLAY_WIDTH = WIDTH - 2 * BORDER_WIDTH; // 288px
 export const DISPLAY_HEIGHT = HEIGHT - 2 * BORDER_HEIGHT; // 192px
 export const DISPLAY_BOUNDS = [
-    BORDER_WIDTH,
-    BORDER_HEIGHT,
-    BORDER_WIDTH + DISPLAY_WIDTH,
-    BORDER_HEIGHT + DISPLAY_HEIGHT
+  BORDER_WIDTH,
+  BORDER_HEIGHT,
+  BORDER_WIDTH + DISPLAY_WIDTH,
+  BORDER_HEIGHT + DISPLAY_HEIGHT
 ];
 export const DISPLAY_PIXELS = WIDTH * HEIGHT;
 
@@ -61,7 +61,7 @@ export const PACKET_SIZE = 24;
  *  CDG Audio Constants
  */
 
-export const GAIN_DEFAULT = 1;
+export const GAIN_DEFAULT = 1.0;
 export const PITCH_DEFAULT = 1;
 
 /**
@@ -69,3 +69,8 @@ export const PITCH_DEFAULT = 1;
  */
 
 export const SCALE_DEFAULT = 1;
+
+/**
+ * CDG Controls Constants
+ */
+export const PANEL_POSITION = ['top', 'bottom'];

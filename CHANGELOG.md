@@ -1,5 +1,10 @@
 # Change Log
 
+## Sep 13, 2018 - v0.0.6
+
+* Create Volume slider control and methods
+* Update example
+
 ## Sep 10, 2018 - v0.0.5
 
 * Read ID3 tag from audio file in zip

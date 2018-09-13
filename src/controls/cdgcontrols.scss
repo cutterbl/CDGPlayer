@@ -33,6 +33,21 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.icofont-mic:before
+{
+  content: "\ef95";
+}
+
+.icofont-mic-mute:before
+{
+  content: "\ef94";
+}
+
+.icofont-audio:before
+{
+  content: "\eea8";
+}
+
 .icofont-play-alt-1:before
 {
   content: "\eca6";
@@ -45,13 +60,17 @@
 
 .icofont-md
 {
-  font-size: 1.25em;
+  font-size: 2em;
 }
 
 .icofont-fw
 {
   text-align: center;
   width: 1.25em;
+}
+
+.mute {
+  color: darkgrey;
 }
 
 cdg-controls {
@@ -71,7 +90,6 @@ cdg-controls {
   justify-content: center;
   width: 100%;
   font-size: 1.25em;
-  & > button,
   & > span,
   & > div {
     margin: 3px 5px;
@@ -82,7 +100,11 @@ cdg-controls {
       margin-right: 0;
     }
   }
-  .playButton {
+  .playButton,
+  .volumeButton {
+    outline: none;
+    border:none;
+    border-radius: 3px;
     padding: 5px;
     width: 34px;
     height: 34px;
@@ -91,7 +113,62 @@ cdg-controls {
       @extend .icofont-md;
     }
     &[disabled] {
+      @extend .mute;
       cursor: not-allowed;
+    }
+  }
+  .volumeControl {
+    &>div {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      &:hover {
+        .volumeSlider {
+          display: block;
+        }
+      }
+      .volumeSlider {
+        display: none;
+        position: absolute;
+        top: -75px;
+        left: -55px;
+        z-index: 100;
+        width: 100px;
+        transform: rotate(270deg);
+        padding: 10px 20px;
+        &.under {
+          top: 75px;
+          transform: rotate(90deg);
+        }
+        &:hover {
+          display: block;
+        }
+        .volumeRange {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 5px;
+          background: #d3d3d3;
+          border: 1px solid;
+          border-radius: 2.5px;
+          outline: none;
+          opacity: 0.7;
+          -webkit-transition: .2s;
+          transition: opacity .2s;
+          &:hover {
+            opacity: 1;
+          }
+          &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1px solid blue;
+            background: white;
+            cursor: pointer;
+          }
+        }
+      }
     }
   }
   .pitch {
@@ -99,6 +176,7 @@ cdg-controls {
     font-size: .8em;
     text-align: right;
     &[disabled] {
+      @extend .mute;
       cursor: not-allowed;
     }
   }

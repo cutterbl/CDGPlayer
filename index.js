@@ -2,7 +2,7 @@ import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
 
 (function() {
   const player = new CDGPlayer('#cdg_wrapper');
-  const controls = new CDGControls('#cdg_controls', player);
+  const controls = new CDGControls('#cdg_controls', player, { position: 'top' });
   const statusChanged = player.props.on('status', val => {
     console.log('Status: ', val);
   });

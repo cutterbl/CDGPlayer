@@ -185,7 +185,7 @@ loaded into the `CDGPlayer`, including base styling. It allows you to start/paus
 position, and change the key. This makes setting up a fully functional player very easy. Control defaults to 100% of
 the width of it's container.
 
-#### constructor(String - CSS selector for video wrapper container, CDGPlayer - your 'player' instance)
+#### constructor(String - CSS selector for video wrapper container, CDGPlayer - your 'player' instance [,options])
 
 ```html
     <div class="cdg-player">
@@ -201,6 +201,9 @@ const player = new CDGPlayer('#cdg_wrapper');
 const controls = new CDGControls('#cdg_controls', player);
 // logic to get your songlist and load songs
 ```
+
+Options is an optional object. Currently the only option is `position`, which defaults to `bottom`. If you place the
+controls above your player, use `postion: 'top'`. This will allow the volume slider to switch positions.
 
 There are no methods, as all control is handled directly from the interface and it's connection to your player.
 
@@ -229,7 +232,7 @@ override the default display, write a css file that is appened to the **body** o
 * .playButton>i -- The icon in the play button
 * .playButton>i.icofont-play-alt-1 -- The icon when song not playing (play icon)
 * .playButton>i.icofont-pause -- The icon when song is playing (pause icon)
-* .playButton[disabled] -- change the cursor when disabled
+* .playButton[disabled] -- change the cursor and font color when disabled
 * .timePlayed -- The current playhead time position
 * .progress-meter -- Container for the meter
 * .progress -- The actual `progress` HTML element
@@ -238,6 +241,15 @@ override the default display, write a css file that is appened to the **body** o
 * .trackLength -- The current song's track length
 * .pitch -- The key changer Number input
 * .pitch[disabled] -- change the cursor when disabled
+* .volumeControl -- container for the volume button and slider
+* .volumeButton -- the volume button itself
+* .volumeButton.i -- the icon for volume
+* .volumeButton.i.icofont-audio -- the actual icon
+* .volumeButton[disabled] -- change the cursor and font color when disabled
+* .volumeSlider -- the container for the volume range slider
+* .volumeSlider.under -- moves the range slider to below the controls (defaults to above)
+* .volumeRange -- the volume range slider
+* .volumeRange::-webkit-slider-thumb -- the slider knob
 
 ### Running The Example
 

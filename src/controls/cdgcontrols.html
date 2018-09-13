@@ -1,5 +1,7 @@
 <cdg-controls>
-    <button class="playButton" disabled><i class="icofont-play-alt-1"></i></button>
+    <span class="playControl">
+        <button class="playButton" disabled><i class="icofont-play-alt-1"></i></button>
+    </span>
     <span class="timePlayed"></span>
     <div class="progress-container">
         <progress class="progressMeter"
@@ -17,4 +19,20 @@
                value="0"
                disabled />
     </span>
+    <span class="volumeControl">
+        <div>
+            <button class="volumeButton" id="song_volume_button" disabled><i class="icofont-audio"></i></button>
+            <div class="volumeSlider">
+                <input type="range" min="0.00" max="1.00" step="0.01" class="volumeRange" id="song_volume" />
+            </div>
+        </div>
+    </span>
+    <!-- <span class="volumeControl">
+        <div>
+            <button class="volumeButton" id="mic_volume_button"><i class="icofont-mic"></i></button>
+            <div class="volumeSlider">
+                <input type="range" min="0.0" max="1" step="0.1" class="volumeRange" id="mic_volume" />
+            </div>
+        </div>
+    </span> -->
 </cdg-controls>

@@ -104,7 +104,6 @@ const drawTag = function() {
 };
 
 const loadTag = function(tag) {
-  console.log('TAG: ', tag);
   this.tag = tag.tags;
   return drawTag.call(this);
 };
@@ -134,6 +133,10 @@ const updatePlayPosition = function() {
   this.player.sync(this.shifter.timePlayed * 1000);
 };
 
+const setVolume = function(val) {
+  this.gainNode.gain.value = val;
+};
+
 export class KaraokePlayer {
   audio = null;
   gainNode = null;
@@ -153,6 +156,7 @@ export class KaraokePlayer {
     timePlayed: '0:00',
     trackLength: '0:00',
     percentagePlayed: 0,
+    songVolume: 1,
     destroy: false
   });
 
@@ -172,7 +176,10 @@ export class KaraokePlayer {
 
     this.audio = new (window.AudioContext || window.webkitAudioContext)();
     this.gainNode = this.audio.createGain();
-    this.gainNode.gain.value = GAIN_DEFAULT;
+    this.onvolume = this.props.on('songVolume', val => {
+      setVolume.call(this, val);
+    });
+    this.props.songVolume = GAIN_DEFAULT;
   }
 
   destroy() {
@@ -184,6 +191,7 @@ export class KaraokePlayer {
     this.audio = null;
     this.canvas.remove();
     this.props.destroy = true;
+    this.props.off('onvolume');
   }
 
   load(filePath) {
@@ -264,12 +272,12 @@ export class KaraokePlayer {
   volume(change) {
     const current = this.gainNode.gain.value;
     const newValue = +(current + change).toFixed(2);
-    this.gainNode.gain.value = newValue >= 0 ? newValue : 0;
+    this.props.songVolume = newValue < 0 ? 0 : newValue > 1 ? 1 : newValue;
   }
 
   toggleMute() {
     const fallback = this.gainNode.gain.value;
-    this.gainNode.gain.value = fallback ? 0 : this.fallbackVolume;
+    this.props.songVolume = fallback ? 0 : this.fallbackVolume;
     this.fallbackVolume = fallback;
   }
 }
