@@ -212,6 +212,23 @@ There are no methods, as all control is handled directly from the interface and 
 * Pitch Control - Disabled until your song is 'loaded' into the player, a Number input to change your key up or down
 (on change). Defaults to 0;
 
+## Adding A Title Image
+
+It's fairly common to want something to display when the player is not yet loaded. We've provided a container, with
+a transparent background, which will automatically cover the video canvas whenever the player is not 'loaded'. Here
+you can add your own CSS to include your own title image. Because you want to use something that works at almost any
+size, we suggest you use a large SVG (maybe 1024x1024). Just remember that your video window's aspect ration is 75:54.
+Here's an example of your possible CSS.
+
+```css
+.titleImage {
+    background-image: url('./myTitleGraphic.svg');
+    background-size: 90% 90%;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+```
+
 ## Styleguide
 
 The following classes are automatically appended to the **head** of your document, by the package. If you choose to
@@ -224,6 +241,7 @@ override the default display, write a css file that is appened to the **body** o
 * .cdg-video-player.x2 -- 2x the base player size
 * .cdg-video-player.x3 -- 3x the base player size
 * .cdg-video-player.x4 -- 4x the base player size
+* .titleImage -- A container for a title image to display when the player isn't loaded
 
 ### CDGControls Styles
 

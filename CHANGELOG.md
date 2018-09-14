@@ -1,5 +1,9 @@
 # Change Log
 
+## Sep 14, 2018 - v0.0.7
+
+* Create Title Image capability. Documented in the README and added to example.
+
 ## Sep 13, 2018 - v0.0.6
 
 * Create Volume slider control and methods

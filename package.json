@@ -24,7 +24,11 @@
   },
   "license": "GPL-3.0-or-later",
   "files": [
-    "dist/**/*"
+    "dist/**/*",
+    "index.html",
+    "index.js",
+    "server.js",
+    "CDGPlayer.svg"
   ],
   "devDependencies": {
     "@fortawesome/fontawesome-free": "^5.2.0",

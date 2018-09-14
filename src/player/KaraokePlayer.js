@@ -173,6 +173,16 @@ export class KaraokePlayer {
       afterRender: context => copyContextToCanvas.call(this, context)
     });
     this.wrapper.appendChild(this.canvas);
+    const titleImage = document.createElement('div');
+    titleImage.classList.add('titleImage');
+    this.wrapper.appendChild(titleImage);
+    this.onloaded = this.props.on('loaded', val => {
+      if (val) {
+        titleImage.classList.add('hide');
+        return;
+      }
+      titleImage.classList.remove('hide');
+    });
 
     this.audio = new (window.AudioContext || window.webkitAudioContext)();
     this.gainNode = this.audio.createGain();

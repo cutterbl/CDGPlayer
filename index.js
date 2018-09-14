@@ -6,5 +6,7 @@ import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
   const statusChanged = player.props.on('status', val => {
     console.log('Status: ', val);
   });
-  player.load('zipfiles/MercyMe_I_Can_Only_Imagine(MP3+CDG_Karaoke)_65074.zip');
+  setTimeout(() => {
+    player.load('zipfiles/MercyMe_I_Can_Only_Imagine(MP3+CDG_Karaoke)_65074.zip');
+  }, 10000);
 })();
