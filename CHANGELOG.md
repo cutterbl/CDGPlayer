@@ -1,5 +1,9 @@
 # Change Log
 
+## Sep 14, 2018 - v0.0.8
+
+* Change it so that it doesn't display the song tag until after the player is marked as 'loaded'.
+
 ## Sep 14, 2018 - v0.0.7
 
 * Create Title Image capability. Documented in the README and added to example.

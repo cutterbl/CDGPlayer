@@ -1,12 +1,18 @@
 import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
 
+const fileName = ''; /*** Place your file path here **/
+
 (function() {
   const player = new CDGPlayer('#cdg_wrapper');
   const controls = new CDGControls('#cdg_controls', player, { position: 'top' });
   const statusChanged = player.props.on('status', val => {
     console.log('Status: ', val);
   });
-  setTimeout(() => {
-    player.load('zipfiles/MercyMe_I_Can_Only_Imagine(MP3+CDG_Karaoke)_65074.zip');
-  }, 10000);
+  if (fileName) {
+    setTimeout(() => {
+      player.load(fileName);
+    }, 5000);
+  } else {
+    alert('You need to put a fileName path in the example script');
+  }
 })();

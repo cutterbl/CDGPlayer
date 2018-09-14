@@ -104,19 +104,22 @@ const drawTag = function() {
 };
 
 const loadTag = function(tag) {
-  this.tag = tag.tags;
-  return drawTag.call(this);
+  this.tag = tag && tag.tags;
+  if (this.tag) {
+    return drawTag.call(this);
+  }
 };
 
 const handleExtractedZip = function(responseArr) {
   const process = [];
   process.push(loadAudio.call(this, responseArr[0])); // audio is always first
   process.push(loadVideo.call(this, responseArr[1])); // video is always second
-  process.push(loadTag.call(this, responseArr[2])); // mp3 tag data is always last
   return Promise.all(process)
     .then(() => {
       this.props.status = 'File Loaded';
       this.props.loaded = true;
+      // Display tag after marking player loaded
+      loadTag.call(this, responseArr[2]); // mp3 tag data is always last
     })
     .catch(error => {
       this.props.status = 'File Loading Failed';
