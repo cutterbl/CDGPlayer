@@ -61,7 +61,7 @@
     "rollup-plugin-terser": "^1.0.1",
     "sass": "^1.13.0",
     "serve-static": "^1.13.2",
-    "soundtouchjs": "^0.1.1"
+    "soundtouchjs": "0.1.4"
   },
   "dependencies": {
     "jsmediatags": "^3.8.1",

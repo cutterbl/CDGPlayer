@@ -3,7 +3,15 @@ import CDGPlayer from '../cdg/CDGPlayer.js';
 import CDGFileLoader from '../loader/CDGFileLoader.js';
 import { PitchShifter } from 'soundtouchjs';
 import Deferred from '../utilities/deferred.js';
-import { WIDTH, HEIGHT, GAIN_DEFAULT, SCALE_DEFAULT, PITCH_DEFAULT } from '../cdg/constants';
+import {
+  WIDTH,
+  HEIGHT,
+  GAIN_DEFAULT,
+  SCALE_DEFAULT,
+  PITCH_DEFAULT,
+  START_TIME,
+  FILTER_PLAYBACK_OFFSET
+} from '../cdg/constants';
 import { isString } from '../utilities/is.js';
 import observable from '../observable/observable.js';
 
@@ -17,6 +25,8 @@ const createDisplayCanvas = function(width, height) {
 const createCanvasContext = function(canvas) {
   const ctx = canvas.getContext('2d');
   ctx.webkitImageSmoothingEnabled = false;
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.msImageSmoothingEnabled = false;
   ctx.imageSmoothingEnabled = false;
   return ctx;
 };
@@ -45,11 +55,21 @@ const clearCanvas = function(context, canvas) {
 };
 
 const loadAudio = function(buffer) {
+  if (this.shifter) {
+    this.shifter.off();
+  }
   return this.audio
     .decodeAudioData(buffer)
     .then(audioBuffer => {
-      this.shifter = new PitchShifter(this.audio, audioBuffer, 1024, () => {
-        this.stop();
+      this.shifter = observable(
+        new PitchShifter(this.audio, audioBuffer, 1024, () => {
+          this.stop();
+        })
+      );
+      this.shifter.on('play', detail => {
+        this.props.timePlayed = detail.formattedTimePlayed;
+        this.props.percentagePlayed = detail.percentagePlayed;
+        this.player.sync(detail.timePlayed * 1000 - FILTER_PLAYBACK_OFFSET);
       });
       this.shifter.pitch = PITCH_DEFAULT;
       this.props.trackLength = this.shifter.formattedDuration;
@@ -130,11 +150,11 @@ const handleExtractedZip = function(responseArr) {
     });
 };
 
-const updatePlayPosition = function() {
+/*const updatePlayPosition = function() {
   this.props.timePlayed = this.shifter.formattedTimePlayed;
   this.props.percentagePlayed = this.shifter.percentagePlayed;
-  this.player.sync(this.shifter.timePlayed * 1000);
-};
+  this.player.sync(this.shifter.timePlayed * 1000 - FILTER_PLAYBACK_OFFSET);
+};*/
 
 const setVolume = function(val) {
   this.gainNode.gain.value = val;
@@ -156,8 +176,8 @@ export class KaraokePlayer {
     loaded: false,
     loading: false,
     isPlaying: false,
-    timePlayed: '0:00',
-    trackLength: '0:00',
+    timePlayed: START_TIME,
+    trackLength: START_TIME,
     percentagePlayed: 0,
     songVolume: 1,
     destroy: false
@@ -199,6 +219,9 @@ export class KaraokePlayer {
     this.wrapper.classList.remove('cdg-video-wrapper');
     this.stop();
     this.gainNode.disconnect();
+    if (this.shifter) {
+      this.shifter.off();
+    }
     this.shifter = null;
     this.gainNode = null;
     this.audio = null;
@@ -244,16 +267,16 @@ export class KaraokePlayer {
     this.gainNode.connect(this.audio.destination);
     this.props.isPlaying = true;
     this.player.play();
-    this.timeInterval = setInterval(() => updatePlayPosition.call(this), 20);
+    //this.timeInterval = setInterval(() => updatePlayPosition.call(this), 1);
   }
 
   pause(playing = false) {
     this.props.isPlaying = playing;
     this.shifter.disconnect();
-    if (this.timeInterval) {
+    /*if (this.timeInterval) {
       clearInterval(this.timeInterval);
       this.timeInterval = null;
-    }
+    }*/
     this.player.stop();
   }
 
@@ -271,8 +294,9 @@ export class KaraokePlayer {
     this.props.percentagePlayed = this.shifter.percentagePlayed;
     this.props.timePlayed = this.shifter.formattedTimePlayed;
     this.player.reset();
-    if (this.props.isPlaying) {
-      updatePlayPosition.call(this);
+    if (!perc) {
+      this.props.isPlaying = false;
+      this.props.timePlayed = START_TIME;
     }
   }
 

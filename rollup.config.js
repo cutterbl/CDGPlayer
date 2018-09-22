@@ -74,7 +74,7 @@ export default [
         }
       }),
       eslint({
-        exclude: [/node_modules/, /jszip/, /\.scss/, /\.html/]
+        exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/]
       }),
       babel({
         babelrc: false,

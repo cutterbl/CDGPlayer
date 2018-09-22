@@ -11,7 +11,7 @@ const fileName = ''; /*** Place your file path here **/
   if (fileName) {
     setTimeout(() => {
       player.load(fileName);
-    }, 5000);
+    }, 1000);
   } else {
     alert('You need to put a fileName path in the example script');
   }

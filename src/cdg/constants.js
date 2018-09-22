@@ -69,6 +69,8 @@ export const PITCH_DEFAULT = 1;
  */
 
 export const SCALE_DEFAULT = 1;
+export const FILTER_PLAYBACK_OFFSET = 800;
+export const START_TIME = '0:00';
 
 /**
  * CDG Controls Constants

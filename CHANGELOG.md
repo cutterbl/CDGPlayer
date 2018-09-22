@@ -1,5 +1,13 @@
 # Change Log
 
+## Sep 22, 2018 - v0.0.9
+
+* Update underlying soundtouchjs library
+* Update internal vars to use 'play' event from soundtouchjs
+* Update playback head to use 'play' event from soundtouchjs
+* Call video sync from 'play' event from soundtouchjs for smoother output
+* Apply playback offset to more closely match the video and audio on timing
+
 ## Sep 14, 2018 - v0.0.8
 
 * Change it so that it doesn't display the song tag until after the player is marked as 'loaded'.
