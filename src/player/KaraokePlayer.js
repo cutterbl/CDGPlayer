@@ -113,7 +113,7 @@ const drawTag = function() {
   const maxWidth = cvs.width - 10;
   let lineHeight = 30;
   const x = maxWidth / 2;
-  let y = 30;
+  let y = 60;
   ctx.font = '30px sans-serif';
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
@@ -149,12 +149,6 @@ const handleExtractedZip = function(responseArr) {
       this.props.loading = false;
     });
 };
-
-/*const updatePlayPosition = function() {
-  this.props.timePlayed = this.shifter.formattedTimePlayed;
-  this.props.percentagePlayed = this.shifter.percentagePlayed;
-  this.player.sync(this.shifter.timePlayed * 1000 - FILTER_PLAYBACK_OFFSET);
-};*/
 
 const setVolume = function(val) {
   this.gainNode.gain.value = val;
@@ -267,7 +261,6 @@ export class KaraokePlayer {
     this.gainNode.connect(this.audio.destination);
     this.props.isPlaying = true;
     this.player.play();
-    //this.timeInterval = setInterval(() => updatePlayPosition.call(this), 1);
   }
 
   pause(playing = false) {

@@ -8,23 +8,36 @@
         <script type="text/javascript" src="node_modules/jsmediatags/dist/jsmediatags.js"></script>
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css">
         <style>
+            html {
+                height: 100vh;
+            }
             body {
+                height: 100vh;
                 text-align: center;
             }
             #app {
-                display: inline-block;
-                margin: 0 auto;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                height: 100vh;
             }
             .cdg-player {
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                min-width: 880px;
-                min-height: 366px;
+                flex: 1 1 auto;
+                width: 100%;
+                height: 100%;
                 margin: 0 auto;
             }
             #cdg_wrapper {
-                flex: 0 1 auto;
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .cdg-video-player {
+                flex: 1 1 auto;
             }
             .titleImage {
                 background-image: url(CDGPlayer.svg);

@@ -4,16 +4,12 @@ $playerBaseHeight: 216px;
 
 .cdg-video-wrapper {
   position: relative;
-  height: 0;
-  overflow: hidden;
-  padding-top: $playerBaseHeight / $playerBaseWidth * 100%;
+  text-align: center;
   background-color: #000;
   .cdg-video-player {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    position: relative;
+    width: calc(.72 * 100%);
+    margin: 0 auto;
   }
   .titleImage {
     position: absolute;
