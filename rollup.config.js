@@ -77,19 +77,7 @@ export default [
         exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/]
       }),
       babel({
-        babelrc: false,
-        plugins: ['external-helpers', 'babel-plugin-transform-class-properties'],
-        presets: [
-          [
-            'env',
-            {
-              modules: false,
-              targets: {
-                browsers: ['ie >= 10']
-              }
-            }
-          ]
-        ]
+        runtimeHelpers: true
       }),
       resolve({
         browser: true

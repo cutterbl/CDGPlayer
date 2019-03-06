@@ -259,8 +259,11 @@ export class KaraokePlayer {
     clearCanvas.call(this, this.ctx, this.canvas);
     this.shifter.connect(this.gainNode);
     this.gainNode.connect(this.audio.destination);
-    this.props.isPlaying = true;
-    this.player.play();
+    // updates for autoplay issues
+    this.audio.resume().then(() => {
+      this.props.isPlaying = true;
+      this.player.play();
+    });
   }
 
   pause(playing = false) {

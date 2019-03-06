@@ -1,5 +1,11 @@
 # Change Log
 
+## Mar 6, 2019 - v0.1.1
+
+* Update dependency libraries to account for security vulnerability
+* Update play code for browser changes to autoplay policy (Thanks to Colin Hill for reporting)
+* Update package bundling to Babel 7
+
 ## Sep 22, 2018 - v0.0.9
 
 * Update underlying soundtouchjs library
