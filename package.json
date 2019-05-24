@@ -65,5 +65,8 @@
     "jsmediatags": "^3.8.1",
     "jszip": "^3.2.0",
     "jszip-utils": "0.0.2"
+  },
+  "resolutions": {
+    "tar": ">=4.4.2"
   }
 }
