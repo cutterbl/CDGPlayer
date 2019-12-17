@@ -1,18 +1,43 @@
 import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
 
-const fileName = ''; /*** Place your file path here **/
+function setState(state) {
+  switch (state) {
+    case 'loading':
+      document.querySelector('#file-select-container').style.visibility = 'visible';
+      document.querySelector('.cdg-player').style.visibility = 'hidden';
+      break;
+    case 'cdg':
+      document.querySelector('#file-select-container').style.visibility = 'hidden';
+      document.querySelector('.cdg-player').style.visibility = 'visible';
+      break;
+    default:
+      alert('unknown state');
+  }
+}
 
-(function() {
+function loadPlayer(filename) {
   const player = new CDGPlayer('#cdg_wrapper');
   const controls = new CDGControls('#cdg_controls', player, { position: 'top' });
   const statusChanged = player.props.on('status', val => {
     console.log('Status: ', val);
+    if (val === 'File Loaded') {
+      player.start();
+    }
   });
-  if (fileName) {
-    setTimeout(() => {
-      player.load(fileName);
-    }, 1000);
-  } else {
-    alert('You need to put a fileName path in the example script');
-  }
+  player.load(filename);
+}
+
+(function() {
+  const fileReader = new FileReader();
+  setState('loading');
+  fileReader.onload = fileEvent => loadPlayer(fileEvent.target.result);
+  document.querySelector('#file-select').addEventListener('change', event => {
+    const files = event.target.files;
+    try {
+      fileReader.readAsArrayBuffer(files[0]);
+      setState('cdg');
+    } catch (error) {
+      alert(error);
+    }
+  });
 })();

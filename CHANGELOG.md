@@ -1,5 +1,11 @@
 # Change Log
 
+## Dec 17, 2019 - v0.1.4
+
+* Update dependency libraries to account for security vulnerability
+* Update example to account for changes in Chrome (Thanks to [Katherine Winter](https://github.com/KatherineWinter) for code updates)
+* Update example to load via file browser (Thanks to [Katherine Winter](https://github.com/KatherineWinter) for code updates)
+
 ## Mar 6, 2019 - v0.1.1
 
 * Update dependency libraries to account for security vulnerability
