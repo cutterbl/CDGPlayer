@@ -1,5 +1,5 @@
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import babel from 'rollup-plugin-babel';
 import clear from 'rollup-plugin-clear';
 import { eslint } from 'rollup-plugin-eslint';
@@ -50,55 +50,55 @@ export default [
         globals: {
           JSZip: 'JSZip',
           JSZipUtils: 'JSZipUtils',
-          jsmediatags: 'jsmediatags'
-        }
-      }
+          jsmediatags: 'jsmediatags',
+        },
+      },
     ],
     external: ['JSZip', 'JSZipUtils', 'jsmediatags'],
     plugins: [
       clear({
         targets: ['dist'],
-        watch: true
+        watch: true,
       }),
       postcss({
         minimize: true,
         config: {
-          path: './postcss.config.js'
-        }
+          path: './postcss.config.js',
+        },
       }),
       html({
         htmlMinifierOptions: {
           collapseWhitespace: true,
           collapseBooleanAttributes: true,
-          conservativeCollapse: true
-        }
+          conservativeCollapse: true,
+        },
       }),
       eslint({
-        exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/]
+        exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/],
       }),
       babel({
-        runtimeHelpers: true
+        runtimeHelpers: true,
       }),
       resolve({
-        browser: true
+        browser: true,
       }),
       commonjs({
         includes: ['node_modules/proxy-observable/bin/proxy.observable.es6.js'],
         namedExports: {
-          'node_modules/proxy-observable/bin/proxy.observable.es6.js': 'observable'
-        }
+          'node_modules/proxy-observable/bin/proxy.observable.es6.js': 'observable',
+        },
       }),
       terser({
         output: {
-          comments: function(node, comment) {
+          comments: function (node, comment) {
             const { value, type } = comment;
             if (type === 'comment2') {
               return /@preserve|@license|@cc_on/i.test(value);
             }
-          }
-        }
+          },
+        },
       }),
-      cleanup()
-    ]
-  }
+      cleanup(),
+    ],
+  },
 ];
