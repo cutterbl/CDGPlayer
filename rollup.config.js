@@ -84,9 +84,6 @@ export default [
       }),
       commonjs({
         includes: ['node_modules/proxy-observable/bin/proxy.observable.es6.js'],
-        namedExports: {
-          'node_modules/proxy-observable/bin/proxy.observable.es6.js': 'observable',
-        },
       }),
       terser({
         output: {
