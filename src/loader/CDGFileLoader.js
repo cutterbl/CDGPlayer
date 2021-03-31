@@ -77,7 +77,7 @@ const processZip = function (entries) {
     process.push(loadAudio(audio[0]));
     process.push(loadVideo(video[0]));
     process.push(getTagData(audio[0]));
-    return Promise.all(process).catch((err) => Promise.reject(err));
+    return Promise.all(process);
   }
   const errors = [];
   if (!audio.length) {
