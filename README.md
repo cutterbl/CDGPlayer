@@ -295,4 +295,3 @@ I got my observable properties courtesy of [proxy-observable](https://github.com
 Anton Lapshin.
 
 And I got royalty free `play` and `pause` font icons courtesy of [IcoFont](https://icofont.com).
-
