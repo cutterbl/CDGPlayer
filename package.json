@@ -42,7 +42,6 @@
     "@rollup/plugin-commonjs": "21.0.0",
     "@rollup/plugin-eslint": "8.0.1",
     "@rollup/plugin-node-resolve": "13.0.5",
-    "acorn": "8.1.0",
     "autoprefixer": "10.3.7",
     "babel-eslint": "10.1.0",
     "connect": "3.7.0",
