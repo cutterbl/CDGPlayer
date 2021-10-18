@@ -28,6 +28,7 @@
   "scripts": {
     "build": "rollup -c ./configs/rollup.config.js",
     "watch": "rollup -c ./configs/rollup.config.js --watch",
+    "release": "standard-version",
     "start": "node ./scripts/server.js"
   },
   "devDependencies": {
