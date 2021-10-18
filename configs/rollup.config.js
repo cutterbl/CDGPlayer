@@ -1,17 +1,18 @@
+import path from 'path';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
-import babel from 'rollup-plugin-babel';
+import babel from '@rollup/plugin-babel';
+import eslint from '@rollup/plugin-eslint';
 import clear from 'rollup-plugin-clear';
-import { eslint } from 'rollup-plugin-eslint';
 import cleanup from 'rollup-plugin-cleanup';
 import html from 'rollup-plugin-html';
 import postcss from 'rollup-plugin-postcss';
 import { terser } from 'rollup-plugin-terser';
-import pkg from './package.json';
+import pkg from '../package.json';
 
 export default [
   {
-    input: 'src/index.js',
+    input: path.join(__dirname, '../src/index.js'),
     output: [
       {
         file: pkg.module,
@@ -63,7 +64,7 @@ export default [
       postcss({
         minimize: true,
         config: {
-          path: './postcss.config.js',
+          path: path.resolve(__dirname, './postcss.config.js'),
         },
       }),
       html({
@@ -74,10 +75,37 @@ export default [
         },
       }),
       eslint({
+        env: {
+          browser: true,
+          es2021: true,
+          node: true,
+        },
+        plugins: ['class-property'],
+        globals: ['JSZip', 'JSZipUtils', 'jsmediatags'],
         exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/],
+        extends: 'eslint:recommended',
+        parser: '@babel/eslint-parser',
+        parserOptions: {
+          sourceType: 'module',
+          ecmaVersion: 2021,
+          babelOptions: {
+            configFile: path.resolve(__dirname, './babel.config.json'),
+          },
+        },
+        rules: {
+          indent: ['error', 2, { SwitchCase: 1 }],
+          'linebreak-style': ['error', 'unix'],
+          quotes: [
+            'error',
+            'single',
+            { avoidEscape: true, allowTemplateLiterals: true },
+          ],
+          semi: ['error', 'always'],
+        },
       }),
       babel({
-        runtimeHelpers: true,
+        babelHelpers: 'bundled',
+        configFile: path.resolve(__dirname, './babel.config.json'),
       }),
       resolve({
         browser: true,

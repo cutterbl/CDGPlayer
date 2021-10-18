@@ -10,19 +10,19 @@ import {
   SCALE_DEFAULT,
   PITCH_DEFAULT,
   START_TIME,
-  FILTER_PLAYBACK_OFFSET
+  FILTER_PLAYBACK_OFFSET,
 } from '../cdg/constants';
 import { isString } from '../utilities/is.js';
 import observable from '../observable/observable.js';
 
-const createDisplayCanvas = function(width, height) {
+const createDisplayCanvas = function (width, height) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
   return canvas;
 };
 
-const createCanvasContext = function(canvas) {
+const createCanvasContext = function (canvas) {
   const ctx = canvas.getContext('2d');
   ctx.webkitImageSmoothingEnabled = false;
   ctx.mozImageSmoothingEnabled = false;
@@ -31,7 +31,7 @@ const createCanvasContext = function(canvas) {
   return ctx;
 };
 
-const copyContextToCanvas = function(context) {
+const copyContextToCanvas = function (context) {
   // If there's transparency, clear the canvas first
   if (context.keyColor >= 0) {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -50,23 +50,23 @@ const copyContextToCanvas = function(context) {
   );
 };
 
-const clearCanvas = function(context, canvas) {
+const clearCanvas = function (context, canvas) {
   context.clearRect(0, 0, canvas.width, canvas.height);
 };
 
-const loadAudio = function(buffer) {
+const loadAudio = function (buffer) {
   if (this.shifter) {
     this.shifter.off();
   }
   return this.audio
     .decodeAudioData(buffer)
-    .then(audioBuffer => {
+    .then((audioBuffer) => {
       this.shifter = observable(
         new PitchShifter(this.audio, audioBuffer, 1024, () => {
           this.stop();
         })
       );
-      this.shifter.on('play', detail => {
+      this.shifter.on('play', (detail) => {
         this.props.timePlayed = detail.formattedTimePlayed;
         this.props.percentagePlayed = detail.percentagePlayed;
         this.player.sync(detail.timePlayed * 1000 - FILTER_PLAYBACK_OFFSET);
@@ -74,10 +74,14 @@ const loadAudio = function(buffer) {
       this.shifter.pitch = PITCH_DEFAULT;
       this.props.trackLength = this.shifter.formattedDuration;
     })
-    .catch(error => Promise.reject(new Error(`There was an error decoding the audio file`, error)));
+    .catch((error) =>
+      Promise.reject(
+        new Error('There was an error decoding the audio file', error)
+      )
+    );
 };
 
-const loadVideo = function(buffer) {
+const loadVideo = function (buffer) {
   const deferred = new Deferred();
   if (buffer) {
     this.player.load(Array.from(buffer));
@@ -88,7 +92,7 @@ const loadVideo = function(buffer) {
   return deferred.promise;
 };
 
-const wrapText = function(context, text, x, y, maxWidth, lineHeight) {
+const wrapText = function (context, text, x, y, maxWidth, lineHeight) {
   var words = text.split(' ');
   var line = '';
 
@@ -107,7 +111,7 @@ const wrapText = function(context, text, x, y, maxWidth, lineHeight) {
   context.fillText(line.trim(), x, y);
 };
 
-const drawTag = function() {
+const drawTag = function () {
   const ctx = this.ctx;
   const cvs = this.canvas;
   const maxWidth = cvs.width - 10;
@@ -123,14 +127,14 @@ const drawTag = function() {
   wrapText(ctx, `by ${this.tag.artist}`, x, y, maxWidth, lineHeight);
 };
 
-const loadTag = function(tag) {
+const loadTag = function (tag) {
   this.tag = tag && tag.tags;
   if (this.tag) {
     return drawTag.call(this);
   }
 };
 
-const handleExtractedZip = function(responseArr) {
+const handleExtractedZip = function (responseArr) {
   const process = [];
   process.push(loadAudio.call(this, responseArr[0])); // audio is always first
   process.push(loadVideo.call(this, responseArr[1])); // video is always second
@@ -141,7 +145,7 @@ const handleExtractedZip = function(responseArr) {
       // Display tag after marking player loaded
       loadTag.call(this, responseArr[2]); // mp3 tag data is always last
     })
-    .catch(error => {
+    .catch((error) => {
       this.props.status = 'File Loading Failed';
       return Promise.reject(error);
     })
@@ -150,7 +154,7 @@ const handleExtractedZip = function(responseArr) {
     });
 };
 
-const setVolume = function(val) {
+const setVolume = function (val) {
   this.gainNode.gain.value = val;
 };
 
@@ -174,26 +178,28 @@ export class KaraokePlayer {
     trackLength: START_TIME,
     percentagePlayed: 0,
     songVolume: 1,
-    destroy: false
+    destroy: false,
   });
 
   constructor(selector) {
     this.wrapper = document.querySelector(selector);
     if (!this.wrapper) {
-      throw new Error(`CDGPlayer: and element was not found with the "${selector}" selector`);
+      throw new Error(
+        `CDGPlayer: and element was not found with the "${selector}" selector`
+      );
     }
     this.wrapper.classList.add('cdg-video-wrapper');
     this.canvas = createDisplayCanvas(WIDTH, HEIGHT);
     this.canvas.classList.add('cdg-video-player');
     this.ctx = createCanvasContext(this.canvas);
     this.player = new CDGPlayer({
-      afterRender: context => copyContextToCanvas.call(this, context)
+      afterRender: (context) => copyContextToCanvas.call(this, context),
     });
     this.wrapper.appendChild(this.canvas);
     const titleImage = document.createElement('div');
     titleImage.classList.add('titleImage');
     this.wrapper.appendChild(titleImage);
-    this.onloaded = this.props.on('loaded', val => {
+    this.onloaded = this.props.on('loaded', (val) => {
       if (val) {
         titleImage.classList.add('hide');
         return;
@@ -203,7 +209,7 @@ export class KaraokePlayer {
 
     this.audio = new (window.AudioContext || window.webkitAudioContext)();
     this.gainNode = this.audio.createGain();
-    this.onvolume = this.props.on('songVolume', val => {
+    this.onvolume = this.props.on('songVolume', (val) => {
       setVolume.call(this, val);
     });
     this.props.songVolume = GAIN_DEFAULT;
@@ -239,12 +245,12 @@ export class KaraokePlayer {
       this.props.status = 'Retrieving File...';
       promise = CDGFileLoader.loadZipFile(filePath);
     } else {
-      this.props.status = `Loading File...`;
+      this.props.status = 'Loading File...';
       promise = CDGFileLoader.loadFileBuffer(filePath);
     }
     return promise
-      .then(zipResponse => handleExtractedZip.call(this, zipResponse))
-      .catch(error => Promise.reject(error));
+      .then((zipResponse) => handleExtractedZip.call(this, zipResponse))
+      .catch((error) => Promise.reject(error));
   }
 
   togglePlay() {

@@ -1,13 +1,15 @@
-import { CDGPlayer, CDGControls } from './dist/cdgplayer.js';
+import { CDGPlayer, CDGControls } from './js/cdgplayer.js';
 
 function setState(state) {
   switch (state) {
     case 'loading':
-      document.querySelector('#file-select-container').style.visibility = 'visible';
+      document.querySelector('#file-select-container').style.visibility =
+        'visible';
       document.querySelector('.cdg-player').style.visibility = 'hidden';
       break;
     case 'cdg':
-      document.querySelector('#file-select-container').style.visibility = 'hidden';
+      document.querySelector('#file-select-container').style.visibility =
+        'hidden';
       document.querySelector('.cdg-player').style.visibility = 'visible';
       break;
     default:
@@ -17,8 +19,10 @@ function setState(state) {
 
 function loadPlayer(filename) {
   const player = new CDGPlayer('#cdg_wrapper');
-  const controls = new CDGControls('#cdg_controls', player, { position: 'top' });
-  const statusChanged = player.props.on('status', val => {
+  const controls = new CDGControls('#cdg_controls', player, {
+    position: 'top',
+  });
+  const statusChanged = player.props.on('status', (val) => {
     console.log('Status: ', val);
     if (val === 'File Loaded') {
       player.start();
@@ -27,11 +31,11 @@ function loadPlayer(filename) {
   player.load(filename);
 }
 
-(function() {
+(function () {
   const fileReader = new FileReader();
   setState('loading');
-  fileReader.onload = fileEvent => loadPlayer(fileEvent.target.result);
-  document.querySelector('#file-select').addEventListener('change', event => {
+  fileReader.onload = (fileEvent) => loadPlayer(fileEvent.target.result);
+  document.querySelector('#file-select').addEventListener('change', (event) => {
     const files = event.target.files;
     try {
       fileReader.readAsArrayBuffer(files[0]);

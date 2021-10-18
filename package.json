@@ -4,11 +4,6 @@
   "description": "A browser based HTML5/JS karaoke 'Player', that takes a zip file containing an mp3 and cdg file, allowing the user to render and play directly in the browser.",
   "main": "dist/cdgplayer.js",
   "module": "dist/cdgplayer.js",
-  "scripts": {
-    "build": "rollup -c",
-    "watch": "rollup -c --watch",
-    "start": "node ./server.js"
-  },
   "keywords": [
     "cdg",
     "cd+g",
@@ -30,48 +25,119 @@
     "server.js",
     "CDGPlayer.svg"
   ],
-  "browserslist": [
-    "last 2 versions"
-  ],
+  "scripts": {
+    "build": "rollup -c ./configs/rollup.config.js",
+    "watch": "rollup -c ./configs/rollup.config.js --watch",
+    "start": "node ./scripts/server.js"
+  },
   "devDependencies": {
-    "@babel/core": "7.13.14",
-    "@babel/plugin-proposal-class-properties": "7.13.0",
-    "@babel/preset-env": "7.13.12",
-    "@fortawesome/fontawesome-free": "5.15.3",
-    "@fortawesome/fontawesome-svg-core": "1.2.35",
-    "@fortawesome/free-regular-svg-icons": "5.15.3",
-    "@rollup/plugin-commonjs": "18.0.0",
-    "@rollup/plugin-node-resolve": "11.2.1",
+    "@babel/core": "7.15.8",
+    "@babel/eslint-parser": "7.15.8",
+    "@babel/plugin-proposal-class-properties": "7.14.5",
+    "@babel/preset-env": "7.15.8",
+    "@commitlint/cli": "13.2.1",
+    "@commitlint/config-conventional": "13.2.0",
+    "@rollup/plugin-babel": "5.3.0",
+    "@rollup/plugin-commonjs": "21.0.0",
+    "@rollup/plugin-eslint": "8.0.1",
+    "@rollup/plugin-node-resolve": "13.0.5",
     "acorn": "8.1.0",
-    "autoprefixer": "10.2.5",
+    "autoprefixer": "10.3.7",
     "babel-eslint": "10.1.0",
     "connect": "3.7.0",
-    "eslint": "7.23.0",
-    "node-sass": "5.0.0",
-    "open": "8.0.4",
-    "postcss": "8.2.9",
-    "postcss-assets": "^5.0.0",
-    "prettier": "2.2.1",
-    "regenerator-runtime": "0.13.7",
-    "rollup": "2.44.0",
-    "rollup-plugin-babel": "4.4.0",
+    "eslint": "8.0.1",
+    "eslint-plugin-class-property": "1.1.0",
+    "localip": "1.0.0",
+    "node-sass": "6.0.1",
+    "open": "8.3.0",
+    "postcss": "8.3.9",
+    "postcss-assets": "6.0.0",
+    "prettier": "2.4.1",
+    "regenerator-runtime": "0.13.9",
+    "rollup": "2.58.0",
     "rollup-plugin-cleanup": "3.2.1",
     "rollup-plugin-clear": "2.0.7",
     "rollup-plugin-embed-css": "1.0.21",
-    "rollup-plugin-eslint": "^7.0.0",
     "rollup-plugin-html": "0.2.1",
-    "rollup-plugin-postcss": "4.0.0",
+    "rollup-plugin-postcss": "4.0.1",
     "rollup-plugin-terser": "7.0.2",
-    "sass": "1.32.8",
+    "sass": "1.43.2",
     "serve-static": "1.14.1",
-    "soundtouchjs": "0.1.26"
+    "soundtouchjs": "0.1.29",
+    "standard-version": "9.3.2"
   },
   "dependencies": {
-    "jsmediatags": "3.9.3",
-    "jszip": "3.6.0",
+    "jsmediatags": "3.9.7",
+    "jszip": "3.7.1",
     "jszip-utils": "0.1.0"
   },
   "resolutions": {
     "tar": ">=4.4.2"
+  },
+  "browserslist": [
+    "last 2 versions"
+  ],
+  "prettier": {
+    "printWidth": 80,
+    "singleQuote": true,
+    "tabWidth": 2,
+    "useTabs": false
+  },
+  "commitlint": {
+    "extends": [
+      "@commitlint/config-conventional"
+    ],
+    "rules": {
+      "subject-case": [
+        2,
+        "always",
+        "sentence-case"
+      ]
+    }
+  },
+  "standard-version": {
+    "header": "Changelog",
+    "types": [
+      {
+        "type": "feat",
+        "section": "Features"
+      },
+      {
+        "type": "fix",
+        "section": "Bug Fixes"
+      },
+      {
+        "type": "chore",
+        "hidden": true
+      },
+      {
+        "type": "docs",
+        "hidden": true
+      },
+      {
+        "type": "style",
+        "hidden": true
+      },
+      {
+        "type": "refactor",
+        "hidden": true
+      },
+      {
+        "type": "perf",
+        "hidden": true
+      },
+      {
+        "type": "test",
+        "hidden": true
+      }
+    ],
+    "commitUrlFormat": "{{host}}/{{owner}}/{{repository}}/commit/{{hash}}",
+    "compareUrlFormat": "{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}",
+    "issueUrlFormat": "{{host}}/{{owner}}/{{repository}}/issues/{{id}}",
+    "userUrlFormat": "{{host}}/{{user}}",
+    "releaseCommitMessageFormat": "chore(release): {{currentTag}}",
+    "issuePrefixes": [
+      "#"
+    ]
   }
 }

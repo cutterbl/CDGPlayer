@@ -8,7 +8,9 @@ const getDataFile = function (filePath) {
   const deferred = new Deferred();
   JSZipUtils.getBinaryContent(filePath, (err, data) => {
     if (err) {
-      deferred.reject(new Error(`There was an error retrieving ${filePath}`, err));
+      deferred.reject(
+        new Error(`There was an error retrieving ${filePath}`, err)
+      );
       return;
     }
     deferred.resolve(data);
@@ -18,14 +20,14 @@ const getDataFile = function (filePath) {
 
 const loadZipBuffer = function (fileBuffer) {
   return JSZip.loadAsync(fileBuffer).catch((error) =>
-    Promise.reject(new Error(`There was an error reading the zip file.`, error))
+    Promise.reject(new Error('There was an error reading the zip file.', error))
   );
 };
 
 const loadAudio = function (zipEntry) {
   return zipEntry
     .async('arraybuffer')
-    .catch(() => Promise.reject(new Error(`Unable to load the audio file`)));
+    .catch(() => Promise.reject(new Error('Unable to load the audio file')));
 };
 
 const getFallbackTagData = function (name) {
@@ -45,7 +47,15 @@ const getTagData = function (zipEntry) {
       (buffer) =>
         new Promise((resolve) => {
           new jsmediatags.Reader(buffer)
-            .setTagsToRead(['title', 'artist', 'album', 'track', 'year', 'genre', 'picture'])
+            .setTagsToRead([
+              'title',
+              'artist',
+              'album',
+              'track',
+              'year',
+              'genre',
+              'picture',
+            ])
             .read({
               onSuccess: (tag) => resolve(tag),
               onError: () => resolve(getFallbackTagData(zipEntry.name)),
@@ -58,15 +68,17 @@ const getTagData = function (zipEntry) {
 const loadVideo = function (zipEntry) {
   return zipEntry
     .async('uint8array')
-    .catch(() => Promise.reject(new Error(`Unable to load the video file`)));
+    .catch(() => Promise.reject(new Error('Unable to load the video file')));
 };
 
 const getKaraokeFiles = function (zipFile) {
-  const entries = zipFile.filter((relPath) => relPath.endsWith('.cdg') || relPath.endsWith('.mp3'));
+  const entries = zipFile.filter(
+    (relPath) => relPath.endsWith('.cdg') || relPath.endsWith('.mp3')
+  );
   if (entries.length === 2) {
     return Promise.resolve(entries);
   }
-  return Promise.reject(`The file is not a karaoke .zip file`);
+  return Promise.reject('The file is not a karaoke .zip file');
 };
 
 const processZip = function (entries) {

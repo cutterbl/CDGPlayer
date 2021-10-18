@@ -6,18 +6,16 @@
 * @license - https://icofont.com/license/
 */
 
-@font-face
-{
-
-  font-family: "IcoFont";
+@font-face {
+  font-family: 'IcoFont';
   font-weight: normal;
   font-style: normal;
-  src: inline("./fonts/icofont.woff2") format("woff2"),
-  inline("./fonts/icofont.woff") format("woff");
+  src: inline('./fonts/icofont.woff2') format('woff2'),
+    inline('./fonts/icofont.woff') format('woff');
 }
 
-[class^="icofont-"], [class*=" icofont-"]
-{
+[class^='icofont-'],
+[class*=' icofont-'] {
   font-family: 'IcoFont' !important;
   speak: none;
   font-style: normal;
@@ -29,42 +27,35 @@
   direction: ltr;
   line-height: 1;
   /* Better Font Rendering =========== */
-  -webkit-font-feature-settings: "liga";
+  -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
 }
 
-.icofont-mic:before
-{
-  content: "\ef95";
+.icofont-mic:before {
+  content: '\ef95';
 }
 
-.icofont-mic-mute:before
-{
-  content: "\ef94";
+.icofont-mic-mute:before {
+  content: '\ef94';
 }
 
-.icofont-audio:before
-{
-  content: "\eea8";
+.icofont-audio:before {
+  content: '\eea8';
 }
 
-.icofont-play-alt-1:before
-{
-  content: "\eca6";
+.icofont-play-alt-1:before {
+  content: '\eca6';
 }
 
-.icofont-pause:before
-{
-  content: "\eca5";
+.icofont-pause:before {
+  content: '\eca5';
 }
 
-.icofont-md
-{
+.icofont-md {
   font-size: 2em;
 }
 
-.icofont-fw
-{
+.icofont-fw {
   text-align: center;
   width: 1.25em;
 }
@@ -73,7 +64,7 @@
   color: darkgrey;
 }
 
-cdg-controls {
+.cdg-controls {
   position: relative;
   display: -ms-flexbox;
   display: -webkit-flex;
@@ -103,12 +94,12 @@ cdg-controls {
   .playButton,
   .volumeButton {
     outline: none;
-    border:none;
+    border: none;
     border-radius: 3px;
     padding: 5px;
     width: 34px;
     height: 34px;
-    &>i {
+    & > i {
       @extend .icofont-fw;
       @extend .icofont-md;
     }
@@ -118,7 +109,7 @@ cdg-controls {
     }
   }
   .volumeControl {
-    &>div {
+    & > div {
       position: relative;
       width: 100%;
       height: 100%;
@@ -152,8 +143,8 @@ cdg-controls {
           border-radius: 2.5px;
           outline: none;
           opacity: 0.7;
-          -webkit-transition: .2s;
-          transition: opacity .2s;
+          -webkit-transition: 0.2s;
+          transition: opacity 0.2s;
           &:hover {
             opacity: 1;
           }
@@ -173,7 +164,7 @@ cdg-controls {
   }
   .pitch {
     height: 28px;
-    font-size: .8em;
+    font-size: 0.8em;
     text-align: right;
     &[disabled] {
       @extend .mute;
@@ -193,21 +184,20 @@ cdg-controls {
       height: 1em;
       &::-webkit-progress-bar {
         background-color: #eee;
-        border-radius: .5em;
+        border-radius: 0.5em;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
       }
       &::-webkit-progress-value {
-        background-image:
-                -webkit-linear-gradient(-45deg,
-                        transparent 33%,
-                        rgba(0, 0, 0, -1) 33%,
-                        rgba(0, 0, 0, .1) 66%,
-                        transparent 66%),
-                -webkit-linear-gradient(top,
-                        rgba(255, 255, 255, .25),
-                        rgba(0, 0, 0, .25)),
-                -webkit-linear-gradient(left, #09c, #f44);
-        border-radius: .5em;
+        background-image: -webkit-linear-gradient(
+            -45deg,
+            transparent 33%,
+            rgba(0, 0, 0, -1) 33%,
+            rgba(0, 0, 0, 0.1) 66%,
+            transparent 66%
+          ),
+          -webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.25)),
+          -webkit-linear-gradient(left, #09c, #f44);
+        border-radius: 0.5em;
         background-size: 35px 20px, 100% 100%, 100% 100%;
         // -webkit-animation: animate-stripes 5s linear infinite;
         // animation: animate-stripes 5s linear infinite;
