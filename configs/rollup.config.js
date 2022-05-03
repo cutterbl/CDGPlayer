@@ -80,7 +80,6 @@ export default [
           es2021: true,
           node: true,
         },
-        plugins: ['class-property'],
         globals: ['JSZip', 'JSZipUtils', 'jsmediatags'],
         exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/],
         extends: 'eslint:recommended',
