@@ -43,6 +43,7 @@ jobs:
       run: git push --follow-tags origin master
     - name: Build fresh for new package with updated version numbers
       run: npm run build
-    - uses: JS-DevTools/npm-publish@v1
-      with:
-        token: ${{secrets.NPM_TOKEN}}
+    - name: Publish package on NPM 📦
+      run: npm publish
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
