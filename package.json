@@ -26,116 +26,51 @@
     "CDGPlayer.svg"
   ],
   "scripts": {
-    "build": "rollup -c ./configs/rollup.config.js",
-    "watch": "rollup -c ./configs/rollup.config.js --watch",
+    "build": "rollup -c ./configs/rollup.config.mjs",
+    "watch": "rollup -c ./configs/rollup.config.mjs --watch",
     "release": "standard-version",
     "start": "node ./scripts/server.js"
   },
   "devDependencies": {
-    "@babel/core": "7.17.10",
-    "@babel/eslint-parser": "7.17.0",
-    "@babel/plugin-proposal-class-properties": "7.16.7",
-    "@babel/preset-env": "7.17.10",
-    "@commitlint/cli": "16.2.4",
-    "@commitlint/config-conventional": "16.2.4",
-    "@rollup/plugin-babel": "5.3.1",
-    "@rollup/plugin-commonjs": "22.0.0",
-    "@rollup/plugin-eslint": "8.0.2",
-    "@rollup/plugin-node-resolve": "13.3.0",
-    "autoprefixer": "10.4.7",
+    "@babel/core": "7.20.12",
+    "@babel/eslint-parser": "7.19.1",
+    "@babel/plugin-proposal-class-properties": "7.18.6",
+    "@babel/preset-env": "7.20.2",
+    "@commitlint/cli": "17.4.0",
+    "@commitlint/config-conventional": "17.4.0",
+    "@rollup/plugin-babel": "6.0.3",
+    "@rollup/plugin-commonjs": "24.0.0",
+    "@rollup/plugin-eslint": "9.0.1",
+    "@rollup/plugin-html": "1.0.1",
+    "@rollup/plugin-node-resolve": "15.0.1",
+    "@rollup/plugin-terser": "0.2.1",
+    "autoprefixer": "10.4.13",
     "babel-eslint": "10.1.0",
     "connect": "3.7.0",
-    "eslint": "8.14.0",
+    "eslint": "8.31.0",
     "localip": "1.0.0",
     "open": "8.4.0",
-    "postcss": "8.4.13",
+    "postcss": "8.4.20",
     "postcss-assets": "6.0.0",
-    "prettier": "2.6.2",
-    "regenerator-runtime": "0.13.9",
-    "rollup": "2.71.1",
+    "prettier": "2.8.1",
+    "regenerator-runtime": "0.13.11",
+    "rollup": "3.9.1",
     "rollup-plugin-cleanup": "3.2.1",
     "rollup-plugin-clear": "2.0.7",
-    "rollup-plugin-embed-css": "1.0.24",
+    "rollup-plugin-embed-css": "1.0.25",
     "rollup-plugin-html": "0.2.1",
     "rollup-plugin-postcss": "4.0.2",
-    "rollup-plugin-terser": "7.0.2",
-    "sass": "1.51.0",
+    "sass": "1.57.1",
     "serve-static": "1.15.0",
     "soundtouchjs": "0.1.30",
-    "standard-version": "9.3.2"
+    "standard-version": "9.5.0"
   },
   "dependencies": {
     "jsmediatags": "3.9.7",
-    "jszip": "3.9.1",
+    "jszip": "3.10.1",
     "jszip-utils": "0.1.0"
   },
   "resolutions": {
     "tar": ">=4.4.2"
-  },
-  "browserslist": [
-    "last 2 versions"
-  ],
-  "prettier": {
-    "printWidth": 80,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "useTabs": false
-  },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
-    "rules": {
-      "subject-case": [
-        2,
-        "always",
-        "sentence-case"
-      ]
-    }
-  },
-  "standard-version": {
-    "header": "Changelog",
-    "types": [
-      {
-        "type": "feat",
-        "section": "Features"
-      },
-      {
-        "type": "fix",
-        "section": "Bug Fixes"
-      },
-      {
-        "type": "chore",
-        "hidden": true
-      },
-      {
-        "type": "docs",
-        "hidden": true
-      },
-      {
-        "type": "style",
-        "hidden": true
-      },
-      {
-        "type": "refactor",
-        "hidden": true
-      },
-      {
-        "type": "perf",
-        "hidden": true
-      },
-      {
-        "type": "test",
-        "hidden": true
-      }
-    ],
-    "commitUrlFormat": "{{host}}/{{owner}}/{{repository}}/commit/{{hash}}",
-    "compareUrlFormat": "{{host}}/{{owner}}/{{repository}}/compare/{{previousTag}}...{{currentTag}}",
-    "issueUrlFormat": "{{host}}/{{owner}}/{{repository}}/issues/{{id}}",
-    "userUrlFormat": "{{host}}/{{user}}",
-    "releaseCommitMessageFormat": "chore(release): {{currentTag}}",
-    "issuePrefixes": [
-      "#"
-    ]
   }
 }
