@@ -1,6 +1,6 @@
 {
   "name": "cdgplayer",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "A browser based HTML5/JS karaoke 'Player', that takes a zip file containing an mp3 and cdg file, allowing the user to render and play directly in the browser.",
   "main": "dist/cdgplayer.js",
   "module": "dist/cdgplayer.js",
