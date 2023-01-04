@@ -1,4 +1,5 @@
 import path from 'path';
+import * as url from 'url';
 import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import babel from '@rollup/plugin-babel';
@@ -7,8 +8,10 @@ import clear from 'rollup-plugin-clear';
 import cleanup from 'rollup-plugin-cleanup';
 import html from 'rollup-plugin-html';
 import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
-import pkg from '../package.json';
+import terser from '@rollup/plugin-terser';
+import pkg from '../package.json' assert { type: 'json' };
+
+const __dirname = url.fileURLToPath(new URL('.', import.meta.url));
 
 export default [
   {
@@ -75,32 +78,32 @@ export default [
         },
       }),
       eslint({
-        env: {
-          browser: true,
-          es2021: true,
-          node: true,
-        },
-        globals: ['JSZip', 'JSZipUtils', 'jsmediatags'],
-        exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/],
-        extends: 'eslint:recommended',
-        parser: '@babel/eslint-parser',
-        parserOptions: {
-          sourceType: 'module',
-          ecmaVersion: 2021,
-          babelOptions: {
-            configFile: path.resolve(__dirname, './babel.config.json'),
+        overrideConfig: {
+          globals: {
+            JSZip: 'readonly',
+            JSZipUtils: 'readonly',
+            jsmediatags: 'readonly',
+          },
+          parser: '@babel/eslint-parser',
+          parserOptions: {
+            sourceType: 'module',
+            ecmaVersion: 2021,
+            babelOptions: {
+              configFile: path.resolve(__dirname, './babel.config.json'),
+            },
+          },
+          rules: {
+            indent: ['error', 2, { SwitchCase: 1 }],
+            'linebreak-style': ['error', 'unix'],
+            quotes: [
+              'error',
+              'single',
+              { avoidEscape: true, allowTemplateLiterals: true },
+            ],
+            semi: ['error', 'always'],
           },
         },
-        rules: {
-          indent: ['error', 2, { SwitchCase: 1 }],
-          'linebreak-style': ['error', 'unix'],
-          quotes: [
-            'error',
-            'single',
-            { avoidEscape: true, allowTemplateLiterals: true },
-          ],
-          semi: ['error', 'always'],
-        },
+        exclude: [/node_modules/, /soundtouchjs/, /jszip/, /\.scss/, /\.html/],
       }),
       babel({
         babelHelpers: 'bundled',
