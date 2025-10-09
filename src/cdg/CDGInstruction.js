@@ -235,7 +235,7 @@ export class CDGScrollPresetInstruction extends CDGInstruction {
     this.vOffset = vScroll & 0x0f;
   }
 
-  // eslint-disable-next-line complexity
+   
   execute(context) {
     context.backgroundColor = this.color;
     context.hOffset = Math.min(this.hOffset, TILE_WIDTH - 1);

@@ -1,5 +1,5 @@
 // From https://github.com/AntonLapshin/proxy-observable#readme
-/* eslint-disable */
+ 
 import { PubSub } from './pubsub.js';
 
 /**

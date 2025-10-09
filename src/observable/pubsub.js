@@ -1,5 +1,5 @@
 // From https://github.com/AntonLapshin/proxy-observable#readme
-/* eslint-disable */
+ 
 export class PubSub {
     /**
      * Creates an instance of PubSub

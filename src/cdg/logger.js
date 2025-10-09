@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 
 export function log(...args) {
   console && console.log && console.log(...args);

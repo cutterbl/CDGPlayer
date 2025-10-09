@@ -16,9 +16,9 @@ const Deferred = function () {
     //need import of Promise.jsm for example: Cu.import('resource:/gree/modules/Promise.jsm');
     return Promise.defer();
   } else if (typeof PromiseUtils !== 'undefined' && PromiseUtils.defer) {
-    // eslint-disable-line no-undef
+     
     //need import of PromiseUtils.jsm for example: Cu.import('resource:/gree/modules/PromiseUtils.jsm');
-    return PromiseUtils.defer(); // eslint-disable-line no-undef
+    return PromiseUtils.defer();  
   } else {
     /* A method to resolve the associated Promise with the value passed.
      * If the promise is already settled it does nothing.

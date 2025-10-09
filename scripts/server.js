@@ -1,8 +1,14 @@
-const path = require('path');
-const connect = require('connect');
-const serveStatic = require('serve-static');
-const open = require('open');
-const ip = require('localip')();
+import path from 'path';
+import { fileURLToPath } from 'url';
+import connect from 'connect';
+import serveStatic from 'serve-static';
+import open from 'open';
+import localip from 'localip';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const ip = localip();
 const port = 8081;
 
 const setHeaders = (res) => {
