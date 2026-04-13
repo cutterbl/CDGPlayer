@@ -1,0 +1,36 @@
+{
+  "name": "@cxing/cdg-loader",
+  "version": "0.0.1",
+  "description": "CD+G track loading, archive extraction, and worker transport utilities.",
+  "keywords": [
+    "cdg",
+    "cd+g",
+    "karaoke",
+    "loader"
+  ],
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cutterbl/CDGPlayer.git"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "assets"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "jsmediatags": "^3.9.7",
+    "jszip": "^3.10.1"
+  }
+}

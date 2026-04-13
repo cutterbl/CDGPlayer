@@ -1,0 +1,109 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/Getting Started" />
+
+# Getting Started
+
+This page is for developers using published `@cxing/cdg-*` packages in their own application.
+
+If you are looking for repository contributor commands (`pnpm dev`, `pnpm storybook:dev`, etc.), see [Contribution Guidelines](/?path=/docs/documentation-contribution-guidelines--docs).
+
+## Prerequisites
+
+- Node.js 20+
+- A bundler/browser app environment that supports modern ESM output
+
+## Install Packages In Your App
+
+```bash
+pnpm add @cxing/cdg-player @cxing/cdg-controls
+```
+
+Using npm instead:
+
+```bash
+npm install @cxing/cdg-player @cxing/cdg-controls
+```
+
+Optional, when you want direct loader usage:
+
+```bash
+pnpm add @cxing/cdg-loader
+```
+
+## Minimal Player Setup
+
+```ts
+import { createPlayer } from '@cxing/cdg-player';
+
+const player = createPlayer({
+  options: {
+    canvas,
+    audio,
+  },
+});
+
+await player.load({
+  input: { kind: 'file', file: selectedZip },
+});
+
+await player.play();
+```
+
+## Minimal Controls Setup
+
+```ts
+import {
+  createControlsModel,
+  createPlayPauseControl,
+  createCurrentTimeDisplay,
+  createProgressControl,
+  createDurationDisplay,
+  createVolumeControl,
+  createTempoControl,
+  createKeyControl,
+} from '@cxing/cdg-controls';
+
+const model = createControlsModel({ options: { player } });
+
+createPlayPauseControl({ container: transportEl, model });
+createCurrentTimeDisplay({ container: transportEl, model });
+createProgressControl({ container: transportEl, model });
+createDurationDisplay({ container: transportEl, model });
+
+createVolumeControl({
+  container: settingsEl,
+  model,
+  orientation: 'vertical',
+});
+createTempoControl({
+  container: settingsEl,
+  model,
+  orientation: 'vertical',
+});
+createKeyControl({ container: settingsEl, model });
+```
+
+This split transport/settings pattern is the recommended default for non-trivial UIs.
+
+If you want a single preassembled controls section, use `createControls({ options: { container, player } })`.
+
+## Suggested Learning Path
+
+1. Read [Architecture](/?path=/docs/documentation-architecture--docs)
+2. Read [Loader Contract](/?path=/docs/documentation-api-loader-contract--docs)
+3. Read [Player Contract](/?path=/docs/documentation-api-player-contract--docs)
+4. Read [Controls Contract](/?path=/docs/documentation-api-controls-contract--docs)
+5. Copy from the implementation guides in the `Framework-agnostic Examples` and `React Examples` composed sidebar sections.
+
+## Common First-time Mistakes
+
+- Forgetting to provide both `canvas` and `audio` elements to `createPlayer`.
+- Treating `setPlaybackRate` as the preferred API in new UX; use `setTempo` semantics.
+- Missing teardown (`dispose`) when your screen/component unmounts.
+- Splitting controls across containers but accidentally creating multiple models for one player.
+
+## Cross References
+
+- [Architecture](/?path=/docs/documentation-architecture--docs)
+- Use the composed `Framework-agnostic Examples` and `React Examples` sections for framework-specific implementation guides.

@@ -1,0 +1,42 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/Architecture" />
+
+# Architecture
+
+CDGPlayer is package-first. Think of the system as a pipeline:
+
+`input -> load -> play/sync -> control`
+
+Each package has a single responsibility:
+
+- `@cxing/cdg-core`: parser, instructions, render context
+- `@cxing/cdg-loader`: zip/file/url loading + metadata (embedded audio tags first, filename fallback)
+- `@cxing/cdg-player`: playback orchestration + render dispatch
+- `@cxing/cdg-controls`: UI controls model and adapters
+
+## Mental Model
+
+- `cdg-loader` turns user input into a normalized track payload.
+- `cdg-player` owns playback state, timeline, rendering, and audio behavior.
+- `cdg-controls` binds UI widgets to player actions/state.
+- your app composes these pieces in either plain DOM code or a framework wrapper.
+
+## Runtime Split
+
+- Framework-agnostic path: consume package APIs directly in DOM code
+- Framework path (React): wrap package APIs in framework state/subscriptions
+
+## Typical Runtime Flow
+
+1. create player with canvas + audio elements
+2. create controls model bound to that player
+3. load track from zip/file/url input
+4. respond to `statechange` to keep your UI synchronized
+5. dispose controls + player on teardown
+
+## Cross References
+
+- [Loader Contract](/?path=/docs/documentation-api-loader-contract--docs)
+- [Player Contract](/?path=/docs/documentation-api-player-contract--docs)
+- [Controls Contract](/?path=/docs/documentation-api-controls-contract--docs)

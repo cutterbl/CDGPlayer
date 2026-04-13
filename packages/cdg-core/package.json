@@ -1,0 +1,32 @@
+{
+  "name": "@cxing/cdg-core",
+  "version": "0.0.1",
+  "description": "CD+G parsing, instruction execution, and frame rendering core.",
+  "keywords": [
+    "cdg",
+    "cd+g",
+    "karaoke",
+    "rendering"
+  ],
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cutterbl/CDGPlayer.git"
+  },
+  "type": "module",
+  "main": "./index.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./index.js",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts"
+  ],
+  "sideEffects": false,
+  "dependencies": {}
+}

@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "composite": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "exactOptionalPropertyTypes": true,
+    "importHelpers": true,
+    "isolatedModules": true,
+    "lib": ["es2024", "dom"],
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noUncheckedIndexedAccess": true,
+    "noUnusedLocals": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "es2024",
+    "customConditions": ["cdgplayer"],
+    "paths": {
+      "@cxing/cdg-core": ["packages/cdg-core/src/index.ts"],
+      "@cxing/cdg-loader": ["packages/cdg-loader/src/index.ts"],
+      "@cxing/cdg-player": ["packages/cdg-player/src/index.ts"],
+      "@cxing/cdg-controls": ["packages/cdg-controls/src/index.ts"]
+    }
+  }
+}
