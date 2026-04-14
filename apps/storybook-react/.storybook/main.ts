@@ -13,9 +13,21 @@ const config: StorybookConfig = {
     defaultName: 'Documentation',
   },
   viteFinal: async (viteConfig) => {
+    const existingAlias = viteConfig.resolve?.alias;
+
     return {
       ...viteConfig,
       root: resolve(import.meta.dirname, '..'),
+      resolve: {
+        ...viteConfig.resolve,
+        alias: {
+          ...(Array.isArray(existingAlias) ? {} : existingAlias),
+          'react-native-fs': resolve(
+            import.meta.dirname,
+            '../../../packages/cdg-loader/src/lib/shims/react-native-fs.ts',
+          ),
+        },
+      },
       plugins: [...(viteConfig.plugins ?? []), nxViteTsPaths()],
     };
   },

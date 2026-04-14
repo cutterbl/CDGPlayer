@@ -16,7 +16,7 @@ const requiredFiles = [
   'apps/storybook-hub/docs/workers-and-audio.mdx',
   'apps/storybook-web/stories/framework-agnostic-example.mdx',
   'apps/storybook-react/stories/react-example.mdx',
-  'apps/storybook-hub/docs/release-and-contribution.mdx',
+  'apps/storybook-hub/docs/contribution.mdx',
 ];
 
 const missing = [];

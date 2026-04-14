@@ -1,4 +1,5 @@
 /// <reference types='vitest' />
+import path from 'node:path';
 import { defineConfig } from 'vite';
 import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
@@ -6,6 +7,14 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/demo',
+  resolve: {
+    alias: {
+      'react-native-fs': path.join(
+        import.meta.dirname,
+        '../../packages/cdg-loader/src/lib/shims/react-native-fs.ts',
+      ),
+    },
+  },
   optimizeDeps: {
     exclude: [
       '@cxing/cdg-core',
