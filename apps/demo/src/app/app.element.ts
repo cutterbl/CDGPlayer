@@ -1,9 +1,5 @@
 import './app.element.css';
-import {
-  createPlayer,
-  type CdgPlayer,
-  type PlayerRenderMetricsDetail,
-} from '@cxing/cdg-player';
+import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
 import {
   createControlsModel,
   createCurrentTimeDisplay,
@@ -336,8 +332,7 @@ export class AppElement extends HTMLElement {
         // Save tiny timing snapshots so we can answer:
         // "Is this running smoothly, or is this machine struggling?"
         this.player.addEventListener('rendermetrics', (event: Event) => {
-          const detail = (event as CustomEvent<PlayerRenderMetricsDetail>)
-            .detail;
+          const detail = (event as CustomEvent<RenderSample>).detail;
           this.recordRenderMetrics(detail);
         });
       }
@@ -565,7 +560,7 @@ export class AppElement extends HTMLElement {
    * Records one render telemetry event, keeps the sample window bounded,
    * then refreshes all diagnostics outputs (global artifact, HUD, export state).
    */
-  private recordRenderMetrics(detail: PlayerRenderMetricsDetail): void {
+  private recordRenderMetrics(detail: RenderSample): void {
     if (!this.showPerfDiagnostics || !detail) {
       return;
     }

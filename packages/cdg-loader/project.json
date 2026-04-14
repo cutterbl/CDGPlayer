@@ -30,7 +30,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "packages/cdg-loader",
-        "command": "eslint ."
+        "command": "eslint . --ignore-pattern 'node_modules/**' --ignore-pattern '.dist/**'"
       }
     },
     "typecheck": {

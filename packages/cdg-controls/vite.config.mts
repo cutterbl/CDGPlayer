@@ -52,7 +52,9 @@ export default defineConfig(() => ({
     include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
+      enabled: process.env.CI_COVERAGE === '1',
       reportsDirectory: '../../coverage/packages/cdg-controls',
+      reporter: ['text-summary', 'json-summary', 'lcov'],
       provider: 'v8' as const,
     },
   },

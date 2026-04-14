@@ -39,6 +39,39 @@ pnpm run ci:docs
 - Use cross-reference links to connect loader/player/controls and example pages
 - Keep both integration styles represented in code examples
 
+## Local Performance Monitoring And Reporting
+
+Performance monitoring and reporting are local-development workflows only.
+They are not required CI gates and are not part of the published `@cxing/*` runtime APIs.
+
+Use these commands from repository root:
+
+```bash
+pnpm run perf:check-readiness
+pnpm run perf:generate-artifact
+pnpm run perf:check-artifacts
+```
+
+### What Each Command Does
+
+- `perf:check-readiness`: verifies required worker/render paths and perf budget config are present.
+- `perf:generate-artifact`: aggregates local capture files into `artifacts/perf/localdev-aggregated.json`.
+- `perf:check-artifacts`: validates `artifacts/perf/localdev-aggregated.json` against configured budgets.
+
+### Benchmark Budgets
+
+Budgets are configured in `configs/perf-budgets.json`:
+
+- Main-thread p95 frame CPU must be <= `20ms`.
+- Worker p95 frame CPU must be <= `8ms`.
+- Worker max transferred bytes must be <= `307200`.
+
+### How To Read Results
+
+- **p95 frame CPU**: near worst-case frame processing cost; useful for detecting tail-latency spikes.
+- **max transferred bytes**: highest per-frame copy volume for worker dispatch; useful for spotting large transfer regressions.
+- Treat a single run as directional only; compare multiple local runs when evaluating regressions.
+
 ## Contributor Checklist
 
 1. Update docs when API behavior changes.

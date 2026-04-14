@@ -8,6 +8,14 @@ import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
 export default defineConfig(() => ({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/packages/cdg-loader',
+  resolve: {
+    alias: {
+      'react-native-fs': path.join(
+        import.meta.dirname,
+        'src/lib/shims/react-native-fs.ts',
+      ),
+    },
+  },
   plugins: [
     nxViteTsPaths(),
     nxCopyAssetsPlugin(['*.md']),
@@ -52,7 +60,9 @@ export default defineConfig(() => ({
     include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     reporters: ['default'],
     coverage: {
+      enabled: process.env.CI_COVERAGE === '1',
       reportsDirectory: '../../coverage/packages/cdg-loader',
+      reporter: ['text-summary', 'json-summary', 'lcov'],
       provider: 'v8' as const,
     },
   },

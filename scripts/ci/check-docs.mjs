@@ -6,7 +6,9 @@ import { resolve } from 'node:path';
 
 const requiredFiles = [
   'apps/storybook-hub/docs/README.mdx',
+  'apps/storybook-hub/docs/overview.mdx',
   'apps/storybook-hub/docs/getting-started.mdx',
+  'apps/storybook-hub/docs/migration-guide.mdx',
   'apps/storybook-hub/docs/architecture.mdx',
   'apps/storybook-hub/docs/contracts-loader.mdx',
   'apps/storybook-hub/docs/contracts-player.mdx',

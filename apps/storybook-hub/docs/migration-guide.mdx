@@ -1,0 +1,106 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/Migration Guide" />
+
+# Migration Guide
+
+This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`, `CDGControls`) to the modular `@cxing/cdg-*` package family.
+
+## What Changed
+
+- Legacy monolithic usage is replaced by focused packages.
+- Player runtime, loader, and controls are now independently consumable.
+- Tempo semantics are preferred (`setTempo`) while playback-rate naming remains available for compatibility.
+
+## Package Mapping
+
+| Legacy package                   | New package           | Purpose                                         |
+| -------------------------------- | --------------------- | ----------------------------------------------- |
+| `CDGPlayer`                      | `@cxing/cdg-player`   | High-level playback orchestration               |
+| `CDGControls`                    | `@cxing/cdg-controls` | Controls model and DOM control builders         |
+| Internal decoding/runtime pieces | `@cxing/cdg-core`     | Low-level parser and frame rendering primitives |
+| N/A (standalone in legacy)       | `@cxing/cdg-loader`   | Zip/file/url loading with normalized payloads   |
+
+## 1. Replace Dependencies
+
+Install the packages your application needs:
+
+```bash
+pnpm add @cxing/cdg-player @cxing/cdg-controls
+```
+
+Optional direct loader usage:
+
+```bash
+pnpm add @cxing/cdg-loader
+```
+
+## 2. Replace Player Initialization
+
+Use `createPlayer` from `@cxing/cdg-player` with explicit `canvas` and `audio` elements.
+
+```ts
+import { createPlayer } from '@cxing/cdg-player';
+
+const player = createPlayer({
+  options: {
+    canvas,
+    audio,
+  },
+});
+
+await player.load({
+  input: { kind: 'file', file: selectedZip },
+});
+```
+
+## 3. Replace Controls Wiring
+
+Create a controls model once per player, then mount the controls your UX needs.
+
+```ts
+import {
+  createControlsModel,
+  createPlayPauseControl,
+  createProgressControl,
+  createVolumeControl,
+} from '@cxing/cdg-controls';
+
+const model = createControlsModel({ options: { player } });
+
+createPlayPauseControl({ container: transportEl, model });
+createProgressControl({ container: transportEl, model });
+createVolumeControl({
+  container: settingsEl,
+  model,
+  orientation: 'vertical',
+});
+```
+
+## 4. API Name Updates
+
+- Prefer `setTempo({ value })` for singer-facing speed adjustments.
+- `setPlaybackRate({ value })` is still available as a compatibility alias.
+- Continue using `setPitchSemitones({ value })` for key shift.
+
+## 5. Lifecycle and Teardown
+
+- Call `dispose()` when your screen/component is destroyed.
+- Use one controls model per player instance.
+- Keep transport and settings UI split if your app has a larger control surface.
+
+## Migration Checklist
+
+1. Replace legacy dependencies with `@cxing/cdg-player` and `@cxing/cdg-controls`.
+2. Swap legacy initialization for `createPlayer` and `player.load({ input })`.
+3. Build controls via `createControlsModel` and control builders.
+4. Update tempo calls to `setTempo` where product copy refers to tempo.
+5. Verify teardown paths call `dispose()`.
+
+## Cross References
+
+- [Getting Started](/?path=/docs/documentation-getting-started--docs)
+- [Architecture](/?path=/docs/documentation-architecture--docs)
+- [Loader Contract](/?path=/docs/documentation-api-loader-contract--docs)
+- [Player Contract](/?path=/docs/documentation-api-player-contract--docs)
+- [Controls Contract](/?path=/docs/documentation-api-controls-contract--docs)

@@ -3,29 +3,12 @@ import type { CdgRenderContext } from '@cxing/cdg-core';
 /** Preferred render dispatch mode for frame presentation. */
 export type PlayerRenderMode = 'auto' | 'main-thread' | 'worker';
 
-/** Metrics captured for each rendered frame dispatch. */
-export interface RenderDispatchMetrics {
-  mode: 'main-thread' | 'worker';
-  frameCpuMs: number;
-  transferredBytes: number;
-}
-
 /** Renderer abstraction used by CdgPlayer to present decoded frames. */
 export interface CdgRenderer {
   readonly mode: 'main-thread' | 'worker';
-  render(args: { renderContext: CdgRenderContext }): RenderDispatchMetrics;
+  render(args: { renderContext: CdgRenderContext }): void;
   dispose(): void;
 }
-
-const now = (): number => {
-  if (
-    typeof performance !== 'undefined' &&
-    typeof performance.now === 'function'
-  ) {
-    return performance.now();
-  }
-  return Date.now();
-};
 
 type WorkerInitMessage = {
   type: 'init';
@@ -89,23 +72,12 @@ class MainThreadRenderer implements CdgRenderer {
     this.ctx = ctx;
   }
 
-  render({
-    renderContext,
-  }: {
-    renderContext: CdgRenderContext;
-  }): RenderDispatchMetrics {
-    const startedAt = now();
+  render({ renderContext }: { renderContext: CdgRenderContext }): void {
     drawFrameToDisplay({
       renderContext,
       displayCanvas: this.canvas,
       displayCtx: this.ctx,
     });
-
-    return {
-      mode: this.mode,
-      frameCpuMs: now() - startedAt,
-      transferredBytes: 0,
-    };
   }
 
   dispose(): void {
@@ -150,12 +122,7 @@ class WorkerRenderer implements CdgRenderer {
     this.worker.postMessage(initMessage, [offscreenCanvas]);
   }
 
-  render({
-    renderContext,
-  }: {
-    renderContext: CdgRenderContext;
-  }): RenderDispatchMetrics {
-    const startedAt = now();
+  render({ renderContext }: { renderContext: CdgRenderContext }): void {
     const pixelCopy = new Uint8ClampedArray(renderContext.imageData.data);
     const frameMessage: WorkerFrameMessage = {
       type: 'frame',
@@ -166,12 +133,6 @@ class WorkerRenderer implements CdgRenderer {
     };
 
     this.worker.postMessage(frameMessage, [pixelCopy.buffer]);
-
-    return {
-      mode: this.mode,
-      frameCpuMs: now() - startedAt,
-      transferredBytes: pixelCopy.byteLength,
-    };
   }
 
   dispose(): void {

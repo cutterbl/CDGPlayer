@@ -13,22 +13,7 @@ const perfSignals = [
 const perfBudgetConfigPath = 'configs/perf-budgets.json';
 const artifactFlag = '--artifact';
 const requireArtifactsFlag = '--require-artifacts';
-const defaultArtifactDirs = ['artifacts/perf', '.dist/perf'];
-
-const instrumentationChecks = [
-  {
-    path: 'packages/cdg-player/src/lib/player.ts',
-    requiredSnippets: ["'rendermetrics'", 'renderMetrics', 'atMs'],
-  },
-  {
-    path: 'packages/cdg-player/src/lib/renderer.ts',
-    requiredSnippets: [
-      'frameCpuMs',
-      'transferredBytes',
-      "readonly mode = 'worker'",
-    ],
-  },
-];
+const defaultArtifactDirs = ['artifacts/perf'];
 
 const missing = [];
 
@@ -90,7 +75,7 @@ const discoverArtifactPaths = async () => {
     }
 
     for (const entry of entries) {
-      if (!entry.isFile() || !entry.name.endsWith('.json')) {
+      if (!entry.isFile() || entry.name !== 'localdev-aggregated.json') {
         continue;
       }
 
@@ -175,24 +160,6 @@ if (
     'Perf-readiness check failed: configs/perf-budgets.json is missing required positive numeric thresholds.',
   );
   process.exit(1);
-}
-
-for (const check of instrumentationChecks) {
-  const absolutePath = resolve(process.cwd(), check.path);
-  const source = await readFile(absolutePath, 'utf8');
-  const missingSnippets = check.requiredSnippets.filter(
-    (snippet) => !source.includes(snippet),
-  );
-
-  if (missingSnippets.length > 0) {
-    console.error(
-      `Perf-readiness check failed: ${check.path} is missing instrumentation markers:`,
-    );
-    for (const snippet of missingSnippets) {
-      console.error(`- ${snippet}`);
-    }
-    process.exit(1);
-  }
 }
 
 const cliArgs = parseArtifactArgs(process.argv.slice(2));
@@ -313,5 +280,5 @@ if (artifactPaths.length > 0) {
 }
 
 console.log(
-  'Perf-readiness gate passed: worker paths, render metrics instrumentation, and perf budget thresholds are in place. Add --artifact <path> to validate captured runtime samples.',
+  'Perf-readiness gate passed: worker paths and perf budget thresholds are in place. Add --artifact <path> to validate captured runtime samples.',
 );

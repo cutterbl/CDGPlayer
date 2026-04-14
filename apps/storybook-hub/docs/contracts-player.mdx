@@ -45,6 +45,7 @@ player.addEventListener('statechange', () => {
 ## Important Behavior Notes
 
 - Tempo is the preferred singer-facing API via `setTempo`, with `setPlaybackRate` retained for compatibility.
+- Player runtime does not emit built-in render performance metric events. Performance monitoring/reporting is local-development tooling concern.
 
 ## Common Mistakes
 

@@ -13,11 +13,7 @@ import {
   type LoaderOptions,
   loadInWorker,
 } from '@cxing/cdg-loader';
-import {
-  createRenderer,
-  type CdgRenderer,
-  type RenderDispatchMetrics,
-} from './renderer.js';
+import { createRenderer, type CdgRenderer } from './renderer.js';
 import {
   createAudioEngine,
   type CdgAudioEngine,
@@ -72,11 +68,6 @@ export interface CdgPlayerOptions {
 export interface PlayerStateChangeDetail {
   previous: PlayerState;
   next: PlayerState;
-}
-
-/** Event detail payload for rendermetrics events. */
-export interface PlayerRenderMetricsDetail extends RenderDispatchMetrics {
-  atMs: number;
 }
 
 type CdgCorePlayerAsyncLoad = CDGPlayer & {
@@ -165,15 +156,7 @@ export class CdgPlayer extends EventTarget {
 
     this.cdgPlayer = new CDGPlayer({
       afterRender: (renderContext: CdgRenderContext) => {
-        const renderMetrics = this.renderer.render({ renderContext });
-        this.dispatchEvent(
-          new CustomEvent<PlayerRenderMetricsDetail>('rendermetrics', {
-            detail: {
-              ...renderMetrics,
-              atMs: Date.now(),
-            },
-          }),
-        );
+        this.renderer.render({ renderContext });
       },
     });
 

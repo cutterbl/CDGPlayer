@@ -1,61 +1,34 @@
-# CDGPlayer Monorepo
+# CDGPlayer Libraries
 
-CDGPlayer is a package-first Nx monorepo for browser karaoke playback.
+CDGPlayer provides browser karaoke playback libraries under the `@cxing/cdg-\*` package family.
 
-## Status
+**BREAKING CHANGE**: The legacy `CDGPlayer` and `CDGControls` monolithic packages have been deprecated and replaced with a modular package architecture. See the [migration guide](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs) for details.
 
-- Legacy top-level `src/` and legacy `scripts` demo have been removed.
-- Active implementation lives in `packages/*` and `apps/demo`.
-- Naming is standardized on `@cxing/cdg-*` packages and `Cdg*` symbols.
+## Packages
 
-## Workspace Layout
-
-- `packages/cdg-core`: CD+G parser, instruction model, render context, frame renderer.
-- `packages/cdg-loader`: ZIP/file/url input loading, metadata extraction, worker loading path.
-- `packages/cdg-player`: Playback orchestration, timeline sync, audio integration, renderer dispatch.
-- `packages/cdg-controls`: Framework-agnostic controls bound to player adapter APIs.
-- `apps/demo`: Vite demo app consuming package entrypoints.
-- `apps/storybook-hub/docs`: publishable MDX documentation source of truth.
-- `scripts/ci`: required docs/release/perf readiness checks.
-
-## Prerequisites
-
-- Node.js 20+
-- pnpm 10+
+- `@cxing/cdg-core`: CD+G parsing, instruction execution, and frame rendering primitives.
+- `@cxing/cdg-loader`: zip/file/url loading with normalized track payloads and metadata.
+- `@cxing/cdg-player`: high-level playback orchestration, audio sync, and rendering dispatch.
+- `@cxing/cdg-controls`: framework-agnostic controls model and UI control builders.
 
 ## Install
 
-```bash
-pnpm install
-```
+Install the packages your app needs.
 
-## Common Commands
-
-```bash
-pnpm dev             # run demo in dev mode
-pnpm start           # serve demo app
-pnpm test            # run tests across projects
-pnpm typecheck       # run typecheck across projects
-pnpm lint            # run lint across projects
-pnpm build           # build all active projects
-```
-
-## CI Gates
-
-```bash
-pnpm run ci:validate # lint + typecheck + docs gate
-pnpm run ci:test     # tests for cdg-core/loader/player/controls/demo
-pnpm run ci:build    # builds for cdg-core/loader/player/controls/demo
-```
-
-## Release
-
-```bash
-pnpm run release
-```
-
-The release flow uses `pnpm nx release` with synchronized package versioning across `@cxing/cdg-*` libraries.
+- Minimal playback setup: `@cxing/cdg-player`
+- Loader-only integrations: `@cxing/cdg-loader`
+- UI control integrations: `@cxing/cdg-controls`
 
 ## Documentation
 
-Start with Storybook Hub docs under [apps/storybook-hub/docs/README.mdx](apps/storybook-hub/docs/README.mdx).
+- [Getting started](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-getting-started--documentation)
+- [Migration guide](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs)
+- [Loader contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-loader-contract--documentation)
+- [Player contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-player-contract--documentation)
+- [Controls contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-controls-contract--documentation)
+- [Framework-agnostic implementation guide](https://cutterbl.github.io/CDGPlayer/storybook-web/?path=/docs/examples-framework-agnostic-demo-implementation-guide--documentation)
+- [React implementation guide](https://cutterbl.github.io/CDGPlayer/storybook-react/?path=/docs/examples-react-demo-implementation-guide--documentation)
+
+## Repository Contribution
+
+Repository setup, CI/CD workflows, and branch protection policy are documented in [CONTRIBUTING.md](CONTRIBUTING.md).

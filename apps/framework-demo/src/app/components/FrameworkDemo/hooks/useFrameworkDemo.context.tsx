@@ -11,11 +11,7 @@ import {
   type RefObject,
   type SetStateAction,
 } from 'react';
-import {
-  createPlayer,
-  type CdgPlayer,
-  type PlayerRenderMetricsDetail,
-} from '@cxing/cdg-player';
+import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
 import {
   createControlsModel,
   type CdgControlsModel,
@@ -362,7 +358,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
 
     const renderSamples: RenderSample[] = [];
     const handleRenderMetrics = (event: Event): void => {
-      const detail = (event as CustomEvent<PlayerRenderMetricsDetail>).detail;
+      const detail = (event as CustomEvent<RenderSample>).detail;
       // Save one small "how hard was that frame?" sample.
       renderSamples.push({
         mode: detail.mode,
