@@ -13,7 +13,7 @@ const createAppElement = () => {
 
 describe('AppElement helpers', () => {
   it('handles diagnostics helper guard branches and export logic', () => {
-    const app = createAppElement() as AppElement & {
+    const app = createAppElement() as unknown as {
       createModeSummary: (samples: unknown[]) => unknown;
       syncPerfExportButton: () => void;
       exportPerfArtifact: () => void;
@@ -98,7 +98,7 @@ describe('AppElement helpers', () => {
   });
 
   it('covers render-metric guard branches, overflow trimming, and sparse perf snapshots', () => {
-    const app = createAppElement() as AppElement & {
+    const app = createAppElement() as unknown as {
       recordRenderMetrics: (
         detail: {
           mode: 'main-thread' | 'worker';
@@ -179,7 +179,7 @@ describe('AppElement helpers', () => {
   });
 
   it('handles title/status/layout helper guards and fallback branches', () => {
-    const app = createAppElement() as AppElement & {
+    const app = createAppElement() as unknown as {
       clearStatusFadeTimeout: () => void;
       setStatusMessage: (message: string) => void;
       setTitleMetadata: (
@@ -242,7 +242,7 @@ describe('AppElement helpers', () => {
   });
 
   it('returns early when required DOM nodes are missing during initialization', () => {
-    const app = createAppElement() as AppElement & {
+    const app = createAppElement() as unknown as {
       initializeDemo: () => void;
     };
 

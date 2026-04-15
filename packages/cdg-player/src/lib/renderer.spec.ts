@@ -1,4 +1,5 @@
 import { createRenderer } from './renderer.js';
+import type { CdgRenderContext } from '@cxing/cdg-core';
 
 describe('renderer', () => {
   afterEach(() => {
@@ -40,7 +41,7 @@ describe('renderer', () => {
         canvas: sourceCanvas,
         imageData,
         keyColor: 2,
-      },
+      } as unknown as CdgRenderContext,
     });
 
     expect(clearRect).toHaveBeenCalledWith(0, 0, 300, 216);
@@ -116,7 +117,7 @@ describe('renderer', () => {
         canvas: sourceCanvas,
         imageData,
         keyColor: null,
-      },
+      } as unknown as CdgRenderContext,
     });
 
     const worker = (renderer as unknown as { worker: MockWorker }).worker;
@@ -162,7 +163,7 @@ describe('renderer', () => {
           height: 1,
         } as unknown as ImageData,
         keyColor: null,
-      },
+      } as unknown as CdgRenderContext,
     });
 
     expect(drawImage).toHaveBeenCalledOnce();

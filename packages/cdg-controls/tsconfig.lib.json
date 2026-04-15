@@ -1,8 +1,8 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "./.dist/out-tsc/lib",
-    "tsBuildInfoFile": "./.dist/out-tsc/lib/tsconfig.lib.tsbuildinfo",
+    "outDir": "./.tsbuild/out-tsc/lib",
+    "tsBuildInfoFile": "./.tsbuild/out-tsc/lib/tsconfig.lib.tsbuildinfo",
     "declaration": true,
     "types": ["node", "vite/client"]
   },

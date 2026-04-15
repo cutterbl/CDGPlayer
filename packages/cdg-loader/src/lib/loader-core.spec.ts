@@ -197,19 +197,6 @@ describe('CdgLoader core behavior', () => {
       },
     );
 
-    const archiveBuffer = await createZipArrayBuffer({
-      entries: [
-        {
-          name: 'song.mp3',
-          content: new Uint8Array([1, 2, 3]),
-        },
-        {
-          name: 'song.cdg',
-          content: new Uint8Array([4, 5, 6, 7]),
-        },
-      ],
-    });
-
     const fetchSpy = vi.fn(
       (_url: string, init?: RequestInit) =>
         new Promise<Response>((_resolve, reject) => {

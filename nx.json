@@ -2,7 +2,8 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "targetDefaults": {
     "build": {
-      "cache": true
+      "cache": true,
+      "dependsOn": ["typecheck", "^typecheck", "^build"]
     },
     "test": {
       "cache": true

@@ -583,7 +583,7 @@ describe('AppElement', () => {
     const app = document.createElement('cdgplayer-demo-app') as AppElement;
     document.body.appendChild(app);
 
-    harness.player.getState.mockReturnValueOnce(undefined);
+    harness.player.getState.mockReturnValueOnce(undefined as never);
     harness.emitPlayerEvent('statechange', new Event('statechange'));
 
     harness.player.getState.mockReturnValueOnce({ status: 'paused' });

@@ -10,6 +10,7 @@ node_modules
 vite.config.*.timestamp*
 vitest.config.*.timestamp*
 **/.dist/
+**/.tsbuild/
 /dist/
 /coverage
 /artifacts/perf/**

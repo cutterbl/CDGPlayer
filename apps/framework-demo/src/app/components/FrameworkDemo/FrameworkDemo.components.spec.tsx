@@ -57,7 +57,7 @@ describe('Framework demo components', () => {
   it('renders idle stage and transport fallback states without perf UI', () => {
     mockUseFrameworkDemoContext.mockReturnValue(createContextValue());
 
-    const { container } = render(
+    render(
       <>
         <TransportBar />
         <StageDisplay />

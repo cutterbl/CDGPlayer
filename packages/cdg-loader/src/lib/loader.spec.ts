@@ -124,7 +124,7 @@ describe('createLoader', () => {
       terminate = vi.fn();
 
       emitMessage(data: unknown): void {
-        for (const listener of this.listeners.message) {
+        for (const listener of this.listeners['message'] ?? []) {
           listener({ data } as MessageEvent<unknown>);
         }
       }
@@ -199,7 +199,7 @@ describe('createLoader', () => {
 
       postMessage = vi.fn((message: { requestId: string; type: string }) => {
         if (message.type === 'load') {
-          for (const listener of this.listeners.message) {
+          for (const listener of this.listeners['message'] ?? []) {
             listener({
               data: {
                 type: 'load-result',
@@ -217,7 +217,7 @@ describe('createLoader', () => {
           return;
         }
 
-        for (const listener of this.listeners.error) {
+        for (const listener of this.listeners['error'] ?? []) {
           listener({} as MessageEvent<unknown>);
         }
       });
@@ -264,7 +264,7 @@ describe('createLoader', () => {
 
       postMessage = vi.fn((message: { type: string; requestId?: string }) => {
         if (message.type === 'load') {
-          for (const listener of this.listeners.message) {
+          for (const listener of this.listeners['message'] ?? []) {
             listener({
               data: {
                 type: 'load-result',
