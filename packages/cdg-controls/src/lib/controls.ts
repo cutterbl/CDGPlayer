@@ -177,6 +177,22 @@ const createRangeDatalist = ({
 const MIN_KEY_SEMITONES = -12;
 const MAX_KEY_SEMITONES = 12;
 
+const formatKeyLabelFromSemitones = ({
+  semitones,
+}: {
+  semitones: number;
+}): string => {
+  const halfSteps = semitones / 2;
+  if (Number.isInteger(halfSteps)) {
+    return halfSteps.toString();
+  }
+
+  const absolute = Math.abs(halfSteps);
+  const whole = Math.trunc(absolute);
+  const fractionalLabel = whole === 0 ? '.5' : `${whole}.5`;
+  return halfSteps < 0 ? `-${fractionalLabel}` : fractionalLabel;
+};
+
 const calculateProgress = ({
   currentMs,
   durationMs,
@@ -480,9 +496,15 @@ export const createVolumeControl = ({
     input,
     options: [
       { value: 0 },
-      { value: 0.25 },
+      { value: 0.1 },
+      { value: 0.2 },
+      { value: 0.3 },
+      { value: 0.4 },
       { value: 0.5 },
-      { value: 0.75 },
+      { value: 0.6 },
+      { value: 0.7 },
+      { value: 0.8 },
+      { value: 0.9 },
       { value: 1 },
     ],
   });
@@ -593,7 +615,7 @@ export const createKeyControl = ({
   for (let value = MIN_KEY_SEMITONES; value <= MAX_KEY_SEMITONES; value += 1) {
     const option = document.createElement('option');
     option.value = value.toString();
-    option.textContent = value > 0 ? `+${value}` : value.toString();
+    option.textContent = formatKeyLabelFromSemitones({ semitones: value });
     select.appendChild(option);
   }
 

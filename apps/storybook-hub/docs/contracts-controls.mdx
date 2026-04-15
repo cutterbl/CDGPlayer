@@ -122,6 +122,13 @@ This is intentional, not accidental legacy.
 
 If a future major release removes `setPlaybackRate` from adapter contracts, this fallback section can be removed at the same time.
 
+## Key Control Label Semantics
+
+- The visible `Key` dropdown labels are shown in half-step units for singer-facing readability.
+- Example label/value mapping: `.5 -> 1`, `1 -> 2`, `1.5 -> 3`.
+- `setPitchSemitones({ value })` continues to receive integer semitone offsets under the hood.
+- Keep adapter and player logic semitone-based; only the UI label representation is transformed.
+
 ## Lifecycle Contract
 
 - Call `model.dispose()` during teardown.

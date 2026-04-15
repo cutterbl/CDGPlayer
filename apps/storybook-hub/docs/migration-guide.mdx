@@ -14,13 +14,56 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
 
 ## Package Mapping
 
-| Legacy package                   | New package           | Purpose                                         |
-| -------------------------------- | --------------------- | ----------------------------------------------- |
-| `CDGPlayer`                      | `@cxing/cdg-player`   | High-level playback orchestration               |
-| `CDGControls`                    | `@cxing/cdg-controls` | Controls model and DOM control builders         |
-| Internal decoding/runtime pieces | `@cxing/cdg-core`     | Low-level parser and frame rendering primitives |
-| N/A (standalone in legacy)       | `@cxing/cdg-loader`   | Zip/file/url loading with normalized payloads   |
-| N/A (standalone in legacy)       | `@cxing/logger`       | Scope-prefixed runtime logging utility          |
+<table>
+  <thead>
+    <tr>
+      <th>Legacy package</th>
+      <th>New package</th>
+      <th>Purpose</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>
+        <code>CDGPlayer</code>
+      </td>
+      <td>
+        <code>@cxing/cdg-player</code>
+      </td>
+      <td>High-level playback orchestration</td>
+    </tr>
+    <tr>
+      <td>
+        <code>CDGControls</code>
+      </td>
+      <td>
+        <code>@cxing/cdg-controls</code>
+      </td>
+      <td>Controls model and DOM control builders</td>
+    </tr>
+    <tr>
+      <td>Internal decoding/runtime pieces</td>
+      <td>
+        <code>@cxing/cdg-core</code>
+      </td>
+      <td>Low-level parser and frame rendering primitives</td>
+    </tr>
+    <tr>
+      <td>N/A (standalone in legacy)</td>
+      <td>
+        <code>@cxing/cdg-loader</code>
+      </td>
+      <td>Zip/file/url loading with normalized payloads</td>
+    </tr>
+    <tr>
+      <td>N/A (standalone in legacy)</td>
+      <td>
+        <code>@cxing/logger</code>
+      </td>
+      <td>Scope-prefixed runtime logging utility</td>
+    </tr>
+  </tbody>
+</table>
 
 ## 1. Replace Dependencies
 
@@ -89,6 +132,7 @@ createVolumeControl({
 - Prefer `setTempo({ value })` for singer-facing speed adjustments.
 - `setPlaybackRate({ value })` is still available as a compatibility alias.
 - Continue using `setPitchSemitones({ value })` for key shift.
+- Keep the control label as `Key`, but display option labels as half-step values (`.5`, `1`, `1.5`, etc.) while still writing integer semitone values to `setPitchSemitones`.
 
 ## 5. Lifecycle and Teardown
 

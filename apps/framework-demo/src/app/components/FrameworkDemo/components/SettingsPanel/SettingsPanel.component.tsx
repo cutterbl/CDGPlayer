@@ -6,6 +6,22 @@ import styles from './SettingsPanel.module.css';
  */
 export type SettingsPanelProps = Record<string, never>;
 
+const formatKeyLabelFromSemitones = ({
+  semitones,
+}: {
+  semitones: number;
+}): string => {
+  const halfSteps = semitones / 2;
+  if (Number.isInteger(halfSteps)) {
+    return halfSteps.toString();
+  }
+
+  const absolute = Math.abs(halfSteps);
+  const whole = Math.trunc(absolute);
+  const fractionalLabel = whole === 0 ? '.5' : `${whole}.5`;
+  return halfSteps < 0 ? `-${fractionalLabel}` : fractionalLabel;
+};
+
 /**
  * Floating settings controls for volume, tempo, and key shift.
  */
@@ -39,9 +55,15 @@ function SettingsPanel(_: SettingsPanelProps) {
         />
         <datalist id="framework-volume-ticks">
           <option value={0} />
-          <option value={0.25} />
+          <option value={0.1} />
+          <option value={0.2} />
+          <option value={0.3} />
+          <option value={0.4} />
           <option value={0.5} />
-          <option value={0.75} />
+          <option value={0.6} />
+          <option value={0.7} />
+          <option value={0.8} />
+          <option value={0.9} />
           <option value={1} />
         </datalist>
       </label>
@@ -80,7 +102,7 @@ function SettingsPanel(_: SettingsPanelProps) {
           {Array.from({ length: 25 }, (_, index) => -12 + index).map(
             (value) => (
               <option key={value} value={value}>
-                {value > 0 ? `+${value}` : value}
+                {formatKeyLabelFromSemitones({ semitones: value })}
               </option>
             ),
           )}

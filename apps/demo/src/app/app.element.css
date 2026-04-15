@@ -146,6 +146,8 @@
 }
 
 .settings-panel {
+  --settings-vertical-slider-height: 350px;
+
   position: absolute;
   top: 0.85rem;
   right: 0.85rem;
@@ -403,6 +405,7 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 0.15rem;
+  min-height: var(--settings-vertical-slider-height);
 }
 
 .settings-panel label[data-orientation='vertical'] [data-role='control-label'] {
@@ -420,7 +423,7 @@
 .settings-panel label[data-orientation='vertical'] input[type='range'] {
   display: block;
   width: auto;
-  height: 95px;
+  height: var(--settings-vertical-slider-height);
   direction: rtl;
   writing-mode: vertical-lr;
   -webkit-appearance: auto;

@@ -192,14 +192,17 @@ describe('controls', () => {
     const tempo = settingsContainer.querySelector<HTMLInputElement>(
       '[data-role="playback-rate"]',
     );
-    const volumeTicks = settingsContainer.querySelectorAll('datalist option');
+    const volumeTickList = settingsContainer.querySelector<HTMLDataListElement>(
+      `#${volume?.getAttribute('list') ?? ''}`,
+    );
+    const volumeTicks = volumeTickList?.querySelectorAll('option') ?? [];
 
     expect(playButton).toBeTruthy();
     expect(progress?.value).toBe('25.0');
     expect(volume?.getAttribute('list')).toBeTruthy();
     expect(tempo?.getAttribute('orient')).toBe('vertical');
     expect(tempo?.getAttribute('list')).toBeTruthy();
-    expect(volumeTicks.length).toBe(12);
+    expect(volumeTicks.length).toBe(11);
 
     playButton?.click();
     await Promise.resolve();
@@ -262,6 +265,16 @@ describe('controls', () => {
     if (!progress || !volume || !playbackRate || !pitchSemitones) {
       throw new Error('Expected controls inputs to exist.');
     }
+
+    expect(pitchSemitones.querySelector('option[value="1"]')?.textContent).toBe(
+      '.5',
+    );
+    expect(pitchSemitones.querySelector('option[value="2"]')?.textContent).toBe(
+      '1',
+    );
+    expect(
+      pitchSemitones.querySelector('option[value="-1"]')?.textContent,
+    ).toBe('-.5');
 
     playButton?.click();
     await Promise.resolve();
