@@ -17,6 +17,14 @@ Use loader when:
 - you want a consistent parsed payload before passing to player
 - you want metadata (`title`, `artist`, etc.) along with media bytes
 
+## Logging Behavior
+
+- Loader internals emit scope-prefixed logs (for example `[cdg-loader-core]`, `[cdg-loader]`, `[cdg-loader-worker]`).
+- `options.debug` enables debug trace output only.
+- `info()` and `error()` events are not debug-gated:
+  - metadata filename fallback is logged at `info`
+  - load/worker failures are logged at `error`
+
 ## Minimal Usage
 
 ```ts
@@ -25,6 +33,7 @@ import { createLoader } from '@cxing/cdg-loader';
 const loader = createLoader();
 const loadedTrack = await loader.load({
   input: { kind: 'file', file: selectedZip },
+  options: { debug: true },
 });
 ```
 
@@ -45,5 +54,6 @@ loadedTrack.cdgBytes;
 
 ## Cross References
 
+- [Logger Contract](/?path=/docs/documentation-api-logger-contract--docs)
 - [Player Contract](/?path=/docs/documentation-api-player-contract--docs)
 - Framework-specific implementation guides are available in the composed `Framework-agnostic Examples` and `React Examples` sections.

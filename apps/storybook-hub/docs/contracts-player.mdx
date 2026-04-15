@@ -23,6 +23,7 @@ const player = createPlayer({
   options: {
     canvas,
     audio,
+    debug: true,
   },
 });
 
@@ -38,7 +39,6 @@ await player.play();
 ```ts
 player.addEventListener('statechange', () => {
   const state = player.getState();
-  console.log(state.status, state.currentTimeMs);
 });
 ```
 
@@ -46,6 +46,8 @@ player.addEventListener('statechange', () => {
 
 - Tempo is the preferred singer-facing API via `setTempo`, with `setPlaybackRate` retained for compatibility.
 - Player runtime does not emit built-in render performance metric events. Performance monitoring/reporting is local-development tooling concern.
+- Debug trace logging is controlled by `options.debug`.
+- Failure paths use `error()` severity and are not hidden behind debug gating.
 
 ## Common Mistakes
 
@@ -55,5 +57,6 @@ player.addEventListener('statechange', () => {
 
 ## Cross References
 
+- [Logger Contract](/?path=/docs/documentation-api-logger-contract--docs)
 - [Controls Contract](/?path=/docs/documentation-api-controls-contract--docs)
 - [Workers and Audio](/?path=/docs/documentation-workers-and-audio--docs)

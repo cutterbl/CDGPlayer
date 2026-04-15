@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { App } from '../../framework-demo/src/App.js';
-import '../../framework-demo/src/styles.css';
+import { App } from '@cxing/framework-demo-app';
+import '@cxing/framework-demo-styles';
 
 const meta: Meta<typeof App> = {
   title: 'Examples/React Demo',

@@ -7,4 +7,3 @@ export * from './lib/cdg-context.js';
 export * from './lib/cdg-instruction.js';
 export * from './lib/cdg-parser.js';
 export * from './lib/cdg-player.js';
-export * from './lib/logger.js';

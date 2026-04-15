@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/web-components-vite';
-import { AppElement } from '../../demo/src/app/app.element';
+import { AppElement } from '@cxing/demo-app-element';
 
 const storyTagName = 'cdg-storybook-framework-agnostic-demo';
 

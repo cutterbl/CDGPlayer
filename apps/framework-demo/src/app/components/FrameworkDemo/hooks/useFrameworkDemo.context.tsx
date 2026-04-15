@@ -344,6 +344,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       options: {
         canvas,
         audio,
+        debug: true,
       },
     });
 

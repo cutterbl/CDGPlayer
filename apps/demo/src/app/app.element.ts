@@ -1,4 +1,5 @@
 import './app.element.css';
+import { createScopedLogger } from '@cxing/logger';
 import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
 import {
   createControlsModel,
@@ -13,12 +14,7 @@ import {
   type DisposableControl,
 } from '@cxing/cdg-controls';
 
-/**
- * Shared debug logger for the framework-agnostic demo.
- */
-const debugLog = (...args: unknown[]): void => {
-  console.log('[demo]', ...args);
-};
+const logger = createScopedLogger({ scope: 'demo', debug: true });
 
 // "Performance diagnostics" is just a speed report card for the player.
 // Think 90s PC gaming: if frame time gets too high, playback can feel choppy.
@@ -260,6 +256,7 @@ export class AppElement extends HTMLElement {
         options: {
           canvas,
           audio,
+          debug: true,
         },
       });
 
@@ -325,7 +322,7 @@ export class AppElement extends HTMLElement {
           this.hasPlaybackStarted = true;
         }
 
-        debugLog('statechange', state);
+        logger.debug({ message: 'statechange', state });
       });
 
       if (this.showPerfDiagnostics) {
@@ -361,14 +358,16 @@ export class AppElement extends HTMLElement {
       fileInput.addEventListener('change', () => {
         // File input is our "load track" entrypoint in the framework-agnostic demo.
         const selectedFile = fileInput.files?.item(0);
-        debugLog('file input changed', {
+        logger.debug({
+          message: 'file input changed',
           selected: selectedFile?.name ?? null,
           size: selectedFile?.size ?? null,
           type: selectedFile?.type ?? null,
         });
 
         if (!selectedFile || !this.player) {
-          debugLog('file selection ignored', {
+          logger.debug({
+            message: 'file selection ignored',
             hasFile: Boolean(selectedFile),
             hasPlayer: Boolean(this.player),
           });
@@ -381,15 +380,24 @@ export class AppElement extends HTMLElement {
         this.syncTitleImage('loading');
         this.syncLayout('loading');
         this.setStatusMessage('Loading track...');
-        debugLog('calling player.load', selectedFile.name);
+        logger.debug({
+          message: 'calling player.load',
+          fileName: selectedFile.name,
+        });
         void this.player
           .load({
             input: { kind: 'file', file: selectedFile },
           })
           .then((loadedTrack) => {
             // Player returns parsed metadata (title/artist) when available.
-            debugLog('player.load resolved', selectedFile.name);
-            debugLog('loaded metadata', loadedTrack?.metadata ?? null);
+            logger.debug({
+              message: 'player.load resolved',
+              fileName: selectedFile.name,
+            });
+            logger.debug({
+              message: 'loaded metadata',
+              metadata: loadedTrack?.metadata ?? null,
+            });
             const metadata = loadedTrack?.metadata;
             if (metadata) {
               this.setTitleMetadata({
@@ -408,10 +416,11 @@ export class AppElement extends HTMLElement {
               errorValue instanceof Error
                 ? errorValue.message
                 : 'Unknown load error';
-            debugLog('player.load rejected', {
+            logger.debug({
+              message: 'player.load rejected',
               file: selectedFile.name,
               error: errorValue,
-              message,
+              errorMessage: message,
             });
             this.setStatusMessage(`Load failed: ${message}`);
             this.syncTitleImage('error');

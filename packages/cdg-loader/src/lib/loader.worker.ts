@@ -1,6 +1,7 @@
 /**
  * Worker runtime that executes load/probe requests off the main thread.
  */
+import { createScopedLogger } from '@cxing/logger';
 import { LoaderError } from './errors.js';
 import { createLoader } from './loader-core.js';
 import type {
@@ -10,10 +11,6 @@ import type {
   LoaderOptions,
   LoaderProbeResult,
 } from './types.js';
-
-const debugLog = (...args: unknown[]): void => {
-  console.log('[cdg-loader-worker]', ...args);
-};
 
 /** Worker-side options mirror without AbortSignal (handled by message protocol). */
 type WorkerLoaderOptions = Omit<LoaderOptions, 'signal'>;
@@ -92,6 +89,9 @@ type WorkerScope = {
 const workerScope = self as unknown as WorkerScope;
 const loader = createLoader();
 
+const createWorkerLogger = ({ debug }: { debug: boolean }) =>
+  createScopedLogger({ scope: 'cdg-loader-worker', debug });
+
 const createTransferables = ({
   result,
 }: {
@@ -108,13 +108,26 @@ const postError = ({
   type,
   requestId,
   errorValue,
+  debug,
 }: {
   type: ErrorResponseMessage['type'];
   requestId: string;
   errorValue: unknown;
+  debug: boolean;
 }): void => {
-  debugLog('postError', { type, requestId, errorValue });
+  const logger = createWorkerLogger({ debug });
+  logger.debug({ message: 'postError', type, requestId, errorValue });
   if (errorValue instanceof LoaderError) {
+    logger.error({
+      message: 'postError:loader-error',
+      type,
+      requestId,
+      code: errorValue.code,
+      loaderMessage: errorValue.message,
+      retriable: errorValue.retriable,
+      context: errorValue.context,
+    });
+
     const errorResponse: ErrorResponseMessage = {
       type,
       requestId,
@@ -136,6 +149,15 @@ const postError = ({
     retriable: false,
     causeValue: errorValue,
   });
+  logger.error({
+    message: 'postError:unexpected',
+    type,
+    requestId,
+    code: fallbackError.code,
+    loaderMessage: fallbackError.message,
+    retriable: fallbackError.retriable,
+    context: fallbackError.context,
+  });
 
   const errorResponse: ErrorResponseMessage = {
     type,
@@ -156,19 +178,25 @@ workerScope.addEventListener(
   'message',
   async (event: MessageEvent<WorkerRequestMessage>) => {
     const message = event.data;
-    debugLog('message', {
+    const debugEnabled =
+      (message.type === 'probe' || message.type === 'load') &&
+      message.options?.debug === true;
+    const logger = createWorkerLogger({ debug: debugEnabled });
+
+    logger.debug({
+      message: 'message',
       type: message.type,
       requestId: 'requestId' in message ? message.requestId : null,
     });
 
     if (message.type === 'cancel') {
-      debugLog('cancel', { requestId: message.requestId });
+      logger.debug({ message: 'cancel', requestId: message.requestId });
       loader.cancel({ requestId: message.requestId });
       return;
     }
 
     if (message.type === 'dispose') {
-      debugLog('dispose');
+      logger.debug({ message: 'dispose' });
       loader.dispose();
       workerScope.close();
       return;
@@ -176,7 +204,8 @@ workerScope.addEventListener(
 
     if (message.type === 'probe') {
       try {
-        debugLog('probe:start', {
+        logger.debug({
+          message: 'probe:start',
           requestId: message.requestId,
           inputKind: message.input.kind,
         });
@@ -195,7 +224,8 @@ workerScope.addEventListener(
         workerScope.postMessage(
           successResponse satisfies WorkerResponseMessage,
         );
-        debugLog('probe:success', {
+        logger.debug({
+          message: 'probe:success',
           requestId: message.requestId,
           karaokeLikely: result.karaokeLikely,
         });
@@ -204,6 +234,7 @@ workerScope.addEventListener(
           type: 'probe-result',
           requestId: message.requestId,
           errorValue,
+          debug: debugEnabled,
         });
       }
 
@@ -212,7 +243,8 @@ workerScope.addEventListener(
 
     if (message.type === 'load') {
       try {
-        debugLog('load:start', {
+        logger.debug({
+          message: 'load:start',
           requestId: message.requestId,
           inputKind: message.input.kind,
         });
@@ -234,7 +266,8 @@ workerScope.addEventListener(
             transfer: createTransferables({ result }),
           },
         );
-        debugLog('load:success', {
+        logger.debug({
+          message: 'load:success',
           requestId: message.requestId,
           trackId: result.trackId,
           sourceSummary: result.sourceSummary,
@@ -244,6 +277,7 @@ workerScope.addEventListener(
           type: 'load-result',
           requestId: message.requestId,
           errorValue,
+          debug: debugEnabled,
         });
       }
     }

@@ -10,6 +10,7 @@ export interface LoaderOptions {
   signal?: AbortSignal;
   requestId?: string;
   strictValidation?: boolean;
+  debug?: boolean;
 }
 
 /** Lightweight probe output for archive preflight checks. */

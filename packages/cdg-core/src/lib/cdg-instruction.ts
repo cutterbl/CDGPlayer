@@ -22,8 +22,10 @@ import {
   TILE_WIDTH,
   WIDTH,
 } from './constants.js';
-import { warn } from './logger.js';
+import { createScopedLogger } from '@cxing/logger';
 import type { ByteLike, CdgRenderContext } from './types.js';
+
+const logger = createScopedLogger({ scope: 'cdg-core', debug: false });
 
 /**
  * Safe indexed byte accessor with zero fallback.
@@ -205,7 +207,9 @@ export class CDGTileBlockInstruction extends CDGInstruction {
     const y = this.row * TILE_HEIGHT;
 
     if (x + TILE_WIDTH > WIDTH || y + TILE_HEIGHT > HEIGHT) {
-      warn(`TileBlock out of bounds (${this.row}, ${this.column})`);
+      logger.warn({
+        message: `TileBlock out of bounds (${this.row}, ${this.column})`,
+      });
       return;
     }
 

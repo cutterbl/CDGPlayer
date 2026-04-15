@@ -25,6 +25,9 @@
   ],
   "references": [
     {
+      "path": "../logger/tsconfig.lib.json"
+    },
+    {
       "path": "../cdg-loader/tsconfig.lib.json"
     },
     {

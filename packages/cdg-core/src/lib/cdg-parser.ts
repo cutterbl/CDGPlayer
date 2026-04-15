@@ -26,8 +26,10 @@ import {
   CDGTileBlockInstruction,
   CDGTileBlockXORInstruction,
 } from './cdg-instruction.js';
-import { warn } from './logger.js';
+import { createScopedLogger } from '@cxing/logger';
 import type { ByteLike } from './types.js';
+
+const logger = createScopedLogger({ scope: 'cdg-core', debug: false });
 
 /**
  * Constructor signature for instruction classes registered with CDGParser.
@@ -87,7 +89,9 @@ export class CDGParser {
     offset?: number;
   }): CDGInstruction {
     if (!(opcode in this.instructionClassByType)) {
-      warn(`Unknown CDG instruction (instruction = ${opcode})`);
+      logger.warn({
+        message: `Unknown CDG instruction (instruction = ${opcode})`,
+      });
     }
 
     const InstructionClass =

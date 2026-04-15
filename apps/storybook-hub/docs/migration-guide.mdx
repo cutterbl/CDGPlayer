@@ -20,6 +20,7 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
 | `CDGControls`                    | `@cxing/cdg-controls` | Controls model and DOM control builders         |
 | Internal decoding/runtime pieces | `@cxing/cdg-core`     | Low-level parser and frame rendering primitives |
 | N/A (standalone in legacy)       | `@cxing/cdg-loader`   | Zip/file/url loading with normalized payloads   |
+| N/A (standalone in legacy)       | `@cxing/logger`       | Scope-prefixed runtime logging utility          |
 
 ## 1. Replace Dependencies
 
@@ -33,6 +34,12 @@ Optional direct loader usage:
 
 ```bash
 pnpm add @cxing/cdg-loader
+```
+
+Optional direct logger usage:
+
+```bash
+pnpm add @cxing/logger
 ```
 
 ## 2. Replace Player Initialization

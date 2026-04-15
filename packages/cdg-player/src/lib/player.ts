@@ -4,6 +4,7 @@ import {
   WIDTH,
   type CdgRenderContext,
 } from '@cxing/cdg-core';
+import { createScopedLogger } from '@cxing/logger';
 import {
   createLoader,
   type CdgLoader,
@@ -19,13 +20,6 @@ import {
   type CdgAudioEngine,
   type PlayerAudioEngineMode,
 } from './audio-engine.js';
-
-/**
- * Package-local debug logger.
- */
-const debugLog = (...args: unknown[]): void => {
-  console.log('[cdg-player]', ...args);
-};
 
 /** Playback lifecycle states for high-level player consumers. */
 export type PlayerStatus =
@@ -59,6 +53,7 @@ export interface CdgPlayerOptions {
   canvas: HTMLCanvasElement;
   audio: HTMLAudioElement;
   loader?: CdgLoader;
+  debug?: boolean;
   renderMode?: 'auto' | 'main-thread' | 'worker';
   loadTransport?: 'auto' | 'main-thread' | 'worker';
   audioEngineMode?: PlayerAudioEngineMode;
@@ -106,6 +101,8 @@ export class CdgPlayer extends EventTarget {
   private readonly audio: HTMLAudioElement;
   private readonly loader: CdgLoader;
   private readonly ownsLoader: boolean;
+  private readonly logger: ReturnType<typeof createScopedLogger>;
+  private readonly debug: boolean;
   private readonly loadTransport: 'auto' | 'main-thread' | 'worker';
   private readonly cdgPlayer: CDGPlayer;
   private readonly renderer: CdgRenderer;
@@ -121,6 +118,7 @@ export class CdgPlayer extends EventTarget {
     canvas,
     audio,
     loader,
+    debug = false,
     renderMode = 'auto',
     loadTransport = 'auto',
     audioEngineMode = 'auto',
@@ -128,7 +126,9 @@ export class CdgPlayer extends EventTarget {
     super();
     this.canvas = canvas;
     this.audio = audio;
-    this.loader = loader ?? createLoader();
+    this.debug = debug;
+    this.logger = createScopedLogger({ scope: 'cdg-player', debug });
+    this.loader = loader ?? createLoader({ debug });
     this.ownsLoader = !loader;
     this.loadTransport = loadTransport;
 
@@ -183,7 +183,8 @@ export class CdgPlayer extends EventTarget {
     autoplay = false,
   }: PlayerLoadOptions): Promise<LoadedTrack> {
     this.applyState({ status: 'loading' });
-    debugLog('load:start', {
+    this.logger.debug({
+      message: 'load:start',
       inputKind: input.kind,
       loadTransport: this.loadTransport,
       autoplay,
@@ -191,35 +192,42 @@ export class CdgPlayer extends EventTarget {
 
     try {
       const useWorkerLoader = this.shouldUseWorkerLoader();
-      debugLog('load:transport-selected', {
+      this.logger.debug({
+        message: 'load:transport-selected',
         useWorkerLoader,
         loadTransport: this.loadTransport,
       });
       let loadedTrack: LoadedTrack;
+      const effectiveLoaderOptions: LoaderOptions = {
+        ...(loaderOptions ?? {}),
+        debug: loaderOptions?.debug ?? this.debug,
+      };
 
       if (useWorkerLoader) {
         try {
           loadedTrack = await loadInWorker({
             input,
-            ...(loaderOptions ? { options: loaderOptions } : {}),
+            options: effectiveLoaderOptions,
           });
-          debugLog('load:worker-success', {
+          this.logger.debug({
+            message: 'load:worker-success',
             trackId: loadedTrack.trackId,
             sourceSummary: loadedTrack.sourceSummary,
           });
         } catch (errorValue: unknown) {
-          debugLog('load:worker-error', errorValue);
+          this.logger.debug({ message: 'load:worker-error', errorValue });
           if (!this.shouldFallbackToMainThreadLoad({ errorValue })) {
             throw errorValue;
           }
 
-          debugLog('load:fallback-main-thread');
+          this.logger.debug({ message: 'load:fallback-main-thread' });
 
           loadedTrack = await this.loader.load({
             input,
-            ...(loaderOptions ? { options: loaderOptions } : {}),
+            options: effectiveLoaderOptions,
           });
-          debugLog('load:main-thread-success-after-fallback', {
+          this.logger.debug({
+            message: 'load:main-thread-success-after-fallback',
             trackId: loadedTrack.trackId,
             sourceSummary: loadedTrack.sourceSummary,
           });
@@ -227,9 +235,10 @@ export class CdgPlayer extends EventTarget {
       } else {
         loadedTrack = await this.loader.load({
           input,
-          ...(loaderOptions ? { options: loaderOptions } : {}),
+          options: effectiveLoaderOptions,
         });
-        debugLog('load:main-thread-success', {
+        this.logger.debug({
+          message: 'load:main-thread-success',
           trackId: loadedTrack.trackId,
           sourceSummary: loadedTrack.sourceSummary,
         });
@@ -245,13 +254,14 @@ export class CdgPlayer extends EventTarget {
         await this.play();
       }
 
-      debugLog('load:ready', {
+      this.logger.debug({
+        message: 'load:ready',
         trackId: loadedTrack.trackId,
       });
 
       return loadedTrack;
     } catch (errorValue: unknown) {
-      debugLog('load:error', errorValue);
+      this.logger.error({ message: 'load:error', errorValue });
       this.applyState({ status: 'error' });
       this.dispatchEvent(new CustomEvent('error', { detail: { errorValue } }));
       throw errorValue;
@@ -368,7 +378,8 @@ export class CdgPlayer extends EventTarget {
     loadedTrack: LoadedTrack;
   }): Promise<void> {
     this.releaseObjectUrl();
-    debugLog('attach:start', {
+    this.logger.debug({
+      message: 'attach:start',
       trackId: loadedTrack.trackId,
       cdgBytes: loadedTrack.cdgBytes.byteLength,
       audioBytes: loadedTrack.audioBuffer.byteLength,
@@ -376,10 +387,10 @@ export class CdgPlayer extends EventTarget {
 
     const corePlayer = this.cdgPlayer as CdgCorePlayerAsyncLoad;
     if (typeof corePlayer.loadAsync === 'function') {
-      debugLog('attach:core-loadAsync');
+      this.logger.debug({ message: 'attach:core-loadAsync' });
       await corePlayer.loadAsync({ data: loadedTrack.cdgBytes });
     } else {
-      debugLog('attach:core-load-sync');
+      this.logger.debug({ message: 'attach:core-load-sync' });
       this.cdgPlayer.load({ data: loadedTrack.cdgBytes });
     }
 
@@ -391,7 +402,8 @@ export class CdgPlayer extends EventTarget {
     this.currentObjectUrl = URL.createObjectURL(audioBlob);
     this.audio.src = this.currentObjectUrl;
     this.audio.load();
-    debugLog('attach:audio-bound', {
+    this.logger.debug({
+      message: 'attach:audio-bound',
       objectUrl: this.currentObjectUrl,
     });
   }

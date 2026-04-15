@@ -43,6 +43,84 @@ vi.mock('@cxing/cdg-controls', () => ({
 
 import { AppElement } from './app.element';
 
+const registerAppElement = (): void => {
+  if (!customElements.get('cdgplayer-demo-app')) {
+    customElements.define('cdgplayer-demo-app', AppElement);
+  }
+};
+
+const createDemoHarness = ({
+  playerState = { status: 'idle' },
+  loadResult,
+  loadError,
+  initialViewState = { status: 'idle' },
+}: {
+  playerState?: { status: string };
+  loadResult?:
+    | {
+        metadata?: {
+          title: string;
+          artist: string;
+        };
+      }
+    | undefined;
+  loadError?: Error;
+  initialViewState?: { status: string };
+} = {}) => {
+  const unsubscribeMock = vi.fn();
+  const playerListeners = new Map<string, EventListener>();
+  let controlsStateListener = (_state: { status: string }): void => undefined;
+
+  const player = {
+    addEventListener: vi.fn((eventName: string, listener: EventListener) => {
+      playerListeners.set(eventName, listener);
+    }),
+    getState: vi.fn(() => playerState),
+    load: loadError
+      ? vi.fn(async () => {
+          throw loadError;
+        })
+      : vi.fn(async () => loadResult),
+    stop: vi.fn(),
+    dispose: vi.fn(),
+  };
+  const model = {
+    subscribe: vi.fn((listener: typeof controlsStateListener) => {
+      controlsStateListener = listener;
+      listener(initialViewState);
+      return unsubscribeMock;
+    }),
+    togglePlayPause: vi.fn(async () => undefined),
+    dispose: vi.fn(),
+  };
+  const controlDisposers = Array.from({ length: 7 }, () => ({
+    dispose: vi.fn(),
+  }));
+
+  createPlayerMock.mockReturnValue(player);
+  createControlsModelMock.mockReturnValue(model);
+  createPlayPauseControlMock.mockReturnValue(controlDisposers[0]);
+  createCurrentTimeDisplayMock.mockReturnValue(controlDisposers[1]);
+  createProgressControlMock.mockReturnValue(controlDisposers[2]);
+  createDurationDisplayMock.mockReturnValue(controlDisposers[3]);
+  createVolumeControlMock.mockReturnValue(controlDisposers[4]);
+  createTempoControlMock.mockReturnValue(controlDisposers[5]);
+  createKeyControlMock.mockReturnValue(controlDisposers[6]);
+
+  return {
+    player,
+    model,
+    controlDisposers,
+    unsubscribeMock,
+    emitControlsState(nextState: { status: string }) {
+      controlsStateListener(nextState);
+    },
+    emitPlayerEvent(eventName: string, event: Event) {
+      playerListeners.get(eventName)?.(event);
+    },
+  };
+};
+
 describe('AppElement', () => {
   beforeEach(() => {
     vi.useRealTimers();
@@ -94,9 +172,7 @@ describe('AppElement', () => {
     createTempoControlMock.mockReturnValue(controlDisposers[5]);
     createKeyControlMock.mockReturnValue(controlDisposers[6]);
 
-    if (!customElements.get('cdgplayer-demo-app')) {
-      customElements.define('cdgplayer-demo-app', AppElement);
-    }
+    registerAppElement();
 
     const app = document.createElement('cdgplayer-demo-app') as AppElement;
     document.body.appendChild(app);
@@ -161,9 +237,7 @@ describe('AppElement', () => {
     createTempoControlMock.mockReturnValue(controlDisposers[5]);
     createKeyControlMock.mockReturnValue(controlDisposers[6]);
 
-    if (!customElements.get('cdgplayer-demo-app')) {
-      customElements.define('cdgplayer-demo-app', AppElement);
-    }
+    registerAppElement();
 
     const app = document.createElement('cdgplayer-demo-app') as AppElement;
     document.body.appendChild(app);
@@ -240,9 +314,7 @@ describe('AppElement', () => {
     createTempoControlMock.mockReturnValue(controlDisposers[5]);
     createKeyControlMock.mockReturnValue(controlDisposers[6]);
 
-    if (!customElements.get('cdgplayer-demo-app')) {
-      customElements.define('cdgplayer-demo-app', AppElement);
-    }
+    registerAppElement();
 
     const app = document.createElement('cdgplayer-demo-app') as AppElement;
     document.body.appendChild(app);
@@ -317,9 +389,7 @@ describe('AppElement', () => {
     createTempoControlMock.mockReturnValue(controlDisposers[5]);
     createKeyControlMock.mockReturnValue(controlDisposers[6]);
 
-    if (!customElements.get('cdgplayer-demo-app')) {
-      customElements.define('cdgplayer-demo-app', AppElement);
-    }
+    registerAppElement();
 
     const app = document.createElement('cdgplayer-demo-app') as AppElement;
     document.body.appendChild(app);
@@ -338,6 +408,276 @@ describe('AppElement', () => {
 
     settingsPanel.dispatchEvent(new MouseEvent('click', { bubbles: true }));
     expect(model.togglePlayPause).toHaveBeenCalledTimes(1);
+
+    document.body.removeChild(app);
+  });
+
+  it('shows load failure state when player.load rejects', async () => {
+    const harness = createDemoHarness({
+      loadError: new Error('Broken zip'),
+      playerState: { status: 'error' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const input = app.querySelector<HTMLInputElement>('#track-input');
+    const status = app.querySelector<HTMLElement>('[data-role="status"]');
+    const shell = app.querySelector<HTMLElement>('[data-role="app-shell"]');
+    const file = new File(['zip-content'], 'broken.zip', {
+      type: 'application/zip',
+    });
+
+    if (!input) {
+      throw new Error('Expected file input to exist.');
+    }
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: {
+        item: (index: number) => (index === 0 ? file : null),
+        length: 1,
+        0: file,
+      },
+    });
+
+    input.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(harness.player.stop).toHaveBeenCalledOnce();
+    expect(status?.textContent).toBe('Load failed: Broken zip');
+    expect(shell?.classList.contains('show-player')).toBe(true);
+    expect(shell?.classList.contains('has-track')).toBe(false);
+    expect(input.value).toBe('');
+
+    document.body.removeChild(app);
+  });
+
+  it('renders fallback metadata and syncs ready/playing layout classes', async () => {
+    const harness = createDemoHarness({
+      loadResult: {
+        metadata: {
+          title: '   ',
+          artist: '   ',
+        },
+      },
+      playerState: { status: 'playing' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const input = app.querySelector<HTMLInputElement>('#track-input');
+    const title = app.querySelector<HTMLElement>(
+      '[data-role="title-meta-title"]',
+    );
+    const artist = app.querySelector<HTMLElement>(
+      '[data-role="title-meta-artist"]',
+    );
+    const titleImage = app.querySelector<HTMLElement>(
+      '[data-role="title-image"]',
+    );
+    const shell = app.querySelector<HTMLElement>('[data-role="app-shell"]');
+    const file = new File(['zip-content'], 'ready.zip', {
+      type: 'application/zip',
+    });
+
+    if (!input) {
+      throw new Error('Expected file input to exist.');
+    }
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: {
+        item: (index: number) => (index === 0 ? file : null),
+        length: 1,
+        0: file,
+      },
+    });
+
+    input.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(title?.textContent).toBe('Unknown Title');
+    expect(artist?.textContent).toBe('Unknown Artist');
+    expect(titleImage?.classList.contains('show-metadata')).toBe(true);
+
+    harness.emitControlsState({ status: 'ready' });
+    expect(shell?.classList.contains('has-track')).toBe(true);
+    expect(shell?.classList.contains('is-playing')).toBe(false);
+
+    harness.emitControlsState({ status: 'playing' });
+    expect(shell?.classList.contains('is-playing')).toBe(true);
+    expect(titleImage?.classList.contains('hide')).toBe(true);
+
+    document.body.removeChild(app);
+  });
+
+  it('captures perf metrics and exports a local speed report', () => {
+    const harness = createDemoHarness();
+    const createObjectUrlSpy = vi
+      .spyOn(URL, 'createObjectURL')
+      .mockReturnValue('blob:perf-report');
+    const revokeObjectUrlSpy = vi
+      .spyOn(URL, 'revokeObjectURL')
+      .mockImplementation(() => undefined);
+    const clickSpy = vi
+      .spyOn(HTMLAnchorElement.prototype, 'click')
+      .mockImplementation(() => undefined);
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const perfHud = app.querySelector<HTMLElement>('[data-role="perf-hud"]');
+    const exportButton = app.querySelector<HTMLButtonElement>(
+      '[data-role="perf-export"]',
+    );
+
+    expect(perfHud?.textContent).toContain('play a song to collect samples');
+    expect(exportButton?.disabled).toBe(true);
+
+    harness.emitPlayerEvent(
+      'rendermetrics',
+      new CustomEvent('rendermetrics', {
+        detail: {
+          mode: 'worker',
+          frameCpuMs: 4.25,
+          transferredBytes: 1024,
+          atMs: 33,
+        },
+      }),
+    );
+
+    expect(perfHud?.textContent).toContain('Speed check (worker)');
+    expect(perfHud?.textContent).toContain('avg 4.25 ms');
+    expect(exportButton?.disabled).toBe(false);
+
+    exportButton?.click();
+
+    expect(createObjectUrlSpy).toHaveBeenCalledOnce();
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(revokeObjectUrlSpy).toHaveBeenCalledOnce();
+    expect(
+      (globalThis as { __CDG_PERF_ARTIFACT__?: { source: string } })
+        .__CDG_PERF_ARTIFACT__?.source,
+    ).toBe('apps/demo');
+
+    document.body.removeChild(app);
+  });
+
+  it('handles player statechange callbacks when state is missing and when playback starts', () => {
+    const harness = createDemoHarness({
+      playerState: { status: 'idle' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    harness.player.getState.mockReturnValueOnce(undefined);
+    harness.emitPlayerEvent('statechange', new Event('statechange'));
+
+    harness.player.getState.mockReturnValueOnce({ status: 'paused' });
+    harness.emitPlayerEvent('statechange', new Event('statechange'));
+
+    harness.player.getState.mockReturnValueOnce({ status: 'playing' });
+    harness.emitPlayerEvent('statechange', new Event('statechange'));
+
+    harness.emitControlsState({ status: 'ready' });
+
+    const titleImage = app.querySelector<HTMLElement>(
+      '[data-role="title-image"]',
+    );
+    expect(titleImage?.classList.contains('hide')).toBe(true);
+
+    document.body.removeChild(app);
+  });
+
+  it('shows user-facing fallback messages for non-Error failures', async () => {
+    const harness = createDemoHarness({
+      loadError: 'zip blew up' as never,
+      playerState: { status: 'error' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const input = app.querySelector<HTMLInputElement>('#track-input');
+    const status = app.querySelector<HTMLElement>('[data-role="status"]');
+    const file = new File(['zip-content'], 'broken.zip', {
+      type: 'application/zip',
+    });
+
+    if (!input) {
+      throw new Error('Expected file input to exist.');
+    }
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: {
+        item: (index: number) => (index === 0 ? file : null),
+        length: 1,
+        0: file,
+      },
+    });
+
+    input.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(harness.player.stop).toHaveBeenCalledOnce();
+    expect(status?.textContent).toBe('Load failed: Unknown load error');
+
+    document.body.removeChild(app);
+  });
+
+  it('surfaces non-Error initialization failures when player setup throws', () => {
+    createPlayerMock.mockImplementation(() => {
+      throw 'setup exploded';
+    });
+    createControlsModelMock.mockReset();
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const status = app.querySelector<HTMLElement>('[data-role="status"]');
+    expect(status?.textContent).toBe(
+      'Demo unavailable: Unknown initialization error',
+    );
+
+    document.body.removeChild(app);
+  });
+
+  it('shows a user-facing initialization error when player setup throws', () => {
+    createPlayerMock.mockImplementation(() => {
+      throw new Error('Canvas init failed');
+    });
+    createControlsModelMock.mockImplementation(() => {
+      throw new Error('Should not create controls after player failure');
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const status = app.querySelector<HTMLElement>('[data-role="status"]');
+
+    expect(status?.textContent).toBe('Demo unavailable: Canvas init failed');
+    expect(createControlsModelMock).not.toHaveBeenCalled();
 
     document.body.removeChild(app);
   });

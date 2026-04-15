@@ -21,5 +21,10 @@
     "src/**/*.spec.jsx",
     "src/**/*.d.ts",
     "src/**/*.ts"
+  ],
+  "references": [
+    {
+      "path": "../logger/tsconfig.lib.json"
+    }
   ]
 }

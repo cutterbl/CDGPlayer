@@ -7,6 +7,8 @@ import { mkdir } from 'node:fs/promises';
 const rootDir = process.cwd();
 const coverageRoot = resolve(rootDir, 'coverage');
 const outputFlag = '--out';
+const minFunctionsFlag = '--min-functions';
+const minBranchesFlag = '--min-branches';
 
 const parseOutputPath = (argv) => {
   for (let index = 0; index < argv.length; index += 1) {
@@ -36,6 +38,47 @@ const parseOutputPath = (argv) => {
   }
 
   return 'coverage/summary.md';
+};
+
+const parsePercentFlag = (argv, flagName) => {
+  for (let index = 0; index < argv.length; index += 1) {
+    const arg = argv[index];
+
+    if (arg === flagName) {
+      const value = argv[index + 1];
+      if (!value || value.startsWith('--')) {
+        console.error(
+          `Coverage summary failed: ${flagName} requires a numeric value.`,
+        );
+        process.exit(1);
+      }
+
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+        console.error(
+          `Coverage summary failed: ${flagName} must be a number between 0 and 100.`,
+        );
+        process.exit(1);
+      }
+
+      return parsed;
+    }
+
+    if (arg.startsWith(`${flagName}=`)) {
+      const value = arg.slice(`${flagName}=`.length);
+      const parsed = Number(value);
+      if (!value || !Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+        console.error(
+          `Coverage summary failed: ${flagName} must be a number between 0 and 100.`,
+        );
+        process.exit(1);
+      }
+
+      return parsed;
+    }
+  }
+
+  return null;
 };
 
 const walk = async (dir) => {
@@ -76,6 +119,9 @@ if (summaryFiles.length === 0) {
   );
   process.exit(1);
 }
+
+const minFunctions = parsePercentFlag(process.argv.slice(2), minFunctionsFlag);
+const minBranches = parsePercentFlag(process.argv.slice(2), minBranchesFlag);
 
 const rows = [];
 const aggregate = {
@@ -121,6 +167,18 @@ for (const filePath of summaryFiles) {
 
 rows.sort((left, right) => left.project.localeCompare(right.project));
 
+const thresholdFailures = rows.filter((row) => {
+  if (minFunctions !== null && row.functions < minFunctions) {
+    return true;
+  }
+
+  if (minBranches !== null && row.branches < minBranches) {
+    return true;
+  }
+
+  return false;
+});
+
 const overall = {
   statements: pct(aggregate.statements.covered, aggregate.statements.total),
   branches: pct(aggregate.branches.covered, aggregate.branches.total),
@@ -149,3 +207,26 @@ await mkdir(dirname(absoluteOutputPath), { recursive: true });
 await writeFile(absoluteOutputPath, markdownLines.join('\n'), 'utf8');
 
 console.log(`Coverage summary written to ${outputPath}`);
+
+if (thresholdFailures.length > 0) {
+  console.error('Coverage thresholds failed for the following projects:');
+  for (const row of thresholdFailures) {
+    const details = [];
+
+    if (minFunctions !== null && row.functions < minFunctions) {
+      details.push(
+        `functions ${formatPct(row.functions)} < ${formatPct(minFunctions)}`,
+      );
+    }
+
+    if (minBranches !== null && row.branches < minBranches) {
+      details.push(
+        `branches ${formatPct(row.branches)} < ${formatPct(minBranches)}`,
+      );
+    }
+
+    console.error(`- ${row.project}: ${details.join(', ')}`);
+  }
+
+  process.exit(1);
+}

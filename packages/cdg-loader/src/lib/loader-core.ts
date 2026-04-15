@@ -1,5 +1,6 @@
 import JSZip from 'jszip';
 import { read as readMediaTags } from 'jsmediatags';
+import { createScopedLogger } from '@cxing/logger';
 import { LoaderError } from './errors.js';
 import type {
   LoadedTrack,
@@ -8,10 +9,6 @@ import type {
   LoaderOptions,
   LoaderProbeResult,
 } from './types.js';
-
-const debugLog = (...args: unknown[]): void => {
-  console.log('[cdg-loader-core]', ...args);
-};
 
 const fileNameFromInput = ({ input }: { input: LoaderInput }): string => {
   switch (input.kind) {
@@ -82,12 +79,19 @@ const readMetadataFromAudio = async ({
 
         resolve(nextMetadata);
       },
-      onError: (errorValue) => {
-        debugLog('metadata:read-fallback-to-filename', errorValue);
+      onError: () => {
         resolve({});
       },
     });
   });
+};
+
+const hasAnyEmbeddedMetadata = ({
+  metadata,
+}: {
+  metadata: Partial<LoaderMetadata>;
+}): boolean => {
+  return Boolean(metadata.title || metadata.artist || metadata.album);
 };
 
 const mergeMetadata = ({
@@ -213,6 +217,11 @@ const getKaraokeEntries = ({
  */
 export class CdgLoader {
   private readonly controllers = new Map<string, AbortController>();
+  private readonly debug: boolean;
+
+  constructor({ debug = false }: { debug?: boolean } = {}) {
+    this.debug = debug;
+  }
 
   /**
    * Loads and validates karaoke assets from supported input types.
@@ -224,7 +233,13 @@ export class CdgLoader {
     input: LoaderInput;
     options?: LoaderOptions;
   }): Promise<LoadedTrack> {
-    debugLog('load:start', {
+    const logger = createScopedLogger({
+      scope: 'cdg-loader-core',
+      debug: options.debug ?? this.debug,
+    });
+
+    logger.debug({
+      message: 'load:start',
       inputKind: input.kind,
       requestId: options.requestId ?? null,
       strictValidation: options.strictValidation ?? false,
@@ -250,7 +265,10 @@ export class CdgLoader {
         input,
         signal: controller.signal,
       });
-      debugLog('load:archive-read', { bytes: archiveBuffer.byteLength });
+      logger.debug({
+        message: 'load:archive-read',
+        bytes: archiveBuffer.byteLength,
+      });
       const zip = await JSZip.loadAsync(archiveBuffer).catch(
         (causeValue: unknown) => {
           throw new LoaderError({
@@ -266,7 +284,8 @@ export class CdgLoader {
         zip,
         strictValidation: options.strictValidation ?? false,
       });
-      debugLog('load:entries-selected', {
+      logger.debug({
+        message: 'load:entries-selected',
         audio: selection.audio.name,
         graphics: selection.graphics.name,
         warnings: selection.warnings,
@@ -294,11 +313,20 @@ export class CdgLoader {
       const sourceSummary = fileNameFromInput({ input });
       const fallbackMetadata = metadataFromName({ name: selection.audio.name });
       const embeddedMetadata = await readMetadataFromAudio({ audioBuffer });
+      if (!hasAnyEmbeddedMetadata({ metadata: embeddedMetadata })) {
+        logger.info({
+          message: 'metadata:fallback-filename',
+          sourceSummary,
+          audioEntry: selection.audio.name,
+        });
+      }
+
       const metadata = mergeMetadata({
         preferred: embeddedMetadata,
         fallback: fallbackMetadata,
       });
-      debugLog('load:success', {
+      logger.debug({
+        message: 'load:success',
         sourceSummary,
         audioBytes: audioBuffer.byteLength,
         cdgBytes: cdgBytes.byteLength,
@@ -313,26 +341,48 @@ export class CdgLoader {
         warnings: selection.warnings,
       };
     } catch (errorValue: unknown) {
-      debugLog('load:error', errorValue);
+      logger.debug({ message: 'load:error', errorValue });
+
       if (errorValue instanceof LoaderError) {
+        logger.error({
+          message: 'load:loader-error',
+          code: errorValue.code,
+          loaderMessage: errorValue.message,
+          retriable: errorValue.retriable,
+          context: errorValue.context,
+        });
         throw errorValue;
       }
 
+      logger.error({ message: 'load:unexpected-error', errorValue });
+
       if (controller.signal.aborted) {
-        throw new LoaderError({
+        const abortedError = new LoaderError({
           code: 'ABORTED',
           message: 'Load was aborted.',
           retriable: true,
           causeValue: errorValue,
         });
+        logger.error({
+          message: 'load:aborted',
+          code: abortedError.code,
+          loaderMessage: abortedError.message,
+        });
+        throw abortedError;
       }
 
-      throw new LoaderError({
+      const internalError = new LoaderError({
         code: 'INTERNAL',
         message: 'Unexpected loader failure.',
         retriable: false,
         causeValue: errorValue,
       });
+      logger.error({
+        message: 'load:internal',
+        code: internalError.code,
+        loaderMessage: internalError.message,
+      });
+      throw internalError;
     } finally {
       if (options.requestId) {
         this.controllers.delete(options.requestId);
@@ -350,7 +400,13 @@ export class CdgLoader {
     input: LoaderInput;
     options?: LoaderOptions;
   }): Promise<LoaderProbeResult> {
-    debugLog('probe:start', {
+    const logger = createScopedLogger({
+      scope: 'cdg-loader-core',
+      debug: options.debug ?? this.debug,
+    });
+
+    logger.debug({
+      message: 'probe:start',
       inputKind: input.kind,
       requestId: options.requestId ?? null,
     });
@@ -378,7 +434,8 @@ export class CdgLoader {
       (name) => /\.(MP3|CDG)$/u.test(name) && !/\.(mp3|cdg)$/u.test(name),
     );
 
-    debugLog('probe:result', {
+    logger.debug({
+      message: 'probe:result',
       entryCount: names.length,
       karaokeEntries: karaokeEntries.length,
       extensionCaseIssues: lowerCasedMismatches,
@@ -415,4 +472,8 @@ export class CdgLoader {
 /**
  * Factory helper for creating a CdgLoader instance.
  */
-export const createLoader = (): CdgLoader => new CdgLoader();
+export const createLoader = ({
+  debug = false,
+}: {
+  debug?: boolean;
+} = {}): CdgLoader => new CdgLoader({ debug });

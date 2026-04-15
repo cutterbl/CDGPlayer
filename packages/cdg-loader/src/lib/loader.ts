@@ -1,3 +1,4 @@
+import { createScopedLogger } from '@cxing/logger';
 import { LoaderError } from './errors.js';
 import { createLoader, type CdgLoader } from './loader-core.js';
 import type {
@@ -6,10 +7,6 @@ import type {
   LoaderInput,
   LoaderOptions,
 } from './types.js';
-
-const debugLog = (...args: unknown[]): void => {
-  console.log('[cdg-loader]', ...args);
-};
 
 export { CdgLoader, createLoader };
 
@@ -117,6 +114,11 @@ const toWorkerOptions = (
           strictValidation: options.strictValidation,
         }
       : {}),
+    ...(options.debug != null
+      ? {
+          debug: options.debug,
+        }
+      : {}),
   };
 
   return Object.keys(nextOptions).length ? nextOptions : undefined;
@@ -127,13 +129,18 @@ const runWorkerRequest = async <TResult>({
   resultType,
   requestId,
   signal,
+  debug,
 }: {
   requestMessage: WorkerRequestMessage;
   resultType: WorkerResultMessage['type'];
   requestId: string;
   signal: AbortSignal | undefined;
+  debug: boolean;
 }): Promise<TResult> => {
-  debugLog('worker:spawn', {
+  const logger = createScopedLogger({ scope: 'cdg-loader', debug });
+
+  logger.debug({
+    message: 'worker:spawn',
     requestId,
     resultType,
     requestType: requestMessage.type,
@@ -172,7 +179,7 @@ const runWorkerRequest = async <TResult>({
     };
 
     const handleAbort = (): void => {
-      debugLog('worker:abort', { requestId });
+      logger.debug({ message: 'worker:abort', requestId });
       const cancelMessage: CancelRequestMessage = {
         type: 'cancel',
         requestId,
@@ -191,7 +198,7 @@ const runWorkerRequest = async <TResult>({
     };
 
     const handleError = (): void => {
-      debugLog('worker:error-event', { requestId });
+      logger.debug({ message: 'worker:error-event', requestId });
       settle({
         value: new LoaderError({
           code: 'INTERNAL',
@@ -208,7 +215,8 @@ const runWorkerRequest = async <TResult>({
         return;
       }
 
-      debugLog('worker:message', {
+      logger.debug({
+        message: 'worker:message',
         requestId,
         type: message.type,
         ok: message.ok,
@@ -225,7 +233,11 @@ const runWorkerRequest = async <TResult>({
     worker.addEventListener('message', handleMessage);
     worker.addEventListener('error', handleError);
     signal?.addEventListener('abort', handleAbort, { once: true });
-    debugLog('worker:post', { requestId, requestType: requestMessage.type });
+    logger.debug({
+      message: 'worker:post',
+      requestId,
+      requestType: requestMessage.type,
+    });
     worker.postMessage(requestMessage);
   });
 };
@@ -240,17 +252,23 @@ export const loadInWorker = async ({
   input: LoaderInput;
   options?: LoaderOptions;
 }): Promise<LoadedTrack> => {
-  debugLog('loadInWorker:start', { inputKind: input.kind });
+  const debugEnabled = options?.debug ?? false;
+  const logger = createScopedLogger({
+    scope: 'cdg-loader',
+    debug: debugEnabled,
+  });
+
+  logger.debug({ message: 'loadInWorker:start', inputKind: input.kind });
   if (!supportsWorkerTransport()) {
-    debugLog('loadInWorker:fallback-no-worker-support');
-    return createLoader().load({
+    logger.debug({ message: 'loadInWorker:fallback-no-worker-support' });
+    return createLoader({ debug: debugEnabled }).load({
       input,
       ...(options ? { options } : {}),
     });
   }
 
   if (options?.signal?.aborted) {
-    debugLog('loadInWorker:aborted-before-dispatch');
+    logger.debug({ message: 'loadInWorker:aborted-before-dispatch' });
     throw new LoaderError({
       code: 'ABORTED',
       message: 'Load was aborted before dispatch.',
@@ -268,13 +286,14 @@ export const loadInWorker = async ({
     ...(workerOptions ? { options: workerOptions } : {}),
   };
 
-  debugLog('loadInWorker:dispatch', { requestId });
+  logger.debug({ message: 'loadInWorker:dispatch', requestId });
 
   return runWorkerRequest<LoadedTrack>({
     requestMessage,
     resultType: 'load-result',
     requestId,
     signal: options?.signal,
+    debug: debugEnabled,
   });
 };
 
@@ -293,9 +312,15 @@ export const probeInWorker = async ({
   hasExtraEntries: boolean;
   extensionCaseIssues: boolean;
 }> => {
-  debugLog('probeInWorker:start', { inputKind: input.kind });
+  const debugEnabled = options?.debug ?? false;
+  const logger = createScopedLogger({
+    scope: 'cdg-loader',
+    debug: debugEnabled,
+  });
+
+  logger.debug({ message: 'probeInWorker:start', inputKind: input.kind });
   if (!supportsWorkerTransport()) {
-    return createLoader().probe({
+    return createLoader({ debug: debugEnabled }).probe({
       input,
       ...(options ? { options } : {}),
     });
@@ -329,5 +354,6 @@ export const probeInWorker = async ({
     resultType: 'probe-result',
     requestId,
     signal: options?.signal,
+    debug: debugEnabled,
   });
 };

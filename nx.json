@@ -40,7 +40,13 @@
     }
   ],
   "release": {
-    "projects": ["cdg-core", "cdg-loader", "cdg-player", "cdg-controls"],
+    "projects": [
+      "logger",
+      "cdg-core",
+      "cdg-loader",
+      "cdg-player",
+      "cdg-controls"
+    ],
     "projectsRelationship": "fixed",
     "version": {
       "preVersionCommand": "pnpm nx run-many -t build"

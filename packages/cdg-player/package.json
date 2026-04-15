@@ -46,6 +46,7 @@
   "dependencies": {
     "@cxing/cdg-core": "workspace:*",
     "@cxing/cdg-loader": "workspace:*",
+    "@cxing/logger": "workspace:*",
     "@soundtouchjs/audio-worklet": "^1.0.10"
   }
 }

@@ -10,6 +10,7 @@ CDGPlayer provides browser karaoke playback libraries under the `@cxing/cdg-\*` 
 - `@cxing/cdg-loader`: zip/file/url loading with normalized track payloads and metadata.
 - `@cxing/cdg-player`: high-level playback orchestration, audio sync, and rendering dispatch.
 - `@cxing/cdg-controls`: framework-agnostic controls model and UI control builders.
+- `@cxing/logger`: standalone scoped logging utility shared across runtime packages.
 
 ## Install
 
@@ -18,11 +19,13 @@ Install the packages your app needs.
 - Minimal playback setup: `@cxing/cdg-player`
 - Loader-only integrations: `@cxing/cdg-loader`
 - UI control integrations: `@cxing/cdg-controls`
+- Runtime logging integrations: `@cxing/logger`
 
 ## Documentation
 
 - [Getting started](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-getting-started--documentation)
 - [Migration guide](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs)
+- [Logger contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-logger-contract--docs)
 - [Loader contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-loader-contract--documentation)
 - [Player contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-player-contract--documentation)
 - [Controls contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-controls-contract--documentation)

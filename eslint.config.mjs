@@ -25,7 +25,11 @@ export default [
         'error',
         {
           enforceBuildableLibDependency: true,
-          allow: [],
+          allow: [
+            '@cxing/framework-demo-app',
+            '@cxing/framework-demo-styles',
+            '@cxing/demo-app-element',
+          ],
           depConstraints: [
             {
               sourceTag: '*',

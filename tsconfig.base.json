@@ -22,6 +22,10 @@
     "target": "es2024",
     "customConditions": ["cdgplayer"],
     "paths": {
+      "@cxing/framework-demo-app": ["apps/framework-demo/src/App.tsx"],
+      "@cxing/framework-demo-styles": ["apps/framework-demo/src/styles.css"],
+      "@cxing/demo-app-element": ["apps/demo/src/app/app.element.ts"],
+      "@cxing/logger": ["packages/logger/src/index.ts"],
       "@cxing/cdg-core": ["packages/cdg-core/src/index.ts"],
       "@cxing/cdg-loader": ["packages/cdg-loader/src/index.ts"],
       "@cxing/cdg-player": ["packages/cdg-player/src/index.ts"],

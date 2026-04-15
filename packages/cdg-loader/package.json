@@ -44,6 +44,7 @@
   ],
   "sideEffects": false,
   "dependencies": {
+    "@cxing/logger": "workspace:*",
     "jsmediatags": "^3.9.7",
     "jszip": "^3.10.1"
   }

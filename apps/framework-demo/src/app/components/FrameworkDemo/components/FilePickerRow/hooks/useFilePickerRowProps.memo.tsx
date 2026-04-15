@@ -47,10 +47,6 @@ function useFilePickerRowProps(): FilePickerRowResolvedProps {
             file,
           },
         });
-        console.log(
-          '[framework-demo] loaded metadata',
-          loadedTrack?.metadata ?? null,
-        );
 
         if (loadedTrack?.metadata) {
           const title = loadedTrack.metadata.title.trim();

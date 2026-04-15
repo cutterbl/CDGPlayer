@@ -24,6 +24,9 @@
   ],
   "references": [
     {
+      "path": "../../packages/logger/tsconfig.lib.json"
+    },
+    {
       "path": "../../packages/cdg-controls/tsconfig.lib.json"
     },
     {

@@ -15,9 +15,14 @@ Before opening or updating a PR, run the core validation checks locally:
 ```bash
 pnpm run ci:validate
 pnpm run ci:test
+pnpm run ci:test:coverage
 pnpm run ci:build
 pnpm run ci:docs
 ```
+
+`ci:test:coverage` regenerates `coverage/summary.md` and fails if any covered project drops below `90%` function coverage or `80%` branch coverage.
+
+This gate is enforced per covered package or app. The overall summary row is informational only and does not satisfy the requirement if an individual project falls below the threshold.
 
 ## Code Structure Expectations
 
@@ -78,7 +83,7 @@ Budgets are configured in `configs/perf-budgets.json`:
 2. Keep examples aligned with current recommended usage.
 3. Keep new code consistent with package boundaries and existing structure.
 4. Prefer TypeScript and modern ECMAScript patterns over legacy alternatives.
-5. Run CI checks locally before handoff.
+5. Run CI checks locally before handoff, including `pnpm run ci:test:coverage`.
 
 ## Cross References
 
