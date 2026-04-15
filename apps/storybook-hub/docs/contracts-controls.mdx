@@ -125,8 +125,11 @@ If a future major release removes `setPlaybackRate` from adapter contracts, this
 ## Key Control Label Semantics
 
 - The visible `Key` dropdown labels are shown in half-step units for singer-facing readability.
+- `pitchSemitones` follows standard music semantics: `1` semitone is one half-step, not half an octave.
+- Twelve semitones (`12`) equals one octave.
 - Example label/value mapping: `.5 -> 1`, `1 -> 2`, `1.5 -> 3`.
 - `setPitchSemitones({ value })` continues to receive integer semitone offsets under the hood.
+- The label mapping is a UI representation choice only; it does not change the semitone math used by SoundTouch.
 - Keep adapter and player logic semitone-based; only the UI label representation is transformed.
 
 ## Lifecycle Contract

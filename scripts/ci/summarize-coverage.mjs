@@ -122,6 +122,10 @@ if (summaryFiles.length === 0) {
 
 const minFunctions = parsePercentFlag(process.argv.slice(2), minFunctionsFlag);
 const minBranches = parsePercentFlag(process.argv.slice(2), minBranchesFlag);
+const defaultMinFunctions = 90;
+const defaultMinBranches = 80;
+const statusMinFunctions = minFunctions ?? defaultMinFunctions;
+const statusMinBranches = minBranches ?? defaultMinBranches;
 
 const rows = [];
 const aggregate = {
@@ -179,6 +183,12 @@ const thresholdFailures = rows.filter((row) => {
   return false;
 });
 
+const rowStatus = (row) => {
+  const passesFunctions = row.functions >= statusMinFunctions;
+  const passesBranches = row.branches >= statusMinBranches;
+  return passesFunctions && passesBranches ? '🟢' : '🔴';
+};
+
 const overall = {
   statements: pct(aggregate.statements.covered, aggregate.statements.total),
   branches: pct(aggregate.branches.covered, aggregate.branches.total),
@@ -189,13 +199,13 @@ const overall = {
 const markdownLines = [
   '## Coverage Summary',
   '',
-  '| Project | Statements | Branches | Functions | Lines |',
-  '| --- | ---: | ---: | ---: | ---: |',
+  '| Status | Project | Statements | Branches | Functions | Lines |',
+  '| :---: | --- | ---: | ---: | ---: | ---: |',
   ...rows.map(
     (row) =>
-      `| ${row.project} | ${formatPct(row.statements)} | ${formatPct(row.branches)} | ${formatPct(row.functions)} | ${formatPct(row.lines)} |`,
+      `| ${rowStatus(row)} | ${row.project} | ${formatPct(row.statements)} | ${formatPct(row.branches)} | ${formatPct(row.functions)} | ${formatPct(row.lines)} |`,
   ),
-  `| **Overall** | **${formatPct(overall.statements)}** | **${formatPct(overall.branches)}** | **${formatPct(overall.functions)}** | **${formatPct(overall.lines)}** |`,
+  `|  | **Overall** | **${formatPct(overall.statements)}** | **${formatPct(overall.branches)}** | **${formatPct(overall.functions)}** | **${formatPct(overall.lines)}** |`,
   '',
   `_Generated from ${summaryFiles.length} coverage-summary.json files._`,
   '',
