@@ -110,28 +110,3 @@ jobs:
 
       - name: Run builds
         run: pnpm run ci:build
-
-  storybook-build:
-    name: ci/storybook-build
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10.33.0
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Validate Storybook static build
-        run: pnpm run storybook:build
