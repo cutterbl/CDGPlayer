@@ -35,6 +35,8 @@ type FrameworkViewState = {
   progressPercent: number;
 };
 
+type FrameworkStateListener = (state: FrameworkViewState) => void;
+
 const DEFAULT_STATE: FrameworkViewState = {
   status: 'idle',
   trackId: null,
@@ -66,7 +68,7 @@ const createHarness = ({
 } = {}) => {
   const unsubscribeMock = vi.fn();
   const playerListeners = new Map<string, EventListener>();
-  let stateListener = (_state: FrameworkViewState): void => undefined;
+  let stateListener: FrameworkStateListener | undefined;
 
   const player = {
     addEventListener: vi.fn((eventName: string, listener: EventListener) => {
@@ -88,7 +90,7 @@ const createHarness = ({
   };
 
   const controlsModel = {
-    subscribe: vi.fn((listener: typeof stateListener) => {
+    subscribe: vi.fn((listener: FrameworkStateListener) => {
       stateListener = listener;
       listener(initialState);
       return unsubscribeMock;
@@ -110,7 +112,7 @@ const createHarness = ({
     unsubscribeMock,
     emitState(nextState: Partial<FrameworkViewState>) {
       act(() => {
-        stateListener({
+        stateListener?.({
           ...DEFAULT_STATE,
           ...initialState,
           ...nextState,
@@ -211,7 +213,7 @@ describe('App', () => {
     });
     expect(harness.controlsModel.setTempo).toHaveBeenCalledWith({ value: 1.5 });
 
-    fireEvent.change(screen.getByRole('combobox'), {
+    fireEvent.change(screen.getByLabelText('Key'), {
       target: { value: '5' },
     });
     expect(harness.controlsModel.setPitchSemitones).toHaveBeenCalledWith({
@@ -298,7 +300,7 @@ describe('App', () => {
     expect((screen.getByLabelText('Tempo') as HTMLInputElement).disabled).toBe(
       true,
     );
-    expect((screen.getByRole('combobox') as HTMLSelectElement).disabled).toBe(
+    expect((screen.getByLabelText('Key') as HTMLInputElement).disabled).toBe(
       true,
     );
 

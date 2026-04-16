@@ -67,7 +67,7 @@ Your player adapter must provide:
 
 ## Key Label Semantics
 
-- UI `Key` option labels are displayed as singer-facing half-step values.
+- UI `Key` slider datalist labels are displayed as singer-facing half-step values.
 - Model writes remain integer semitone values through `setPitchSemitones({ value })`.
 
 ## Docs

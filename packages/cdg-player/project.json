@@ -30,7 +30,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "packages/cdg-player",
-        "command": "eslint . --ignore-pattern 'node_modules/**' --ignore-pattern '.dist/**'"
+        "command": "eslint . --ignore-pattern 'node_modules/**' --ignore-pattern '.dist/**' --ignore-pattern '.tsbuild/**'"
       }
     },
     "typecheck": {

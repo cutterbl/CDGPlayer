@@ -3,11 +3,6 @@ import styles from './TransportBar.module.css';
 import type { CSSProperties } from 'react';
 
 /**
- * TransportBar currently accepts no external props.
- */
-export type TransportBarProps = Record<string, never>;
-
-/**
  * Formats milliseconds into an mm:ss clock string for transport UI.
  */
 const formatClock = (ms: number): string => {
@@ -23,7 +18,7 @@ const formatClock = (ms: number): string => {
 /**
  * Transport controls for play/pause, timeline seek, and elapsed/duration display.
  */
-function TransportBar(_: TransportBarProps) {
+function TransportBar() {
   const {
     isPlaying,
     isPlayable,

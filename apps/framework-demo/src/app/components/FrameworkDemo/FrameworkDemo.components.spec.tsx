@@ -219,13 +219,18 @@ describe('Framework demo components', () => {
     fireEvent.change(screen.getByLabelText('Tempo'), {
       target: { value: '1.4' },
     });
+    const keyInput = screen.getByLabelText('Key') as HTMLInputElement;
+    const keyTickList = container.querySelector<HTMLDataListElement>(
+      `#${keyInput.getAttribute('list') ?? ''}`,
+    );
     expect(
-      container.querySelector('select option[value="1"]')?.textContent,
-    ).toBe('.5');
+      keyTickList?.querySelector<HTMLOptionElement>('option[value="1"]')?.label,
+    ).toBe('+.5');
     expect(
-      container.querySelector('select option[value="2"]')?.textContent,
-    ).toBe('1');
-    fireEvent.change(screen.getByRole('combobox'), {
+      keyTickList?.querySelector<HTMLOptionElement>('option[value="2"]')?.label,
+    ).toBe('+1');
+
+    fireEvent.change(keyInput, {
       target: { value: '-2' },
     });
 

@@ -1,31 +1,33 @@
 import useSettingsPanelProps from './hooks/useSettingsPanelProps.memo';
 import styles from './SettingsPanel.module.css';
 
-/**
- * SettingsPanel currently accepts no external props.
- */
-export type SettingsPanelProps = Record<string, never>;
-
 const formatKeyLabelFromSemitones = ({
   semitones,
 }: {
   semitones: number;
 }): string => {
+  if (semitones === 0) {
+    return '0';
+  }
+
   const halfSteps = semitones / 2;
   if (Number.isInteger(halfSteps)) {
-    return halfSteps.toString();
+    return halfSteps > 0 ? `+${halfSteps}` : halfSteps.toString();
   }
 
   const absolute = Math.abs(halfSteps);
   const whole = Math.trunc(absolute);
   const fractionalLabel = whole === 0 ? '.5' : `${whole}.5`;
-  return halfSteps < 0 ? `-${fractionalLabel}` : fractionalLabel;
+  return halfSteps < 0 ? `-${fractionalLabel}` : `+${fractionalLabel}`;
 };
+
+const keyTickValues = Array.from({ length: 25 }, (_, index) => -12 + index);
+const keyTickValuesDescending = [...keyTickValues].reverse();
 
 /**
  * Floating settings controls for volume, tempo, and key shift.
  */
-function SettingsPanel(_: SettingsPanelProps) {
+function SettingsPanel() {
   const {
     isPlayable,
     hasModel,
@@ -92,21 +94,36 @@ function SettingsPanel(_: SettingsPanelProps) {
         </datalist>
       </label>
 
-      <label className={`${styles.setting} ${styles.settingKey}`}>
-        <span>Key</span>
-        <select
+      <label className={`${styles.setting} ${styles.settingVertical}`}>
+        <span className={styles.controlLabel}>Key</span>
+        <input
+          className={styles.vertical}
+          type="range"
+          min={-12}
+          max={12}
+          step={1}
+          list="framework-key-ticks"
           value={pitchSemitonesValue}
           disabled={!isPlayable || !hasModel}
           onChange={handleSetPitchSemitones}
-        >
-          {Array.from({ length: 25 }, (_, index) => -12 + index).map(
-            (value) => (
-              <option key={value} value={value}>
-                {formatKeyLabelFromSemitones({ semitones: value })}
-              </option>
-            ),
-          )}
-        </select>
+          aria-label="Key"
+        />
+        <div className={styles.verticalTickLabels} aria-hidden="true">
+          {keyTickValuesDescending.map((value) => (
+            <span key={`label-${value}`} className={styles.verticalTickLabel}>
+              {formatKeyLabelFromSemitones({ semitones: value })}
+            </span>
+          ))}
+        </div>
+        <datalist id="framework-key-ticks">
+          {keyTickValues.map((value) => (
+            <option
+              key={value}
+              value={value}
+              label={formatKeyLabelFromSemitones({ semitones: value })}
+            />
+          ))}
+        </datalist>
       </label>
     </div>
   );

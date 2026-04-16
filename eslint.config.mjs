@@ -6,6 +6,7 @@ export default [
       '**/node_modules/**',
       '**/dist/**',
       '**/.dist/**',
+      '**/.tsbuild/**',
       '**/coverage/**',
       '.nx/**',
       '**/vite.config.*.timestamp*',
@@ -38,6 +39,13 @@ export default [
           ],
         },
       ],
+      '@typescript-eslint/no-explicit-any': 'error',
+    },
+  },
+  {
+    files: ['**/*.{spec,test}.{ts,tsx,js,jsx}'],
+    rules: {
+      '@typescript-eslint/no-non-null-assertion': 'off',
     },
   },
 ];

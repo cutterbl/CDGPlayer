@@ -37,17 +37,14 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     showTitle,
   } = useFrameworkDemoContext();
 
-  const handleStageClick = useCallback(
-    (_event: MouseEvent<HTMLDivElement>): void => {
-      // Match familiar video UX: clicking the stage toggles play/pause.
-      if (!viewState.isPlayable || controlsModel === null) {
-        return;
-      }
+  const handleStageClick = useCallback((): void => {
+    // Match familiar video UX: clicking the stage toggles play/pause.
+    if (!viewState.isPlayable || controlsModel === null) {
+      return;
+    }
 
-      void controlsModel.togglePlayPause();
-    },
-    [viewState.isPlayable, controlsModel],
-  );
+    void controlsModel.togglePlayPause();
+  }, [viewState.isPlayable, controlsModel]);
 
   return {
     canvasRef,

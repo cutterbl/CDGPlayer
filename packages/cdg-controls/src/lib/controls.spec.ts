@@ -192,8 +192,14 @@ describe('controls', () => {
     const tempo = settingsContainer.querySelector<HTMLInputElement>(
       '[data-role="playback-rate"]',
     );
+    const key = settingsContainer.querySelector<HTMLInputElement>(
+      '[data-role="pitch-semitones"]',
+    );
     const volumeTickList = settingsContainer.querySelector<HTMLDataListElement>(
       `#${volume?.getAttribute('list') ?? ''}`,
+    );
+    const keyTickList = settingsContainer.querySelector<HTMLDataListElement>(
+      `#${key?.getAttribute('list') ?? ''}`,
     );
     const volumeTicks = volumeTickList?.querySelectorAll('option') ?? [];
 
@@ -202,7 +208,12 @@ describe('controls', () => {
     expect(volume?.getAttribute('list')).toBeTruthy();
     expect(tempo?.getAttribute('orient')).toBe('vertical');
     expect(tempo?.getAttribute('list')).toBeTruthy();
+    expect(key?.getAttribute('orient')).toBe('vertical');
+    expect(key?.getAttribute('list')).toBeTruthy();
     expect(volumeTicks.length).toBe(11);
+    expect(
+      keyTickList?.querySelector<HTMLOptionElement>('option[value="1"]')?.label,
+    ).toBe('+.5');
 
     playButton?.click();
     await Promise.resolve();
@@ -249,8 +260,11 @@ describe('controls', () => {
     const playbackRate = container.querySelector<HTMLInputElement>(
       '[data-role="playback-rate"]',
     );
-    const pitchSemitones = container.querySelector<HTMLSelectElement>(
+    const pitchSemitones = container.querySelector<HTMLInputElement>(
       '[data-role="pitch-semitones"]',
+    );
+    const pitchTickList = container.querySelector<HTMLDataListElement>(
+      `#${pitchSemitones?.getAttribute('list') ?? ''}`,
     );
 
     expect(playButton).toBeTruthy();
@@ -261,19 +275,24 @@ describe('controls', () => {
     expect(pitchSemitones).toBeTruthy();
     expect(volume?.getAttribute('list')).toBeTruthy();
     expect(playbackRate?.getAttribute('list')).toBeTruthy();
+    expect(pitchSemitones?.getAttribute('list')).toBeTruthy();
+    expect(pitchSemitones?.getAttribute('orient')).toBe('vertical');
 
     if (!progress || !volume || !playbackRate || !pitchSemitones) {
       throw new Error('Expected controls inputs to exist.');
     }
 
-    expect(pitchSemitones.querySelector('option[value="1"]')?.textContent).toBe(
-      '.5',
-    );
-    expect(pitchSemitones.querySelector('option[value="2"]')?.textContent).toBe(
-      '1',
-    );
     expect(
-      pitchSemitones.querySelector('option[value="-1"]')?.textContent,
+      pitchTickList?.querySelector<HTMLOptionElement>('option[value="1"]')
+        ?.label,
+    ).toBe('+.5');
+    expect(
+      pitchTickList?.querySelector<HTMLOptionElement>('option[value="2"]')
+        ?.label,
+    ).toBe('+1');
+    expect(
+      pitchTickList?.querySelector<HTMLOptionElement>('option[value="-1"]')
+        ?.label,
     ).toBe('-.5');
 
     playButton?.click();
@@ -294,7 +313,7 @@ describe('controls', () => {
     expect(player.rates).toHaveLength(0);
 
     pitchSemitones.value = '-3';
-    pitchSemitones.dispatchEvent(new Event('change'));
+    pitchSemitones.dispatchEvent(new Event('input'));
     expect(player.semitones.at(-1)).toBe(-3);
 
     controls.dispose();

@@ -18,8 +18,8 @@ export class CDGContext implements CdgRenderContext {
   memoryColor: number | null = null;
 
   clut: CdgRgb[] = new Array(16).fill([0, 0, 0]);
-  pixels = new Array(DISPLAY_PIXELS).fill(0);
-  buffer = new Array(DISPLAY_PIXELS).fill(0);
+  pixels: number[] = new Array(DISPLAY_PIXELS).fill(0);
+  buffer: number[] = new Array(DISPLAY_PIXELS).fill(0);
 
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -139,7 +139,7 @@ export class CDGContext implements CdgRenderContext {
    * Reads an indexed color value from raster memory.
    */
   getPixel({ x, y }: { x: number; y: number }): number {
-    return this.pixels[x + y * WIDTH];
+    return this.pixels[x + y * WIDTH] ?? 0;
   }
 
   /**
@@ -152,7 +152,7 @@ export class CDGContext implements CdgRenderContext {
         const px = (x - this.hOffset + WIDTH) % WIDTH;
         const py = (y - this.vOffset + HEIGHT) % HEIGHT;
         const pixelIndex = px + py * WIDTH;
-        const colorIndex = this.pixels[pixelIndex];
+        const colorIndex = this.pixels[pixelIndex] ?? 0;
         const [r, g, b] = this.clut[colorIndex] ?? [0, 0, 0];
 
         this.imageData.data[offset] = r;

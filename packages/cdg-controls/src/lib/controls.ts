@@ -114,23 +114,6 @@ const clamp = ({
   max: number;
 }): number => Math.min(max, Math.max(min, value));
 
-const autosizeSelectByOptionText = ({
-  select,
-}: {
-  select: HTMLSelectElement;
-}): void => {
-  const widestLabelLength = Array.from(select.options).reduce(
-    (maxLength, option) => {
-      return Math.max(maxLength, option.text.length);
-    },
-    0,
-  );
-
-  // Extra space accounts for control padding and the native dropdown marker.
-  const widthInCh = widestLabelLength + 4;
-  select.style.width = `${widthInCh}ch`;
-};
-
 const appendClassName = ({
   element,
   className,
@@ -174,6 +157,28 @@ const createRangeDatalist = ({
   return datalist;
 };
 
+const createVisibleRangeTickLabels = ({
+  options,
+}: {
+  options: RangeTickOption[];
+}): HTMLDivElement => {
+  const tickLabels = document.createElement('div');
+  tickLabels.dataset['role'] = 'range-tick-labels';
+  tickLabels.setAttribute('aria-hidden', 'true');
+
+  const labelOptions = [...options].reverse();
+
+  for (const optionConfig of labelOptions) {
+    const tickLabel = document.createElement('span');
+    tickLabel.dataset['role'] = 'range-tick-label';
+    tickLabel.dataset['value'] = optionConfig.value.toString();
+    tickLabel.textContent = optionConfig.label ?? '';
+    tickLabels.appendChild(tickLabel);
+  }
+
+  return tickLabels;
+};
+
 const MIN_KEY_SEMITONES = -12;
 const MAX_KEY_SEMITONES = 12;
 
@@ -182,15 +187,19 @@ const formatKeyLabelFromSemitones = ({
 }: {
   semitones: number;
 }): string => {
+  if (semitones === 0) {
+    return '0';
+  }
+
   const halfSteps = semitones / 2;
   if (Number.isInteger(halfSteps)) {
-    return halfSteps.toString();
+    return halfSteps > 0 ? `+${halfSteps}` : halfSteps.toString();
   }
 
   const absolute = Math.abs(halfSteps);
   const whole = Math.trunc(absolute);
   const fractionalLabel = whole === 0 ? '.5' : `${whole}.5`;
-  return halfSteps < 0 ? `-${fractionalLabel}` : fractionalLabel;
+  return halfSteps < 0 ? `-${fractionalLabel}` : `+${fractionalLabel}`;
 };
 
 const calculateProgress = ({
@@ -597,34 +606,58 @@ export const createTempoControl = ({
 };
 
 /**
- * Mounts key-shift select control.
+ * Mounts key-shift slider control.
  */
 export const createKeyControl = ({
   container,
   model,
   className,
-}: ControlMountOptions): DisposableControl => {
+  orientation = 'vertical',
+}: RangeControlMountOptions): DisposableControl => {
   const root = document.createElement('label');
-  root.textContent = 'Key';
+  root.className = 'control-group control-group--key';
   appendClassName({ element: root, className });
 
-  const select = document.createElement('select');
-  select.dataset['role'] = 'pitch-semitones';
-  select.setAttribute('aria-label', 'Key shift in semitones');
+  const labelText = document.createElement('span');
+  labelText.dataset['role'] = 'control-label';
+  labelText.textContent = 'Key';
+  root.appendChild(labelText);
 
-  for (let value = MIN_KEY_SEMITONES; value <= MAX_KEY_SEMITONES; value += 1) {
-    const option = document.createElement('option');
-    option.value = value.toString();
-    option.textContent = formatKeyLabelFromSemitones({ semitones: value });
-    select.appendChild(option);
-  }
+  const input = document.createElement('input');
+  input.type = 'range';
+  input.min = MIN_KEY_SEMITONES.toString();
+  input.max = MAX_KEY_SEMITONES.toString();
+  input.step = '1';
+  input.value = '0';
+  input.dataset['role'] = 'pitch-semitones';
+  input.setAttribute('aria-label', 'Key shift in semitones');
+  applyRangeOrientation({ root, input, orientation });
 
-  autosizeSelectByOptionText({ select });
-  root.appendChild(select);
+  const keyTickOptions = Array.from(
+    { length: MAX_KEY_SEMITONES - MIN_KEY_SEMITONES + 1 },
+    (_, index) => {
+      const value = MIN_KEY_SEMITONES + index;
+      return {
+        value,
+        label: formatKeyLabelFromSemitones({ semitones: value }),
+      };
+    },
+  );
+
+  const datalist = createRangeDatalist({
+    input,
+    options: keyTickOptions,
+  });
+
+  const tickLabels = createVisibleRangeTickLabels({ options: keyTickOptions });
+
+  root.appendChild(input);
+  root.appendChild(tickLabels);
+  root.appendChild(datalist);
 
   const unsubscribe = model.subscribe((state) => {
-    select.disabled = !state.isPlayable;
-    select.value = Math.round(
+    input.disabled = !state.isPlayable;
+    input.value = Math.round(
       clamp({
         value: state.pitchSemitones,
         min: MIN_KEY_SEMITONES,
@@ -633,17 +666,17 @@ export const createKeyControl = ({
     ).toString();
   });
 
-  const handleChange = (): void => {
-    model.setPitchSemitones({ value: Number(select.value) });
+  const handleInput = (): void => {
+    model.setPitchSemitones({ value: Number.parseInt(input.value, 10) });
   };
 
-  select.addEventListener('change', handleChange);
+  input.addEventListener('input', handleInput);
   container.appendChild(root);
 
   return {
     root,
     dispose(): void {
-      select.removeEventListener('change', handleChange);
+      input.removeEventListener('input', handleInput);
       unsubscribe();
       root.remove();
     },

@@ -37,6 +37,8 @@ type FrameworkViewState = {
   progressPercent: number;
 };
 
+type FrameworkStateListener = (state: FrameworkViewState) => void;
+
 const DEFAULT_STATE: FrameworkViewState = {
   status: 'idle',
   trackId: null,
@@ -53,7 +55,7 @@ const DEFAULT_STATE: FrameworkViewState = {
 const createHarness = ({ initialState = DEFAULT_STATE } = {}) => {
   const unsubscribeMock = vi.fn();
   const playerListeners = new Map<string, EventListener>();
-  let stateListener = (_state: FrameworkViewState): void => undefined;
+  let stateListener: FrameworkStateListener | undefined;
 
   const player = {
     addEventListener: vi.fn((eventName: string, listener: EventListener) => {
@@ -68,7 +70,7 @@ const createHarness = ({ initialState = DEFAULT_STATE } = {}) => {
   };
 
   const controlsModel = {
-    subscribe: vi.fn((listener: typeof stateListener) => {
+    subscribe: vi.fn((listener: FrameworkStateListener) => {
       stateListener = listener;
       listener(initialState);
       return unsubscribeMock;
@@ -85,7 +87,7 @@ const createHarness = ({ initialState = DEFAULT_STATE } = {}) => {
     unsubscribeMock,
     emitState(nextState: Partial<FrameworkViewState>) {
       act(() => {
-        stateListener({
+        stateListener?.({
           ...DEFAULT_STATE,
           ...initialState,
           ...nextState,

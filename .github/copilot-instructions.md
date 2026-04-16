@@ -3,6 +3,7 @@
 ## Code Style
 
 - Prefer TypeScript for shipped application and package code.
+- Never use `any` in TypeScript. Use precise types, generics, discriminated unions, or `unknown` with narrowing.
 - Use modern ECMAScript patterns already established in this repo: ESM modules, async/await, named-argument objects, and standard web platform APIs.
 - Keep public APIs, state, and event payloads explicitly typed.
 - Avoid reintroducing legacy patterns when a modern TypeScript or browser-native approach already exists in the codebase.

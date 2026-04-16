@@ -16,7 +16,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/storybook-hub",
-        "command": "storybook build --config-dir .storybook --output-dir .dist --disable-telemetry"
+        "command": "STORYBOOK_BUILD=true storybook build --config-dir .storybook --output-dir .dist --disable-telemetry"
       }
     }
   }

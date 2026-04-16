@@ -23,7 +23,7 @@
       "executor": "nx:run-commands",
       "options": {
         "cwd": "apps/framework-demo",
-        "command": "eslint . --ext .ts,.tsx"
+        "command": "eslint . --ext .ts,.tsx --ignore-pattern '.dist/**' --ignore-pattern '.tsbuild/**'"
       }
     },
     "typecheck": {

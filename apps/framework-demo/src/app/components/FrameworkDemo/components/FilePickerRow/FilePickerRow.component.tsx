@@ -2,14 +2,9 @@ import useFilePickerRowProps from './hooks/useFilePickerRowProps.memo';
 import styles from './FilePickerRow.module.css';
 
 /**
- * FilePickerRow currently accepts no external props.
- */
-export type FilePickerRowProps = Record<string, never>;
-
-/**
  * File input row for loading karaoke zip files and exporting diagnostics.
  */
-function FilePickerRow(_: FilePickerRowProps) {
+function FilePickerRow() {
   const {
     showPerfDiagnostics,
     canExportPerf,

@@ -90,7 +90,7 @@ createTempoControl({
 createKeyControl({ container: settingsEl, model });
 ```
 
-The visible `Key` labels are singer-facing half-step values (for example `.5`, `1`, `1.5`), while the underlying model still writes integer semitone values via `setPitchSemitones({ value })`.
+The visible `Key` slider datalist labels are singer-facing half-step values (for example `.5`, `1`, `1.5`), while the underlying model still writes integer semitone values via `setPitchSemitones({ value })`.
 
 This split transport/settings pattern is the recommended default for non-trivial UIs.
 

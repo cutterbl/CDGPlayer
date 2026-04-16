@@ -13,7 +13,7 @@ export type SettingsPanelResolvedProps = {
   pitchSemitonesValue: string;
   handleSetVolume: (event: ChangeEvent<HTMLInputElement>) => void;
   handleSetTempo: (event: ChangeEvent<HTMLInputElement>) => void;
-  handleSetPitchSemitones: (event: ChangeEvent<HTMLSelectElement>) => void;
+  handleSetPitchSemitones: (event: ChangeEvent<HTMLInputElement>) => void;
 };
 
 /**
@@ -48,8 +48,8 @@ function useSettingsPanelProps(): SettingsPanelResolvedProps {
   );
 
   const handleSetPitchSemitones = useCallback(
-    (event: ChangeEvent<HTMLSelectElement>): void => {
-      // Key dropdown is an integer semitone offset from -12 to +12.
+    (event: ChangeEvent<HTMLInputElement>): void => {
+      // Key slider emits integer semitone offsets from -12 to +12.
       const value = Number.parseInt(event.target.value, 10);
       if (!Number.isFinite(value)) {
         return;

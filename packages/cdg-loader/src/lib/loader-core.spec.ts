@@ -465,7 +465,7 @@ describe('CdgLoader core behavior', () => {
         'song.mp3': {
           dir: false,
           name: 'song.mp3',
-          async: vi.fn(async (_type: string) => {
+          async: vi.fn(async () => {
             throw new Error('broken audio entry');
           }),
         },
@@ -497,7 +497,7 @@ describe('CdgLoader core behavior', () => {
         'song.cdg': {
           dir: false,
           name: 'song.cdg',
-          async: vi.fn(async (_type: string) => {
+          async: vi.fn(async () => {
             throw new Error('broken graphics entry');
           }),
         },

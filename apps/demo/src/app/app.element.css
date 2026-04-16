@@ -395,12 +395,6 @@
   align-self: flex-start;
 }
 
-.settings-panel label:has(select[data-role='pitch-semitones']) {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-}
-
 .settings-panel label[data-orientation='vertical'] {
   flex-direction: row;
   align-items: flex-start;
@@ -430,21 +424,27 @@
   appearance: auto;
 }
 
-.settings-panel select[data-role='pitch-semitones'] {
-  height: 2rem;
-  min-width: 0;
-  border: 1px solid rgba(62, 84, 104, 0.6);
-  border-radius: 4px;
-  background: #fff;
-  color: #1a2f42;
-  font: inherit;
-  font-size: 0.84rem;
-  appearance: auto;
+.settings-panel
+  label[data-orientation='vertical']
+  [data-role='range-tick-labels'] {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: var(--settings-vertical-slider-height);
+  margin-inline-start: 0.1rem;
+  color: #26394a;
+  font-size: 0.64rem;
+  line-height: 1;
+  text-align: left;
+  user-select: none;
+  pointer-events: none;
 }
 
-.settings-panel select[data-role='pitch-semitones']:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+.settings-panel
+  label[data-orientation='vertical']
+  [data-role='range-tick-labels']
+  [data-role='range-tick-label'] {
+  display: block;
 }
 
 .stage {

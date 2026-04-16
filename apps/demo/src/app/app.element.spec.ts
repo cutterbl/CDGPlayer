@@ -67,9 +67,12 @@ const createDemoHarness = ({
   loadError?: Error;
   initialViewState?: { status: string };
 } = {}) => {
+  type ControlsState = { status: string };
+  type ControlsStateListener = (state: ControlsState) => void;
+
   const unsubscribeMock = vi.fn();
   const playerListeners = new Map<string, EventListener>();
-  let controlsStateListener = (_state: { status: string }): void => undefined;
+  let controlsStateListener: ControlsStateListener | undefined;
 
   const player = {
     addEventListener: vi.fn((eventName: string, listener: EventListener) => {
@@ -85,7 +88,7 @@ const createDemoHarness = ({
     dispose: vi.fn(),
   };
   const model = {
-    subscribe: vi.fn((listener: typeof controlsStateListener) => {
+    subscribe: vi.fn((listener: ControlsStateListener) => {
       controlsStateListener = listener;
       listener(initialViewState);
       return unsubscribeMock;
@@ -112,8 +115,8 @@ const createDemoHarness = ({
     model,
     controlDisposers,
     unsubscribeMock,
-    emitControlsState(nextState: { status: string }) {
-      controlsStateListener(nextState);
+    emitControlsState(nextState: ControlsState) {
+      controlsStateListener?.(nextState);
     },
     emitPlayerEvent(eventName: string, event: Event) {
       playerListeners.get(eventName)?.(event);

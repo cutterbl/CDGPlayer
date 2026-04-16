@@ -7,6 +7,7 @@ applyTo: 'apps/framework-demo/src/**/*.{ts,tsx}, apps/storybook-react/**/*.{ts,t
 
 - Match React example code and framework demo code to the user's React coding style and standards.
 - When examples in `apps/storybook-react` describe implementation, keep them aligned with the actual React source in `apps/framework-demo`.
+- Never use `any` in TypeScript/TSX. Prefer explicit interfaces, generics, discriminated unions, or `unknown` with narrowing.
 
 ## File Naming
 

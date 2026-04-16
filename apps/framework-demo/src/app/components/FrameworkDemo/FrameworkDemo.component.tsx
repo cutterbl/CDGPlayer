@@ -11,12 +11,10 @@ import styles from './FrameworkDemo.module.css';
 const FRAMEWORK_REACT_SOURCE_URL =
   'https://github.com/cutterbl/CDGPlayer/tree/main/apps/framework-demo';
 
-export type FrameworkDemoProps = Record<string, never>;
-
 /**
  * Composes the full React demo UI (source links, controls, and stage).
  */
-function FrameworkDemo(_: FrameworkDemoProps) {
+function FrameworkDemo() {
   return (
     // Provider holds shared player/model state so child controls can stay focused.
     <FrameworkDemoProvider>

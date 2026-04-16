@@ -76,12 +76,23 @@
       -webkit-appearance: auto;
       appearance: auto;
     }
-  }
 
-  .settingKey {
-    display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.25rem;
+    .verticalTickLabels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: var(--settings-vertical-slider-height);
+      margin-inline-start: 0.1rem;
+      color: var(--cdg-color-setting-text);
+      font-size: 0.64rem;
+      line-height: 1;
+      text-align: left;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .verticalTickLabel {
+      display: block;
+    }
   }
 }
