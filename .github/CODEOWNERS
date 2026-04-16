@@ -1,0 +1,29 @@
+# Default owners for all repository paths.
+
+# Replace @cutterbl with your GitHub username or team if needed.
+
+* @cutterbl
+
+# CI, automation, and repository policy
+
+/.github/ @cutterbl
+/scripts/ @cutterbl
+
+# Applications
+
+/apps/ @cutterbl
+
+# Publishable/runtime packages
+
+/packages/ @cutterbl
+
+# Workspace and toolchain config
+
+/nx.json @cutterbl
+/pnpm-workspace.yaml @cutterbl
+/pnpm-lock.yaml @cutterbl
+/package.json @cutterbl
+/tsconfig.json @cutterbl
+/tsconfig.base.json @cutterbl
+/eslint.config.mjs @cutterbl
+/vitest.workspace.ts @cutterbl
