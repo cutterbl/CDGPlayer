@@ -50,12 +50,13 @@
     ],
     "projectsRelationship": "fixed",
     "version": {
+      "conventionalCommits": true,
       "preVersionCommand": "pnpm nx run-many -t build"
     },
     "changelog": {
       "workspaceChangelog": {
         "createRelease": "github",
-        "file": true
+        "file": "CHANGELOG.md"
       }
     }
   },
