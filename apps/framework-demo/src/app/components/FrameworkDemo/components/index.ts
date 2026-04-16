@@ -8,7 +8,5 @@ export { default as FilePickerRow } from './FilePickerRow';
 
 export { default as TransportBar } from './TransportBar';
 
-export { default as SettingsPanel } from './SettingsPanel';
-
 export { default as StageDisplay } from './StageDisplay';
 export type { StageDisplayProps } from './StageDisplay';

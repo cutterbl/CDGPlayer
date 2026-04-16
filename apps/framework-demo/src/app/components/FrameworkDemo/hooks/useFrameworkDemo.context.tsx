@@ -80,6 +80,66 @@ type PerfArtifact = {
 };
 
 /**
+ * Runtime support flags for transport popover features.
+ */
+type TransportUiFeatureSupport = {
+  hasPopoverApi: boolean;
+  hasCssAnchorPositioning: boolean;
+};
+
+/**
+ * Detects browser support for Popover API and CSS Anchor Positioning.
+ */
+const detectTransportUiFeatureSupport = (): TransportUiFeatureSupport => {
+  if (
+    typeof window === 'undefined' ||
+    typeof HTMLElement === 'undefined' ||
+    typeof CSS === 'undefined' ||
+    typeof CSS.supports !== 'function'
+  ) {
+    return {
+      hasPopoverApi: false,
+      hasCssAnchorPositioning: false,
+    };
+  }
+
+  const hasPopoverApi =
+    'showPopover' in HTMLElement.prototype &&
+    'hidePopover' in HTMLElement.prototype;
+
+  const hasCssAnchorPositioning =
+    CSS.supports('anchor-name: --cdg-anchor') &&
+    CSS.supports('position-anchor: --cdg-anchor') &&
+    CSS.supports('top: anchor(bottom)');
+
+  return {
+    hasPopoverApi,
+    hasCssAnchorPositioning,
+  };
+};
+
+/**
+ * Builds a human-readable compatibility warning for unsupported browsers.
+ */
+const createTransportUiCompatibilityWarning = (): string | null => {
+  const support = detectTransportUiFeatureSupport();
+
+  if (support.hasPopoverApi && support.hasCssAnchorPositioning) {
+    return null;
+  }
+
+  if (!support.hasPopoverApi && !support.hasCssAnchorPositioning) {
+    return 'Warning: This browser does not support Popover API or CSS Anchor Positioning. Transport popovers may not work correctly.';
+  }
+
+  if (!support.hasPopoverApi) {
+    return 'Warning: This browser does not support the Popover API. Transport popovers may not work correctly.';
+  }
+
+  return 'Warning: This browser does not support CSS Anchor Positioning. Transport popovers may not align correctly.';
+};
+
+/**
  * Detects localhost runtime so diagnostics are limited to developer sessions.
  */
 const isLocalDevelopmentRuntime = (): boolean => {
@@ -216,6 +276,7 @@ export type FrameworkDemoContextValue = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   audioRef: RefObject<HTMLAudioElement | null>;
   showPerfDiagnostics: boolean;
+  compatibilityWarning: string | null;
   statusMessage: string;
   isStatusVisible: boolean;
   player: CdgPlayer | null;
@@ -245,6 +306,10 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
   // 90s analogy: like watching FPS counters to spot why a game feels laggy.
   // Local-only keeps debug numbers out of the real user experience.
   const showPerfDiagnostics = isLocalDevelopmentRuntime();
+  const compatibilityWarning = useMemo(
+    () => createTransportUiCompatibilityWarning(),
+    [],
+  );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const statusFadeTimeoutRef = useRef<number | null>(null);
@@ -447,6 +512,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       canvasRef,
       audioRef,
       showPerfDiagnostics,
+      compatibilityWarning,
       statusMessage,
       isStatusVisible,
       player,
@@ -463,6 +529,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     }),
     [
       showPerfDiagnostics,
+      compatibilityWarning,
       statusMessage,
       isStatusVisible,
       player,

@@ -17,6 +17,7 @@ function StageDisplay({ children }: StageDisplayProps) {
     canvasRef,
     audioRef,
     showPerfDiagnostics,
+    compatibilityWarning,
     statusMessage,
     isStatusVisible,
     viewState,
@@ -54,9 +55,14 @@ function StageDisplay({ children }: StageDisplayProps) {
         ) : null}
         <canvas ref={canvasRef} width={300} height={216} />
         <div
-          className={`${styles.status}${isStatusVisible ? ` ${styles.isVisible}` : ''}`}
+          className={`${styles.status}${isStatusVisible || compatibilityWarning ? ` ${styles.isVisible}` : ''}`}
         >
           {statusMessage}
+          {compatibilityWarning ? (
+            <div className={styles.compatibilityWarning}>
+              {compatibilityWarning}
+            </div>
+          ) : null}
         </div>
         {showPerfDiagnostics ? (
           <div className={styles.perfHud}>

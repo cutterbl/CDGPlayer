@@ -130,6 +130,9 @@ function ProviderConsumer() {
       <div data-testid="status-message">{context.statusMessage}</div>
       <div data-testid="status-visible">{String(context.isStatusVisible)}</div>
       <div data-testid="perf-mode">{context.perfSummary?.mode ?? 'none'}</div>
+      <div data-testid="compatibility-warning">
+        {context.compatibilityWarning ?? ''}
+      </div>
     </>
   );
 }
@@ -210,5 +213,82 @@ describe('useFrameworkDemoContext', () => {
     expect(() => renderHook(() => useFrameworkDemoContext())).toThrow(
       'useFrameworkDemoContext must be used inside FrameworkDemoProvider.',
     );
+  });
+
+  it('computes compatibility warning from browser feature support', () => {
+    const originalCssDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'CSS',
+    );
+    const showPopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'showPopover',
+    );
+    const hidePopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'hidePopover',
+    );
+
+    try {
+      Object.defineProperty(globalThis, 'CSS', {
+        configurable: true,
+        writable: true,
+        value: {
+          supports: vi.fn(
+            (query: string) =>
+              query === 'anchor-name: --cdg-anchor' ||
+              query === 'position-anchor: --cdg-anchor' ||
+              query === 'top: anchor(bottom)',
+          ),
+        },
+      });
+
+      Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+        configurable: true,
+        value: vi.fn(),
+      });
+      Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+        configurable: true,
+        value: vi.fn(),
+      });
+
+      const harness = createHarness();
+      const { unmount } = render(
+        <FrameworkDemoProvider>
+          <ProviderConsumer />
+        </FrameworkDemoProvider>,
+      );
+
+      expect(screen.getByTestId('compatibility-warning').textContent).toBe('');
+
+      unmount();
+      expect(harness.unsubscribeMock).toHaveBeenCalledOnce();
+    } finally {
+      if (showPopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'showPopover',
+          showPopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+      }
+
+      if (hidePopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'hidePopover',
+          hidePopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+      }
+
+      if (originalCssDescriptor) {
+        Object.defineProperty(globalThis, 'CSS', originalCssDescriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, 'CSS');
+      }
+    }
   });
 });

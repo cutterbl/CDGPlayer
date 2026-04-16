@@ -9,6 +9,7 @@ export type StageDisplayResolvedProps = {
   canvasRef: ReturnType<typeof useFrameworkDemoContext>['canvasRef'];
   audioRef: ReturnType<typeof useFrameworkDemoContext>['audioRef'];
   showPerfDiagnostics: boolean;
+  compatibilityWarning: string | null;
   statusMessage: string;
   isStatusVisible: boolean;
   viewState: ReturnType<typeof useFrameworkDemoContext>['viewState'];
@@ -27,6 +28,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     canvasRef,
     audioRef,
     showPerfDiagnostics,
+    compatibilityWarning,
     statusMessage,
     isStatusVisible,
     controlsModel,
@@ -50,6 +52,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     canvasRef,
     audioRef,
     showPerfDiagnostics,
+    compatibilityWarning,
     statusMessage,
     isStatusVisible,
     viewState,

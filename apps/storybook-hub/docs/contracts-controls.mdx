@@ -119,6 +119,7 @@ This is intentional, not accidental legacy.
 - New adapters should expose `setTempo` as the primary write path.
 - Legacy adapters without `setTempo` continue to work through `setPlaybackRate`.
 - Tempo UI still reads from `playbackRate` in shared state, so state remains consistent across old/new adapters.
+- Framework-rendered popover controls that rely on Popover API + CSS Anchor Positioning should feature-detect browser support and show an inline warning when unsupported.
 
 If a future major release removes `setPlaybackRate` from adapter contracts, this fallback section can be removed at the same time.
 

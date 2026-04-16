@@ -10,7 +10,6 @@ vi.mock('./hooks/useFrameworkDemo.context', () => ({
 }));
 
 import FilePickerRow from './components/FilePickerRow';
-import SettingsPanel from './components/SettingsPanel';
 import StageDisplay from './components/StageDisplay';
 import TransportBar from './components/TransportBar';
 
@@ -18,6 +17,7 @@ const createContextValue = (overrides: Record<string, unknown> = {}) => ({
   canvasRef: { current: null },
   audioRef: { current: null },
   showPerfDiagnostics: false,
+  compatibilityWarning: null,
   statusMessage: 'Choose a track to start.',
   isStatusVisible: true,
   player: null,
@@ -62,7 +62,6 @@ describe('Framework demo components', () => {
         <TransportBar />
         <StageDisplay />
         <FilePickerRow />
-        <SettingsPanel />
       </>,
     );
 
@@ -77,9 +76,18 @@ describe('Framework demo components', () => {
     ).toBeNull();
     expect(screen.getByText('Choose a track to start.')).toBeTruthy();
     expect(screen.queryByText('Track Title')).toBeNull();
-    expect((screen.getByLabelText('Volume') as HTMLInputElement).disabled).toBe(
-      true,
-    );
+    expect(
+      (screen.getByRole('button', { name: 'Volume' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole('button', { name: 'Tempo' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole('button', { name: 'Key' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
   });
 
   it('handles file selection guard branches and success without metadata', async () => {
@@ -186,7 +194,6 @@ describe('Framework demo components', () => {
       <>
         <TransportBar />
         <StageDisplay />
-        <SettingsPanel />
       </>,
     );
 
@@ -213,22 +220,16 @@ describe('Framework demo components', () => {
     );
     expect(seekPercent).toHaveBeenCalledWith({ percentage: 25.5 });
 
-    fireEvent.change(screen.getByLabelText('Volume'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Volume' }));
+    fireEvent.change(screen.getByLabelText('Volume slider'), {
       target: { value: '0.4' },
     });
-    fireEvent.change(screen.getByLabelText('Tempo'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Tempo' }));
+    fireEvent.change(screen.getByLabelText('Tempo slider'), {
       target: { value: '1.4' },
     });
-    const keyInput = screen.getByLabelText('Key') as HTMLInputElement;
-    const keyTickList = container.querySelector<HTMLDataListElement>(
-      `#${keyInput.getAttribute('list') ?? ''}`,
-    );
-    expect(
-      keyTickList?.querySelector<HTMLOptionElement>('option[value="1"]')?.label,
-    ).toBe('+.5');
-    expect(
-      keyTickList?.querySelector<HTMLOptionElement>('option[value="2"]')?.label,
-    ).toBe('+1');
+    fireEvent.click(screen.getByRole('button', { name: 'Key' }));
+    const keyInput = screen.getByLabelText('Key slider') as HTMLInputElement;
 
     fireEvent.change(keyInput, {
       target: { value: '-2' },
@@ -237,5 +238,21 @@ describe('Framework demo components', () => {
     expect(setVolume).toHaveBeenCalledWith({ value: 0.4 });
     expect(setTempo).toHaveBeenCalledWith({ value: 1.4 });
     expect(setPitchSemitones).toHaveBeenCalledWith({ value: -2 });
+  });
+
+  it('renders compatibility warning when browser support is missing', () => {
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        compatibilityWarning:
+          'Warning: This browser does not support CSS Anchor Positioning. Transport popovers may not align correctly.',
+        isStatusVisible: false,
+      }),
+    );
+
+    render(<StageDisplay />);
+
+    expect(
+      screen.getByText(/does not support CSS Anchor Positioning/i),
+    ).toBeTruthy();
   });
 });

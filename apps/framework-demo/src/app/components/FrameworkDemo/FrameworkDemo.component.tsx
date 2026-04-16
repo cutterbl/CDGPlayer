@@ -1,7 +1,6 @@
 import { FrameworkDemoProvider } from './hooks';
 import {
   FilePickerRow,
-  SettingsPanel,
   SourceLinkRow,
   StageDisplay,
   TransportBar,
@@ -28,10 +27,8 @@ function FrameworkDemo() {
         <FilePickerRow />
         <TransportBar />
 
-        {/* Stage owns visuals; settings panel floats inside the stage area */}
-        <StageDisplay>
-          <SettingsPanel />
-        </StageDisplay>
+        {/* Stage owns visuals; transport now hosts settings popovers in-row. */}
+        <StageDisplay />
       </div>
     </FrameworkDemoProvider>
   );

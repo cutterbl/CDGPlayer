@@ -134,6 +134,14 @@ const onFileSelected = async (file: File) => {
 
 Use model `setTempo` from React controls. The model handles fallback to `setPlaybackRate` for adapters that still expose the playback-rate method name.
 
+## Browser Support Note
+
+The framework demo transport uses Popover API and CSS Anchor Positioning for volume/tempo/key popovers.
+
+- On browsers that support both features, popovers open anchored to each trigger button.
+- When support is missing, the demo shows an inline compatibility warning in the stage status area.
+- The warning is runtime feature-detected, so it reflects the current browser rather than build-time assumptions.
+
 ## Common Mistakes
 
 - Recreating player/model on every render instead of once per mount.

@@ -201,19 +201,22 @@ describe('App', () => {
       percentage: 67.5,
     });
 
-    fireEvent.change(screen.getByLabelText('Volume'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Volume' }));
+    fireEvent.change(screen.getByLabelText('Volume slider'), {
       target: { value: '0.33' },
     });
     expect(harness.controlsModel.setVolume).toHaveBeenCalledWith({
       value: 0.33,
     });
 
-    fireEvent.change(screen.getByLabelText('Tempo'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Tempo' }));
+    fireEvent.change(screen.getByLabelText('Tempo slider'), {
       target: { value: '1.50' },
     });
     expect(harness.controlsModel.setTempo).toHaveBeenCalledWith({ value: 1.5 });
 
-    fireEvent.change(screen.getByLabelText('Key'), {
+    fireEvent.click(screen.getByRole('button', { name: 'Key' }));
+    fireEvent.change(screen.getByLabelText('Key slider'), {
       target: { value: '5' },
     });
     expect(harness.controlsModel.setPitchSemitones).toHaveBeenCalledWith({
@@ -294,15 +297,18 @@ describe('App', () => {
     fireEvent.click(canvas.parentElement);
     expect(harness.controlsModel.togglePlayPause).not.toHaveBeenCalled();
 
-    expect((screen.getByLabelText('Volume') as HTMLInputElement).disabled).toBe(
-      true,
-    );
-    expect((screen.getByLabelText('Tempo') as HTMLInputElement).disabled).toBe(
-      true,
-    );
-    expect((screen.getByLabelText('Key') as HTMLInputElement).disabled).toBe(
-      true,
-    );
+    expect(
+      (screen.getByRole('button', { name: 'Volume' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole('button', { name: 'Tempo' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(
+      (screen.getByRole('button', { name: 'Key' }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
 
     const fileInput = screen.getByLabelText('Select a karaoke zip (.zip)');
     const file = new File(['zip-content'], 'broken-track.zip', {
