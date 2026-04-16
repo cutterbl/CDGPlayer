@@ -49,6 +49,15 @@
       "cdg-controls"
     ],
     "projectsRelationship": "fixed",
+    "conventionalCommits": {
+      "useCommitScope": false
+    },
+    "git": {
+      "commit": true,
+      "commitMessage": "chore(release): publish {version}",
+      "tag": true,
+      "tagMessage": "Release {version}"
+    },
     "version": {
       "conventionalCommits": true,
       "preVersionCommand": "pnpm nx run-many -t build"
