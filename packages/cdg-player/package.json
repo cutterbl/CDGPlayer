@@ -1,6 +1,6 @@
 {
   "name": "@cxing/cdg-player",
-  "version": "0.0.1",
+  "version": "0.1.17",
   "description": "CD+G playback orchestration, timeline sync, and renderer dispatch.",
   "keywords": [
     "cdg",

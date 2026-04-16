@@ -1,6 +1,6 @@
 {
   "name": "@cxing/cdg-core",
-  "version": "0.0.1",
+  "version": "0.1.17",
   "description": "CD+G parsing, instruction execution, and frame rendering core.",
   "keywords": [
     "cdg",
