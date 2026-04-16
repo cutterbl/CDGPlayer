@@ -51,6 +51,12 @@
     "projectsRelationship": "fixed",
     "version": {
       "preVersionCommand": "pnpm nx run-many -t build"
+    },
+    "changelog": {
+      "workspaceChangelog": {
+        "createRelease": "github",
+        "file": true
+      }
     }
   },
   "generators": {
