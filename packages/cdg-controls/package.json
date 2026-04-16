@@ -42,5 +42,7 @@
     "index.d.ts"
   ],
   "sideEffects": false,
-  "dependencies": {}
+  "dependencies": {
+    "lucide": "^1.8.0"
+  }
 }

@@ -1,6 +1,7 @@
 import useTransportBarProps from './hooks/useTransportBarProps.memo';
 import styles from './TransportBar.module.css';
 import type { CSSProperties } from 'react';
+import { CirclePause, CirclePlay } from 'lucide-react';
 
 /**
  * Formats milliseconds into an mm:ss clock string for transport UI.
@@ -44,7 +45,21 @@ function TransportBar() {
         disabled={!isPlayable || !hasModel}
         onClick={handleTogglePlayPause}
       >
-        <span aria-hidden="true">{isPlaying ? '❚❚' : '▶'}</span>
+        {isPlaying ? (
+          <CirclePause
+            aria-hidden="true"
+            className={styles.playIcon}
+            size={16}
+            strokeWidth={2.25}
+          />
+        ) : (
+          <CirclePlay
+            aria-hidden="true"
+            className={styles.playIcon}
+            size={16}
+            strokeWidth={2.25}
+          />
+        )}
       </button>
 
       <span className={styles.timecode}>{formatClock(currentTimeMs)}</span>

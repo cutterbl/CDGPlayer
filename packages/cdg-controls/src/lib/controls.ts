@@ -1,3 +1,5 @@
+import { CirclePause, CirclePlay, createElement } from 'lucide';
+
 /** Placement options for the composed controls panel. */
 export type ControlsPanelPosition = 'top' | 'bottom';
 /** Orientation options for range-based controls. */
@@ -339,8 +341,17 @@ export const createPlayPauseControl = ({
   root.appendChild(label);
 
   const unsubscribe = model.subscribe((state) => {
+    const iconSvg = createElement(state.isPlaying ? CirclePause : CirclePlay, {
+      'aria-hidden': 'true',
+      class: 'cdg-play-icon',
+      focusable: 'false',
+      width: 16,
+      height: 16,
+      'stroke-width': 2.25,
+    });
+
     root.disabled = !state.isPlayable;
-    icon.textContent = state.isPlaying ? '❚❚' : '▶';
+    icon.replaceChildren(iconSvg);
     label.textContent = state.isPlaying ? 'Pause' : 'Play';
     root.setAttribute('aria-label', state.isPlaying ? 'Pause' : 'Play');
   });
