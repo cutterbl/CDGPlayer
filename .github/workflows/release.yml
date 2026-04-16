@@ -38,6 +38,14 @@ jobs:
         with:
           version: 10.33.0
 
+      - name: Setup git creds
+        env:
+          config_email: ${{ secrets.GIT_CONFIG_EMAIL }}
+          config_un: ${{ secrets.GIT_CONFIG_USERNAME }}
+        run: |
+          git config --local user.email ${config_email}
+          git config --local user.name ${config_un}
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
