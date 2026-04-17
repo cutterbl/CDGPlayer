@@ -1,0 +1,74 @@
+@layer tokens, base;
+
+@layer tokens {
+  :root {
+    --cdg-font-family-base: 'Avenir Next', 'Segoe UI', sans-serif;
+
+    --cdg-color-text-base: #1f2e3a;
+    --cdg-color-text-muted: #31485d;
+    --cdg-color-link: #0d5f8c;
+    --cdg-color-link-hover: #084b6f;
+    --cdg-color-progress-start: #0a9ad3;
+    --cdg-color-progress-end: #f04a44;
+    --cdg-color-progress-remaining: #d7dee6;
+
+    --cdg-color-surface-page-start: #f8fafb;
+    --cdg-color-surface-page-end: #e9eef2;
+    --cdg-color-surface-button-start: #ffffff;
+    --cdg-color-surface-button-end: #dbe4ee;
+    --cdg-color-surface-panel-start: #f7f9fb;
+    --cdg-color-surface-panel-end: #e8edf2;
+
+    --cdg-color-stage: #000;
+    --cdg-color-status-text: #fff;
+    --cdg-color-title-text: #f6fbff;
+    --cdg-color-hud-text: #eaf4ff;
+    --cdg-color-select-text: #1a2f42;
+    --cdg-color-setting-text: #26394a;
+    --cdg-color-button-text: #102233;
+
+    --cdg-color-border-control: rgba(73, 99, 126, 0.55);
+    --cdg-color-border-panel: rgba(118, 138, 158, 0.45);
+    --cdg-color-border-select: rgba(62, 84, 104, 0.6);
+
+    --cdg-shadow-status: 0 1px 2px rgba(0, 0, 0, 0.7);
+    --cdg-shadow-title: 0 2px 8px rgba(0, 0, 0, 0.72);
+    --cdg-shadow-panel: 0 2px 8px rgba(17, 31, 45, 0.2);
+
+    --cdg-gradient-page: linear-gradient(
+      180deg,
+      var(--cdg-color-surface-page-start) 0%,
+      var(--cdg-color-surface-page-end) 100%
+    );
+    --cdg-gradient-control: linear-gradient(
+      180deg,
+      var(--cdg-color-surface-button-start) 0%,
+      var(--cdg-color-surface-button-end) 100%
+    );
+    --cdg-gradient-panel: linear-gradient(
+      180deg,
+      var(--cdg-color-surface-panel-start) 0%,
+      var(--cdg-color-surface-panel-end) 100%
+    );
+    --cdg-gradient-title-metadata: radial-gradient(
+      circle at 50% 35%,
+      #1a2430 0%,
+      #06090d 78%
+    );
+    --cdg-color-hud-surface: rgba(5, 9, 13, 0.58);
+
+    font-family: var(--cdg-font-family-base);
+  }
+}
+
+@layer base {
+  body {
+    margin: 0;
+    background: var(--cdg-gradient-page);
+    color: var(--cdg-color-text-base);
+  }
+
+  audio {
+    margin-top: 0.5rem;
+  }
+}

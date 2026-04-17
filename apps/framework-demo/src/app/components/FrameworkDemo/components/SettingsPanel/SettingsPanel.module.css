@@ -1,0 +1,98 @@
+@layer components {
+  .controlLabel {
+  }
+
+  .vertical {
+  }
+
+  .floatingPanel {
+    --settings-vertical-slider-height: 350px;
+
+    position: absolute;
+    top: 0.85rem;
+    right: 0.85rem;
+    left: auto;
+    z-index: 3;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.45rem 0.45rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--cdg-color-border-panel);
+    background: var(--cdg-gradient-panel);
+    box-shadow: var(--cdg-shadow-panel);
+
+    &,
+    & *,
+    & *::before,
+    & *::after {
+      box-sizing: border-box;
+    }
+
+    datalist {
+      display: none;
+    }
+
+    select {
+      min-width: 0;
+      height: 2rem;
+      border: 1px solid var(--cdg-color-border-select);
+      border-radius: 4px;
+      background: var(--cdg-color-surface-button-start);
+      color: var(--cdg-color-select-text);
+      font: inherit;
+      font-size: 0.84rem;
+      appearance: auto;
+    }
+  }
+
+  .setting {
+    margin: 0;
+    color: var(--cdg-color-setting-text);
+    font-size: 0.82rem;
+    align-self: flex-start;
+  }
+
+  .settingVertical {
+    display: inline-flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 0.15rem;
+    min-height: var(--settings-vertical-slider-height);
+
+    .controlLabel {
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      line-height: 1;
+      align-self: flex-start;
+    }
+
+    .vertical {
+      display: block;
+      width: auto;
+      height: var(--settings-vertical-slider-height);
+      direction: rtl;
+      writing-mode: vertical-lr;
+      -webkit-appearance: auto;
+      appearance: auto;
+    }
+
+    .verticalTickLabels {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: var(--settings-vertical-slider-height);
+      margin-inline-start: 0.1rem;
+      color: var(--cdg-color-setting-text);
+      font-size: 0.64rem;
+      line-height: 1;
+      text-align: left;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .verticalTickLabel {
+      display: block;
+    }
+  }
+}

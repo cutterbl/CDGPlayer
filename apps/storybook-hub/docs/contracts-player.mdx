@@ -1,0 +1,62 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/API/Player Contract" />
+
+# Player Contract
+
+`@cxing/cdg-player` is the runtime coordinator for playback, timeline sync, rendering, and audio.
+
+Phase status: Phase 4 complete.
+
+Use player when:
+
+- you need a stable playback state machine (`idle`, `loading`, `ready`, `playing`, `paused`, `error`)
+- you want canvas rendering and audio playback synchronized
+- you need a stable runtime API for load, play, pause, seek, tempo, and key changes
+
+## Minimal Usage
+
+```ts
+import { createPlayer } from '@cxing/cdg-player';
+
+const player = createPlayer({
+  options: {
+    canvas,
+    audio,
+    debug: true,
+  },
+});
+
+await player.load({
+  input: { kind: 'file', file: selectedZip },
+});
+
+await player.play();
+```
+
+## State Subscription
+
+```ts
+player.addEventListener('statechange', () => {
+  const state = player.getState();
+});
+```
+
+## Important Behavior Notes
+
+- Tempo is the preferred singer-facing API via `setTempo`, with `setPlaybackRate` retained for compatibility.
+- Player runtime does not emit built-in render performance metric events. Performance monitoring/reporting is local-development tooling concern.
+- Debug trace logging is controlled by `options.debug`.
+- Failure paths use `error()` severity and are not hidden behind debug gating.
+
+## Common Mistakes
+
+- Forgetting to call `dispose()` when your UI unmounts.
+- Updating your UI from stale references instead of reading `player.getState()` on events.
+- Treating `setPlaybackRate` as primary in new code; use `setTempo` first.
+
+## Cross References
+
+- [Logger Contract](/?path=/docs/documentation-api-logger-contract--docs)
+- [Controls Contract](/?path=/docs/documentation-api-controls-contract--docs)
+- [Workers and Audio](/?path=/docs/documentation-workers-and-audio--docs)

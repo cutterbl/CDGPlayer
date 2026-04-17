@@ -1,0 +1,152 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/API/Controls Contract" />
+
+# Controls Contract
+
+`@cxing/cdg-controls` is split into three layers:
+
+- adapter contract (`ControlsPlayerAdapter`)
+- shared headless model (`createControlsModel`)
+- UI mounting primitives (`createPlayPauseControl`, `createTempoControl`, and others)
+
+This split lets you keep one source of playback truth while choosing your UI rendering strategy.
+
+Phase status: Phase 5 complete.
+
+Use controls when:
+
+- you want ready-made playback widgets (play/pause, seek, duration, volume, tempo, key)
+- you want one control model to drive either DOM-mounted controls or framework-rendered controls
+- you need UI state to follow player state changes reliably
+
+## Split Architecture
+
+1. Adapter: your player object must implement `ControlsPlayerAdapter` and emit `statechange`.
+2. Model: `createControlsModel` normalizes state and action methods for any UI layer.
+3. UI layer: either mount controls directly with `create*Control` functions or render your own controls and call model methods.
+
+## Adapter Requirements
+
+Required methods:
+
+- `getState`
+- `play`
+- `pause`
+- `stop`
+- `seek`
+- `setVolume`
+- `setPlaybackRate`
+- `setPitchSemitones`
+
+Optional method:
+
+- `setTempo`
+
+Required event:
+
+- `statechange` dispatched whenever player state changes
+
+Required state shape:
+
+- `status`: `idle | loading | ready | playing | paused | error`
+- `trackId`, `currentTimeMs`, `durationMs`, `volume`, `playbackRate`, `pitchSemitones`
+
+## Minimal Usage
+
+```ts
+import {
+  createControlsModel,
+  createPlayPauseControl,
+  createProgressControl,
+} from '@cxing/cdg-controls';
+
+const model = createControlsModel({ options: { player } });
+createPlayPauseControl({ container: transportEl, model });
+createProgressControl({ container: transportEl, model });
+```
+
+## Distributed Mounting Pattern
+
+Controls can be mounted into different containers while sharing one model.
+
+```ts
+const model = createControlsModel({ options: { player } });
+
+// Transport row
+createPlayPauseControl({ container: transportEl, model });
+createCurrentTimeDisplay({ container: transportEl, model });
+createProgressControl({ container: transportEl, model });
+createDurationDisplay({ container: transportEl, model });
+
+// Settings panel
+createVolumeControl({
+  container: settingsEl,
+  model,
+  orientation: 'vertical',
+});
+createTempoControl({
+  container: settingsEl,
+  model,
+  orientation: 'vertical',
+});
+createKeyControl({ container: settingsEl, model });
+```
+
+This is the default composition strategy used in the framework-agnostic demo.
+
+## Convenience Class vs Granular Composition
+
+- `createControls` creates a single section with all default controls.
+- `createControlsModel` + `create*Control` gives full layout control and is recommended for custom UIs.
+- Framework renderers (like React) should usually use the model directly and render native framework components.
+
+## Tempo and PlaybackRate Semantics
+
+```ts
+// Controls write tempo first, then fallback to playback-rate naming.
+player.setTempo?.({ value: 1.1 }) ?? player.setPlaybackRate({ value: 1.1 });
+```
+
+This is intentional, not accidental legacy.
+
+- UX language is `tempo` for singers and product docs.
+- SoundTouchJS worklet examples drive source speed via `playbackRate` to keep the processing pipeline stable.
+- Controls preserve both names so adapters can migrate without breaking.
+
+## Integration Guidance
+
+- New adapters should expose `setTempo` as the primary write path.
+- Legacy adapters without `setTempo` continue to work through `setPlaybackRate`.
+- Tempo UI still reads from `playbackRate` in shared state, so state remains consistent across old/new adapters.
+- Framework-rendered popover controls that rely on Popover API + CSS Anchor Positioning should feature-detect browser support and show an inline warning when unsupported.
+
+If a future major release removes `setPlaybackRate` from adapter contracts, this fallback section can be removed at the same time.
+
+## Key Control Label Semantics
+
+- The visible `Key` control uses a vertical range slider with datalist labels shown in half-step units for singer-facing readability.
+- `pitchSemitones` follows standard music semantics: `1` semitone is one half-step, not half an octave.
+- Twelve semitones (`12`) equals one octave.
+- Example label/value mapping: `.5 -> 1`, `1 -> 2`, `1.5 -> 3`.
+- `setPitchSemitones({ value })` continues to receive integer semitone offsets under the hood.
+- The label mapping is a UI representation choice only; it does not change the semitone math used by SoundTouch.
+- Keep adapter and player logic semitone-based; only the UI label representation is transformed.
+
+## Lifecycle Contract
+
+- Call `model.dispose()` during teardown.
+- Dispose every mounted control returned by `create*Control`.
+- If you used `createControls`, call `controls.dispose()`.
+- Never keep controls/model bound to a player instance that has already been disposed.
+
+## Common Mistakes
+
+- Recreating model instances repeatedly instead of once per player instance.
+- Mounting controls without disposing them on teardown.
+- Assuming every adapter has helper methods beyond the contract.
+- Labeling UX as playback rate when product language expects tempo.
+
+## Cross References
+
+- Framework-specific implementation guides are available in the composed `Framework-agnostic Examples` and `React Examples` sections.
