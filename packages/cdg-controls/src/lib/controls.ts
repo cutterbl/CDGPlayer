@@ -245,6 +245,7 @@ class DefaultCdgControlsModel implements CdgControlsModel {
   >();
   private state: ControlsViewState;
   private playRequestInFlight = false;
+  private pauseAfterPlayRequest = false;
 
   constructor({ player }: { player: ControlsPlayerAdapter }) {
     this.player = player;
@@ -273,18 +274,30 @@ class DefaultCdgControlsModel implements CdgControlsModel {
       return;
     }
 
-    if (liveState.isPlaying || this.playRequestInFlight) {
-      this.playRequestInFlight = false;
+    if (this.playRequestInFlight) {
+      // While play is still starting, additional toggles flip the desired
+      // post-start state (playing <-> paused).
+      this.pauseAfterPlayRequest = !this.pauseAfterPlayRequest;
+      return;
+    }
+
+    if (liveState.isPlaying) {
       this.player.pause();
       return;
     }
 
     this.playRequestInFlight = true;
+    this.pauseAfterPlayRequest = false;
 
     try {
       await this.player.play();
+
+      if (this.pauseAfterPlayRequest) {
+        this.player.pause();
+      }
     } finally {
       this.playRequestInFlight = false;
+      this.pauseAfterPlayRequest = false;
     }
   }
 
