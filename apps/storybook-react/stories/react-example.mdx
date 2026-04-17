@@ -1,0 +1,150 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Examples/React Demo/Implementation Guide" />
+
+# React Implementation Guide
+
+This guide lives next to the React demo story so React lifecycle patterns are documented with the runnable example.
+
+Source of truth for this guide: `apps/framework-demo/src/App.tsx`.
+
+React integration is intentionally headless for controls UI:
+
+- `@cxing/cdg-controls` provides model and state contracts.
+- React renders buttons and sliders.
+- React handlers call model methods.
+
+## Step 1: Initialize and Subscribe
+
+```tsx
+import { useEffect, useRef, useState } from 'react';
+import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
+import {
+  createControlsModel,
+  type CdgControlsModel,
+  type ControlsViewState,
+} from '@cxing/cdg-controls';
+
+const [viewState, setViewState] = useState<ControlsViewState>(DEFAULT_STATE);
+const [player, setPlayer] = useState<CdgPlayer | null>(null);
+const [controlsModel, setControlsModel] = useState<CdgControlsModel | null>(
+  null,
+);
+const lastStatusRef = useRef<string | null>(null);
+const hasPlaybackStartedRef = useRef(false);
+
+useEffect(() => {
+  if (!canvas || !audio) {
+    return;
+  }
+
+  const nextPlayer = createPlayer({ options: { canvas, audio } });
+  const nextModel = createControlsModel({ options: { player: nextPlayer } });
+
+  setPlayer(nextPlayer);
+  setControlsModel(nextModel);
+
+  const unsubscribe = nextModel.subscribe((state) => {
+    if (state.status !== lastStatusRef.current) {
+      showStatusMessage(`Status: ${state.status}`);
+      lastStatusRef.current = state.status;
+    }
+
+    if (state.status === 'playing') {
+      hasPlaybackStartedRef.current = true;
+    }
+
+    setViewState(state);
+  });
+
+  showStatusMessage('Choose a track to start.');
+
+  return () => {
+    unsubscribe();
+    nextModel.dispose();
+    nextPlayer.dispose();
+    setPlayer(null);
+    setControlsModel(null);
+  };
+}, []);
+```
+
+This matches the framework demo pattern: subscribe once per mount, derive UI state from model emissions, and reset player/model references on cleanup.
+
+## Step 2: Load a Track from File Input
+
+```tsx
+const onFileSelected = async (file: File) => {
+  if (!player) {
+    return;
+  }
+
+  player.stop();
+  hasPlaybackStartedRef.current = false;
+
+  await player.load({
+    input: { kind: 'file', file },
+  });
+};
+```
+
+## Step 3: Bind React Controls to Model Methods
+
+```tsx
+<button
+  type="button"
+  disabled={!viewState.isPlayable || !controlsModel}
+  onClick={() => {
+    if (!controlsModel) {
+      return;
+    }
+
+    void controlsModel.togglePlayPause();
+  }}
+>
+  {viewState.isPlaying ? 'Pause' : 'Play'}
+</button>
+
+<input
+  type="range"
+  min={0}
+  max={100}
+  step={0.1}
+  value={viewState.progressPercent}
+  disabled={!viewState.isPlayable || !controlsModel}
+  onChange={(event) => {
+    controlsModel?.seekPercent({ percentage: Number(event.target.value) });
+  }}
+/>
+
+<input
+  type="range"
+  min={0.5}
+  max={2}
+  step={0.01}
+  value={viewState.playbackRate}
+  disabled={!viewState.isPlayable || !controlsModel}
+  onChange={(event) => {
+    controlsModel?.setTempo({ value: Number(event.target.value) });
+  }}
+/>
+```
+
+## Tempo Note
+
+Use model `setTempo` from React controls. The model handles fallback to `setPlaybackRate` for adapters that still expose the playback-rate method name.
+
+## Browser Support Note
+
+The framework demo transport uses Popover API and CSS Anchor Positioning for volume/tempo/key popovers.
+
+- On browsers that support both features, popovers open anchored to each trigger button.
+- When support is missing, the demo shows an inline compatibility warning in the stage status area.
+- The warning is runtime feature-detected, so it reflects the current browser rather than build-time assumptions.
+
+## Common Mistakes
+
+- Recreating player/model on every render instead of once per mount.
+- Missing cleanup in `useEffect`, causing duplicate subscriptions.
+- Mixing direct player writes with model writes for the same controls.
+- Updating React state from unmanaged event sources in parallel with model subscription.

@@ -1,0 +1,18 @@
+@layer components {
+  .anchor {
+    flex: 0 0 auto;
+    display: inline-flex;
+    anchor-name: --cdg-volume-anchor;
+  }
+
+  .popover {
+    position: fixed;
+    position-anchor: --cdg-volume-anchor;
+    inset: auto;
+    top: anchor(bottom);
+    right: anchor(right);
+    left: auto;
+    bottom: auto;
+    margin: 0;
+  }
+}

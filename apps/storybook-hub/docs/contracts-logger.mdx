@@ -1,0 +1,77 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Documentation/API/Logger Contract" />
+
+# Logger Contract
+
+`@cxing/logger` provides a small scoped logger utility used across loader/player/core runtime paths.
+
+## Why Use It
+
+- ensures every message includes a predictable scope prefix (`[scope]`)
+- standardizes severity methods across packages (`log`, `info`, `warn`, `error`)
+- allows debug traces without suppressing important `info`/`error` events
+
+## Minimal Usage
+
+```ts
+import { createScopedLogger } from '@cxing/logger';
+
+const logger = createScopedLogger({
+  scope: 'my-runtime',
+  debug: false,
+});
+
+logger.info({ message: 'ready' });
+logger.error({ message: 'load failed', errorValue });
+```
+
+## `debug` Semantics
+
+`debug(...)` is the only debug-gated method.
+
+```ts
+const logger = createScopedLogger({ scope: 'demo', debug: true });
+
+logger.debug({ message: 'trace message' }); // defaults to "log" severity
+logger.debug({ severity: 'warn', message: 'degraded path' });
+logger.debug({
+  severity: 'error',
+  message: 'caught error',
+  errorValue,
+  someObj: { a: 1, b: 'foo' },
+});
+```
+
+Behavior details:
+
+- required form: `debug({ message, severity?, ...namedData })`
+- `message` is required
+- any key name is valid in `namedData`
+- all non-`severity` values are forwarded as variadic log args (key insertion order)
+- `debug({ message })` routes to `log` severity
+- `debug({ message, severity, ...namedData })` routes to that severity method
+- when `debug` is `false`, `debug(...)` emits nothing
+- direct `log/info/warn/error` calls are always emitted (never debug-gated)
+- package guidance: use `debug(...)` for routine traces when `debug: true`, and reserve direct severity calls for must-always events (for example: load failures and metadata fallback paths)
+
+## Scope Formatting
+
+All scoped methods emit with this shape:
+
+```ts
+console[severity](`[scope]`, ...args);
+```
+
+Examples from runtime packages:
+
+- `[cdg-loader-core]`
+- `[cdg-loader-worker]`
+- `[cdg-player]`
+- `[cdg-core]`
+
+## Cross References
+
+- [Architecture](/?path=/docs/documentation-architecture--docs)
+- [Loader Contract](/?path=/docs/documentation-api-loader-contract--docs)
+- [Player Contract](/?path=/docs/documentation-api-player-contract--docs)

@@ -1,0 +1,11 @@
+{
+  "renderDispatch": {
+    "mainThread": {
+      "maxFrameCpuMs": 20
+    },
+    "worker": {
+      "maxFrameCpuMs": 8,
+      "maxTransferredBytes": 307200
+    }
+  }
+}
