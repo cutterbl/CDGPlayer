@@ -67,5 +67,5 @@ player.setPitchSemitones({ value: -2 });
 
 ## Docs
 
-- Player contract: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-player-contract--docs
-- Controls contract: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-controls-contract--docs
+- Player contract: https://cutterscrossing.com/?path=/docs/documentation-api-player-contract--docs
+- Controls contract: https://cutterscrossing.com/?path=/docs/documentation-api-controls-contract--docs

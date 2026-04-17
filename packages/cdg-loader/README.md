@@ -63,5 +63,5 @@ You can use worker-backed loading via `loadInWorker(...)` with automatic fallbac
 
 ## Docs
 
-- Loader contract: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-loader-contract--docs
-- Migration guide: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs
+- Loader contract: https://cutterscrossing.com/?path=/docs/documentation-api-loader-contract--docs
+- Migration guide: https://cutterscrossing.com/?path=/docs/documentation-migration-guide--docs

@@ -72,6 +72,6 @@ Your player adapter must provide:
 
 ## Docs
 
-- Controls contract: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-controls-contract--docs
-- Framework-agnostic guide: https://cutterbl.github.io/CDGPlayer/storybook-web/?path=/docs/examples-framework-agnostic-demo-implementation-guide--docs
-- React guide: https://cutterbl.github.io/CDGPlayer/storybook-react/?path=/docs/examples-react-demo-implementation-guide--docs
+- Controls contract: https://cutterscrossing.com/?path=/docs/documentation-api-controls-contract--docs
+- Framework-agnostic guide: https://cutterscrossing.com/storybook-web/?path=/docs/examples-framework-agnostic-demo-implementation-guide--docs
+- React guide: https://cutterscrossing.com/storybook-react/?path=/docs/examples-react-demo-implementation-guide--docs
