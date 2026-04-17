@@ -2,8 +2,8 @@ name: CI
 
 on:
   pull_request:
-    branches: [main, master]
-    types: [opened, reopened, synchronize, ready_for_review]
+    branches: [ main, master ]
+    types: [ opened, reopened, synchronize, ready_for_review ]
   workflow_dispatch:
 
 permissions:
@@ -11,7 +11,8 @@ permissions:
   pull-requests: write
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number ||
+    github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -20,15 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.33.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
@@ -37,10 +38,14 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Run lint
-        run: pnpm nx run-many -t lint --projects=cdg-core,cdg-loader,cdg-player,cdg-controls,demo,framework-demo --outputStyle=stream
+        run: pnpm nx run-many -t lint
+          --projects=cdg-core,cdg-loader,cdg-player,cdg-controls,demo,framework-demo
+          --outputStyle=stream
 
       - name: Run typecheck
-        run: pnpm nx run-many -t typecheck --projects=cdg-core,cdg-loader,cdg-player,cdg-controls,demo,framework-demo --outputStyle=stream
+        run: pnpm nx run-many -t typecheck
+          --projects=cdg-core,cdg-loader,cdg-player,cdg-controls,demo,framework-demo
+          --outputStyle=stream
 
   unit-test:
     name: ci/unit-test
@@ -48,15 +53,15 @@ jobs:
     needs: lint-typecheck
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.33.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
@@ -74,14 +79,14 @@ jobs:
         run: cat coverage/summary.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-reports
           path: coverage/**
 
       - name: Post coverage summary comment
         if: ${{ github.event_name == 'pull_request' }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@v3
         with:
           header: coverage-summary
           path: coverage/summary.md
@@ -92,15 +97,15 @@ jobs:
     needs: unit-test
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v5
         with:
           version: 10.33.0
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: pnpm
