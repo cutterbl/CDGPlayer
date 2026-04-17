@@ -1,3 +1,13 @@
+## 1.0.1 (2026-04-17)
+
+### 🩹 Fixes
+
+- **release:** Correct CI/CD configuration ([#34](https://github.com/cutterbl/CDGPlayer/pull/34))
+
+### ❤️ Thank You
+
+- Steve 'Cutter' Blades
+
 # 1.0.0 (2026-04-17)
 
 ### 🚀 Features

@@ -1,6 +1,6 @@
 {
   "name": "@cxing/cdg-controls",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Framework-agnostic controls for CD+G player interaction.",
   "keywords": [
     "cdg",
