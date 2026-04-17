@@ -1,0 +1,44 @@
+{
+  "name": "@cxing/logger",
+  "version": "0.1.17",
+  "description": "Scoped logging utility for CXing packages and apps.",
+  "keywords": [
+    "logger",
+    "logging",
+    "debug"
+  ],
+  "author": {
+    "name": "Stephen G Blades, Jr (AKA 'Cutter')",
+    "url": "http://cutterscrossing.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cutterbl/CDGPlayer.git"
+  },
+  "homepage": "https://cutterbl.github.io/CDGPlayer",
+  "bugs": {
+    "url": "https://github.com/cutterbl/CDGPlayer/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "type": "module",
+  "main": "./.dist/index.js",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.js",
+      "default": "./.dist/index.js"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {}
+}
