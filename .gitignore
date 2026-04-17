@@ -3,3 +3,15 @@ node_modules
 !/zipfiles
 /zipfiles/*
 !/zipfiles/README.md
+
+
+.nx/cache
+.nx/workspace-data
+vite.config.*.timestamp*
+vitest.config.*.timestamp*
+**/.dist/
+**/.tsbuild/
+/dist/
+/coverage
+/artifacts/perf/**
+!/artifacts/perf/README.md

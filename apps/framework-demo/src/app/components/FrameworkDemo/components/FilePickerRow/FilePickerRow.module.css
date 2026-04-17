@@ -1,0 +1,24 @@
+@layer components {
+  .filePickerRow {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    justify-content: center;
+  }
+
+  .exportPerf {
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--cdg-color-border-control);
+    border-radius: 4px;
+    background: var(--cdg-gradient-control);
+    color: var(--cdg-color-button-text);
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+  }
+}
