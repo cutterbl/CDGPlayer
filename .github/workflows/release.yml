@@ -2,7 +2,7 @@ name: Release
 
 on:
   push:
-    branches: [main, master]
+    branches: [ main, master ]
   workflow_dispatch:
     inputs:
       dry_run:
@@ -51,6 +51,9 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+          registry-url: https://registry.npmjs.org
+          scope: "@cxing"
+          always-auth: true
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
