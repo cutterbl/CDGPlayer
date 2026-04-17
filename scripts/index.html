@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>CDGKaraoke Example</title>
+        <script type="text/javascript" src="./node_modules/jszip/dist/jszip.min.js"></script>
+        <script type="text/javascript" src="./node_modules/jszip-utils/dist/jszip-utils.min.js"></script>
+        <script type="text/javascript" src="./node_modules/jsmediatags/dist/jsmediatags.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reset-css@4.0.1/reset.min.css">
+        <style>
+            html {
+                height: 100vh;
+            }
+            body {
+                height: 100vh;
+                text-align: center;
+            }
+            #app {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                height: 100vh;
+            }
+            .cdg-player {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                flex: 1 1 auto;
+                width: 100%;
+                height: 100%;
+                margin: 0 auto;
+            }
+            #cdg_wrapper {
+                flex: 1 1 auto;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+            }
+            .cdg-video-player {
+                flex: 1 1 auto;
+            }
+            .titleImage {
+                background-image: url(CDGPlayer.svg);
+                background-size: 90% 90%;
+                background-position: center;
+                background-repeat: no-repeat;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app">
+          <div id="file-select-container">
+              <input id="file-select" type="file" name="fileselect[]" />
+          </div>
+          <div class="cdg-player">
+              <div id="cdg_controls"></div>
+              <div id="cdg_wrapper"></div>
+          </div>
+        </div>
+        <script type="module" src="index.js"></script>
+    </body>
+</html>

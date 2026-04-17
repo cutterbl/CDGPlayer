@@ -1,0 +1,38 @@
+<div class="cdg-controls">
+    <span class="playControl">
+        <button class="playButton" disabled><i class="icofont-play-alt-1"></i></button>
+    </span>
+    <span class="timePlayed"></span>
+    <div class="progress-container">
+        <progress class="progressMeter"
+                  ng-disabled="$ctrls.loading"
+                  value="0"
+                  max="100"></progress>
+    </div>
+    <span class="trackLength"></span>
+    <span>
+        <input type="number"
+               class="pitch"
+               step="1"
+               min="-7"
+               max="7"
+               value="0"
+               disabled />
+    </span>
+    <span class="volumeControl">
+        <div>
+            <button class="volumeButton" id="song_volume_button" disabled><i class="icofont-audio"></i></button>
+            <div class="volumeSlider">
+                <input type="range" min="0.00" max="1.00" step="0.01" class="volumeRange" id="song_volume" />
+            </div>
+        </div>
+    </span>
+    <!-- <span class="volumeControl">
+        <div>
+            <button class="volumeButton" id="mic_volume_button"><i class="icofont-mic"></i></button>
+            <div class="volumeSlider">
+                <input type="range" min="0.0" max="1" step="0.1" class="volumeRange" id="mic_volume" />
+            </div>
+        </div>
+    </span> -->
+</div>

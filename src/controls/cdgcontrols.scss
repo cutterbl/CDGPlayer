@@ -1,0 +1,215 @@
+/*
+* @package IcoFont
+* @version 1.0.1
+* @author IcoFont https://icofont.com
+* @copyright Copyright (c) 2015 - 2018 IcoFont
+* @license - https://icofont.com/license/
+*/
+
+@font-face {
+  font-family: 'IcoFont';
+  font-weight: normal;
+  font-style: normal;
+  src: inline('./fonts/icofont.woff2') format('woff2'),
+    inline('./fonts/icofont.woff') format('woff');
+}
+
+[class^='icofont-'],
+[class*=' icofont-'] {
+  font-family: 'IcoFont' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  line-height: 1;
+  /* Better Font Rendering =========== */
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+.icofont-mic:before {
+  content: '\ef95';
+}
+
+.icofont-mic-mute:before {
+  content: '\ef94';
+}
+
+.icofont-audio:before {
+  content: '\eea8';
+}
+
+.icofont-play-alt-1:before {
+  content: '\eca6';
+}
+
+.icofont-pause:before {
+  content: '\eca5';
+}
+
+.icofont-md {
+  font-size: 2em;
+}
+
+.icofont-fw {
+  text-align: center;
+  width: 1.25em;
+}
+
+.mute {
+  color: darkgrey;
+}
+
+.cdg-controls {
+  position: relative;
+  display: -ms-flexbox;
+  display: -webkit-flex;
+  display: flex;
+  height: 40px;
+  -webkit-flex-direction: row;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  -webkit-align-items: center;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 1.25em;
+  & > span,
+  & > div {
+    margin: 3px 5px;
+    &:first-child {
+      margin-left: 0;
+    }
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+  .playButton,
+  .volumeButton {
+    outline: none;
+    border: none;
+    border-radius: 3px;
+    padding: 5px;
+    width: 34px;
+    height: 34px;
+    & > i {
+      @extend .icofont-fw;
+      @extend .icofont-md;
+    }
+    &[disabled] {
+      @extend .mute;
+      cursor: not-allowed;
+    }
+  }
+  .volumeControl {
+    & > div {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      &:hover {
+        .volumeSlider {
+          display: block;
+        }
+      }
+      .volumeSlider {
+        display: none;
+        position: absolute;
+        top: -75px;
+        left: -55px;
+        z-index: 100;
+        width: 100px;
+        transform: rotate(270deg);
+        padding: 10px 20px;
+        &.under {
+          top: 75px;
+          transform: rotate(90deg);
+        }
+        &:hover {
+          display: block;
+        }
+        .volumeRange {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 5px;
+          background: #d3d3d3;
+          border: 1px solid;
+          border-radius: 2.5px;
+          outline: none;
+          opacity: 0.7;
+          -webkit-transition: 0.2s;
+          transition: opacity 0.2s;
+          &:hover {
+            opacity: 1;
+          }
+          &::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 1px solid blue;
+            background: white;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+  .pitch {
+    height: 28px;
+    font-size: 0.8em;
+    text-align: right;
+    &[disabled] {
+      @extend .mute;
+      cursor: not-allowed;
+    }
+  }
+  .progress-container {
+    position: relative;
+    flex: 0 1 auto;
+    width: 100%;
+    display: inline-block;
+
+    progress {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 1em;
+      &::-webkit-progress-bar {
+        background-color: #eee;
+        border-radius: 0.5em;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+      }
+      &::-webkit-progress-value {
+        background-image: -webkit-linear-gradient(
+            -45deg,
+            transparent 33%,
+            rgba(0, 0, 0, -1) 33%,
+            rgba(0, 0, 0, 0.1) 66%,
+            transparent 66%
+          ),
+          -webkit-linear-gradient(top, rgba(255, 255, 255, 0.25), rgba(0, 0, 0, 0.25)),
+          -webkit-linear-gradient(left, #09c, #f44);
+        border-radius: 0.5em;
+        background-size: 35px 20px, 100% 100%, 100% 100%;
+        // -webkit-animation: animate-stripes 5s linear infinite;
+        // animation: animate-stripes 5s linear infinite;
+      }
+    }
+    /* @-webkit-keyframes animate-stripes {
+      0% { background-position: 0px 0px, 0 0, 0 0; }
+      100% { background-position: -100px 0px, 0 0, 0 0; }
+    }
+    @keyframes animate-stripes {
+      0% { background-position: 0px 0px, 0 0, 0 0; }
+      100% { background-position: -100px 0px, 0 0, 0 0; }
+    } */
+  }
+}
