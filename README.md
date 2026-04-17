@@ -2,7 +2,7 @@
 
 CDGPlayer provides browser karaoke playback libraries under the `@cxing/cdg-\*` package family.
 
-**BREAKING CHANGE**: The legacy `CDGPlayer` and `CDGControls` monolithic packages have been deprecated and replaced with a modular package architecture. See the [migration guide](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs) for details.
+**BREAKING CHANGE**: The legacy `CDGPlayer` and `CDGControls` monolithic packages have been deprecated and replaced with a modular package architecture. See the [migration guide](https://cutterscrossing.com/?path=/docs/documentation-migration-guide--docs) for details.
 
 ## Packages
 
@@ -23,14 +23,14 @@ Install the packages your app needs.
 
 ## Documentation
 
-- [Getting started](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-getting-started--documentation)
-- [Migration guide](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-migration-guide--docs)
-- [Logger contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-logger-contract--docs)
-- [Loader contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-loader-contract--documentation)
-- [Player contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-player-contract--documentation)
-- [Controls contract](https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-controls-contract--documentation)
-- [Framework-agnostic implementation guide](https://cutterbl.github.io/CDGPlayer/storybook-web/?path=/docs/examples-framework-agnostic-demo-implementation-guide--documentation)
-- [React implementation guide](https://cutterbl.github.io/CDGPlayer/storybook-react/?path=/docs/examples-react-demo-implementation-guide--documentation)
+- [Getting started](https://cutterscrossing.com/?path=/docs/documentation-getting-started--documentation)
+- [Migration guide](https://cutterscrossing.com/?path=/docs/documentation-migration-guide--docs)
+- [Logger contract](https://cutterscrossing.com/?path=/docs/documentation-api-logger-contract--docs)
+- [Loader contract](https://cutterscrossing.com/?path=/docs/documentation-api-loader-contract--documentation)
+- [Player contract](https://cutterscrossing.com/?path=/docs/documentation-api-player-contract--documentation)
+- [Controls contract](https://cutterscrossing.com/?path=/docs/documentation-api-controls-contract--documentation)
+- [Framework-agnostic implementation guide](https://cutterscrossing.com/storybook-web/?path=/docs/examples-framework-agnostic-demo-implementation-guide--documentation)
+- [React implementation guide](https://cutterscrossing.com/storybook-react/?path=/docs/examples-react-demo-implementation-guide--documentation)
 
 ## Repository Contribution
 

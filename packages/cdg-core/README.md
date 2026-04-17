@@ -60,5 +60,5 @@ const instructions = parser.parseInstructions({ bytes: cdgBytes });
 
 ## Docs
 
-- Architecture: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-architecture--docs
-- Player contract: https://cutterbl.github.io/CDGPlayer/?path=/docs/documentation-api-player-contract--docs
+- Architecture: https://cutterscrossing.com/?path=/docs/documentation-architecture--docs
+- Player contract: https://cutterscrossing.com/?path=/docs/documentation-api-player-contract--docs

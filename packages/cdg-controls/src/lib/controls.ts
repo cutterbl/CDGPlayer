@@ -244,6 +244,7 @@ class DefaultCdgControlsModel implements CdgControlsModel {
     (state: Readonly<ControlsViewState>) => void
   >();
   private state: ControlsViewState;
+  private playRequestInFlight = false;
 
   constructor({ player }: { player: ControlsPlayerAdapter }) {
     this.player = player;
@@ -266,16 +267,25 @@ class DefaultCdgControlsModel implements CdgControlsModel {
   }
 
   async togglePlayPause(): Promise<void> {
-    if (!this.state.isPlayable) {
+    const liveState = deriveViewState({ playerState: this.player.getState() });
+
+    if (!liveState.isPlayable) {
       return;
     }
 
-    if (this.state.isPlaying) {
+    if (liveState.isPlaying || this.playRequestInFlight) {
+      this.playRequestInFlight = false;
       this.player.pause();
       return;
     }
 
-    await this.player.play();
+    this.playRequestInFlight = true;
+
+    try {
+      await this.player.play();
+    } finally {
+      this.playRequestInFlight = false;
+    }
   }
 
   seekPercent({ percentage }: { percentage: number }): void {

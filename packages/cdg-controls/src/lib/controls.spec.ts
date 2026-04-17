@@ -147,6 +147,74 @@ class MockPlayerWithoutTempo
   }
 }
 
+class MockPlayerWithDelayedPlay
+  extends EventTarget
+  implements ControlsPlayerAdapter
+{
+  private state: ControlsPlayerState = {
+    status: 'idle',
+    trackId: null,
+    currentTimeMs: 0,
+    durationMs: 0,
+    volume: 1,
+    playbackRate: 1,
+    pitchSemitones: 0,
+  };
+
+  plays = 0;
+  pauses = 0;
+  private resolvePlay: (() => void) | null = null;
+
+  getState(): Readonly<ControlsPlayerState> {
+    return this.state;
+  }
+
+  async play(): Promise<void> {
+    this.plays += 1;
+
+    await new Promise<void>((resolve) => {
+      this.resolvePlay = resolve;
+    });
+
+    this.setState({ status: 'playing' });
+  }
+
+  pause(): void {
+    this.pauses += 1;
+    this.setState({ status: 'paused' });
+  }
+
+  stop(): void {
+    this.setState({ status: 'ready', currentTimeMs: 0 });
+  }
+
+  seek(_args: { percentage: number }): void {
+    // Not needed for this test adapter.
+  }
+
+  setVolume(_args: { value: number }): void {
+    // Not needed for this test adapter.
+  }
+
+  setPlaybackRate(_args: { value: number }): void {
+    // Not needed for this test adapter.
+  }
+
+  setPitchSemitones(_args: { value: number }): void {
+    // Not needed for this test adapter.
+  }
+
+  flushPlayRequest(): void {
+    this.resolvePlay?.();
+    this.resolvePlay = null;
+  }
+
+  setState(nextPatch: Partial<ControlsPlayerState>): void {
+    this.state = { ...this.state, ...nextPatch };
+    this.dispatchEvent(new CustomEvent('statechange'));
+  }
+}
+
 describe('controls', () => {
   it('supports distributed controls via a shared model', async () => {
     const player = new MockPlayer();
@@ -349,5 +417,27 @@ describe('controls', () => {
 
     controls.dispose();
     container.remove();
+  });
+
+  it('pauses on the next toggle even when play is still pending', async () => {
+    const player = new MockPlayerWithDelayedPlay();
+    player.setState({ status: 'ready' });
+
+    const model = createControlsModel({
+      options: {
+        player,
+      },
+    });
+
+    const firstToggle = model.togglePlayPause();
+    expect(player.plays).toBe(1);
+
+    await model.togglePlayPause();
+    expect(player.pauses).toBe(1);
+
+    player.flushPlayRequest();
+    await firstToggle;
+
+    model.dispose();
   });
 });
