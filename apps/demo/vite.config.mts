@@ -9,6 +9,7 @@ export default defineConfig(() => ({
   cacheDir: '../../node_modules/.vite/apps/demo',
   resolve: {
     alias: {
+      '@shared-assets': path.join(import.meta.dirname, '../../assets/branding'),
       'react-native-fs': path.join(
         import.meta.dirname,
         '../../packages/cdg-loader/src/lib/shims/react-native-fs.ts',

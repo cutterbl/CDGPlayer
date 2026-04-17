@@ -141,7 +141,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-image: url('../../../../../assets/CDGPlayer.svg');
+    background-image: url('@shared-assets/CDGPlayer.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: auto 100%;
