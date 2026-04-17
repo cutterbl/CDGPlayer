@@ -54,7 +54,7 @@
     },
     "git": {
       "commit": true,
-      "commitMessage": "chore(release): publish {version}",
+      "commitMessage": "chore(release): Publish {version}",
       "tag": true,
       "tagMessage": "Release {version}"
     },
