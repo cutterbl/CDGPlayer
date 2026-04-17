@@ -1,3 +1,62 @@
+# 1.0.0 (2026-04-17)
+
+### 🚀 Features
+
+- ⚠️  **monorepo:** migrate CDGPlayer to an Nx package-first workspace ([63351bd](https://github.com/cutterbl/CDGPlayer/commit/63351bd))
+- ⚠️  **monorepo:** Migrate CDGPlayer to an Nx package-first workspace ([#31](https://github.com/cutterbl/CDGPlayer/pull/31))
+- ⚠️  **monorepo:** Migrate CDGPlayer to an Nx package-first workspace ([#33](https://github.com/cutterbl/CDGPlayer/pull/33))
+
+### ⚠️  Breaking Changes
+
+- **monorepo:** Migrate CDGPlayer to an Nx package-first workspace  ([#33](https://github.com/cutterbl/CDGPlayer/pull/33))
+  CDGPlayer now publishes from a package-first Nx workspace.
+  The legacy top-level source and docs layout is no longer the published integration
+  surface; consumers should use the scoped package entrypoints (@cxing/logger,
+  @cxing/cdg-core, @cxing/cdg-loader, @cxing/cdg-player, and @cxing/cdg-controls).
+  The release, documentation, CI, and demo/control integration flows have changed since
+  v0.1.17 and should be reviewed before upgrading.
+- **monorepo:** Migrate CDGPlayer to an Nx package-first workspace  ([#31](https://github.com/cutterbl/CDGPlayer/pull/31))
+  CDGPlayer now publishes from a package-first Nx
+  workspace.
+  The legacy top-level source and docs layout is no longer the
+  published integration surface; consumers should use the scoped
+  package entrypoints (@cxing/logger, @cxing/cdg-core,
+  @cxing/cdg-loader, @cxing/cdg-player, and @cxing/cdg-controls).
+  The release, documentation, CI, and demo/control integration
+  flows have changed since v0.1.17 and should be reviewed before
+  upgrading.
+- **monorepo:** migrate CDGPlayer to an Nx package-first workspace  ([63351bd](https://github.com/cutterbl/CDGPlayer/commit/63351bd))
+  Removes the legacy top-level src/, scripts demo assets, and /docs documentation tree in favor of package entrypoints and Storybook-composed documentation.
+  * chore: Update monorepo tooling and CI workflows
+  * fix: Resolve build blockers and rename contribution doc
+  * feat: expand test coverage and enforce per-project CI thresholds
+  * chore: Stabilize typecheck outputs and test typings
+  * feat(controls): Refine key labels and settings panel sizing
+  * chore: Add package readmes and refine coverage/docs reporting
+  * chore: Tighten lint rules and clean demo/test warnings
+  * feat(release)!: Prepare the next major package-first release
+  - migrate CDGPlayer to an Nx package-first workspace
+  - align package metadata and release automation around scoped
+    package entrypoints
+  - tighten CI validation, coverage thresholds, docs checks, and
+    repository ownership
+  - refine framework-agnostic controls and move framework demo
+    settings into anchored popovers
+  - update demo iconography and supporting Storybook/docs guidance
+  BREAKING CHANGE: CDGPlayer now publishes from a package-first Nx
+  workspace.
+  The legacy top-level source and docs layout is no longer the
+  published integration surface; consumers should use the scoped
+  package entrypoints (@cxing/logger, @cxing/cdg-core,
+  @cxing/cdg-loader, @cxing/cdg-player, and @cxing/cdg-controls).
+  The release, documentation, CI, and demo/control integration
+  flows have changed since v0.1.17 and should be reviewed before
+  upgrading.
+
+### ❤️ Thank You
+
+- Steve 'Cutter' Blades
+
 Changelog
 ### 0.1.17 (2023-01-05)
 
