@@ -1,6 +1,0 @@
-packages:
-  - packages/*
-  - apps/*
-allowBuilds:
-  '@swc/core': false
-  nx: false

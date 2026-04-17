@@ -1,7 +1,0 @@
-@layer components {
-  .timecode {
-    min-width: 3.2rem;
-    text-align: center;
-    font-variant-numeric: tabular-nums;
-  }
-}
