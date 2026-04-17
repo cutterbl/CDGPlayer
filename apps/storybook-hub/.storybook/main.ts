@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/web-components-vite';
+import { resolve } from 'node:path';
 
 const isStaticBuild = process.env.STORYBOOK_BUILD === 'true';
 
@@ -32,6 +33,24 @@ const config: StorybookConfig = {
       },
   docs: {
     defaultName: 'Documentation',
+  },
+  viteFinal: async (viteConfig) => {
+    const existingAlias = viteConfig.resolve?.alias;
+
+    return {
+      ...viteConfig,
+      root: resolve(import.meta.dirname, '..'),
+      resolve: {
+        ...viteConfig.resolve,
+        alias: {
+          ...(Array.isArray(existingAlias) ? {} : existingAlias),
+          '@shared-assets': resolve(
+            import.meta.dirname,
+            '../../../assets/branding',
+          ),
+        },
+      },
+    };
   },
 };
 

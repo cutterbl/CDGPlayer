@@ -433,10 +433,13 @@ describe('controls', () => {
     expect(player.plays).toBe(1);
 
     await model.togglePlayPause();
-    expect(player.pauses).toBe(1);
+    expect(player.pauses).toBe(0);
 
     player.flushPlayRequest();
     await firstToggle;
+
+    expect(player.pauses).toBe(1);
+    expect(model.getState().status).toBe('paused');
 
     model.dispose();
   });

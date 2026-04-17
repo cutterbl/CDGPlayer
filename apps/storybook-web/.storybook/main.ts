@@ -20,6 +20,10 @@ const config: StorybookConfig = {
         ...(viteConfig.resolve ?? {}),
         alias: {
           ...((viteConfig.resolve && viteConfig.resolve.alias) || {}),
+          '@shared-assets': resolve(
+            import.meta.dirname,
+            '../../../assets/branding',
+          ),
           'react-native-fs': resolve(
             import.meta.dirname,
             './shims/react-native-fs.ts',

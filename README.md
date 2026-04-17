@@ -1,5 +1,9 @@
 # CDGPlayer Libraries
 
+<p align="center">
+	<img src="./assets/branding/CDGPlayer.svg" alt="CDGPlayer logo" height="250" width="auto" />
+</p>
+
 CDGPlayer provides browser karaoke playback libraries under the `@cxing/cdg-\*` package family.
 
 **BREAKING CHANGE**: The legacy `CDGPlayer` and `CDGControls` monolithic packages have been deprecated and replaced with a modular package architecture. See the [migration guide](https://cutterscrossing.com/?path=/docs/documentation-migration-guide--docs) for details.

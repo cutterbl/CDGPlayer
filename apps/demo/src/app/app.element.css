@@ -479,7 +479,7 @@ canvas[data-role='canvas'] {
   position: absolute;
   inset: 0;
   background-color: transparent;
-  background-image: url('../assets/CDGPlayer.svg');
+  background-image: url('@shared-assets/CDGPlayer.svg');
   background-size: auto 100%;
   background-position: center;
   background-repeat: no-repeat;
