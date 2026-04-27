@@ -11,7 +11,7 @@ CDGPlayer is package-first. Think of the system as a pipeline:
 Each package has a single responsibility:
 
 - `@cxing/cdg-core`: parser, instructions, render context
-- `@cxing/cdg-loader`: zip/file/url loading + metadata (embedded audio tags first, filename fallback)
+- `@cxing/cdg-loader`: audio/zip/file/url loading + metadata (embedded audio tags first, filename fallback); normalized payload may include optional graphics
 - `@cxing/cdg-player`: playback orchestration + render dispatch
 - `@cxing/cdg-controls`: UI controls model and adapters
 - `@cxing/logger`: scope-prefixed runtime logging with severity methods and debug gating

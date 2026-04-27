@@ -65,8 +65,8 @@ const createAppTemplate = ({
         </a>
       </div>
       <div class="file-select-container" data-role="file-select-container">
-        <label class="file-picker" for="track-input">Select a karaoke zip (.zip)</label>
-        <input id="track-input" type="file" accept=".zip,application/zip" />
+        <label class="file-picker" for="track-input">Select audio or karaoke zip (audio/*, .zip)</label>
+        <input id="track-input" type="file" accept="audio/*,.zip,application/zip" />
         ${showPerfDiagnostics ? '<button type="button" class="perf-export-button" data-role="perf-export">Export speed report (.json)</button>' : ''}
       </div>
 
@@ -147,6 +147,7 @@ export class AppElement extends HTMLElement {
   private controlsModel: CdgControlsModel | null = null;
   private controlsParts: DisposableControl[] = [];
   private controlsUnsubscribe: (() => void) | null = null;
+  private canvasElement: HTMLCanvasElement | null = null;
   private statusElement: HTMLElement | null = null;
   private titleImage: HTMLElement | null = null;
   private titleMeta: HTMLElement | null = null;
@@ -158,6 +159,7 @@ export class AppElement extends HTMLElement {
   private lastStatus: string | null = null;
   private statusFadeTimeoutId: number | null = null;
   private hasPlaybackStarted = false;
+  private hasGraphicsTrack = true;
   private readonly showPerfDiagnostics = isLocalDevelopmentRuntime();
   private renderSamples: RenderSample[] = [];
 
@@ -205,6 +207,7 @@ export class AppElement extends HTMLElement {
     const canvas = this.querySelector<HTMLCanvasElement>(
       '[data-role="canvas"]',
     );
+    this.canvasElement = canvas;
     const audio = this.querySelector<HTMLAudioElement>('[data-role="audio"]');
     const transportContainer = this.querySelector<HTMLElement>(
       '[data-role="transport-bar"]',
@@ -341,6 +344,7 @@ export class AppElement extends HTMLElement {
       }
       this.syncTitleImage('idle');
       this.syncLayout('idle');
+      this.syncStageGraphicsVisibility();
 
       stage.addEventListener('click', (event) => {
         // Stage click toggles play/pause, except when interacting with floating settings.
@@ -376,7 +380,9 @@ export class AppElement extends HTMLElement {
 
         this.player.stop();
         this.hasPlaybackStarted = false;
+        this.hasGraphicsTrack = true;
         this.setTitleMetadata(null);
+        this.syncStageGraphicsVisibility();
         this.syncTitleImage('loading');
         this.syncLayout('loading');
         this.setStatusMessage('Loading track...');
@@ -406,6 +412,9 @@ export class AppElement extends HTMLElement {
               });
             }
 
+            this.hasGraphicsTrack = loadedTrack?.hasGraphics ?? false;
+            this.syncStageGraphicsVisibility();
+
             this.hasPlaybackStarted = false;
             this.syncTitleImage('ready');
             this.setStatusMessage('Track loaded.');
@@ -423,6 +432,8 @@ export class AppElement extends HTMLElement {
               errorMessage: message,
             });
             this.setStatusMessage(`Load failed: ${message}`);
+            this.hasGraphicsTrack = true;
+            this.syncStageGraphicsVisibility();
             this.syncTitleImage('error');
             this.syncLayout('error');
           })
@@ -556,6 +567,7 @@ export class AppElement extends HTMLElement {
     const shouldShowPlayer = status !== 'idle';
     this.appShell.classList.toggle('show-player', shouldShowPlayer);
     this.appShell.classList.toggle('is-playing', status === 'playing');
+    this.appShell.classList.toggle('has-graphics', this.hasGraphicsTrack);
 
     if (status === 'ready' || status === 'playing' || status === 'paused') {
       this.appShell.classList.add('has-track');
@@ -563,6 +575,17 @@ export class AppElement extends HTMLElement {
     }
 
     this.appShell.classList.remove('has-track');
+  }
+
+  /**
+   * Hides canvas when the loaded track has no graphics stream.
+   */
+  private syncStageGraphicsVisibility(): void {
+    if (!this.canvasElement) {
+      return;
+    }
+
+    this.canvasElement.style.display = this.hasGraphicsTrack ? 'block' : 'none';
   }
 
   /**

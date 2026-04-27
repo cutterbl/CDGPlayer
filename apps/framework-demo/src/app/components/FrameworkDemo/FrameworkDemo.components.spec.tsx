@@ -36,6 +36,8 @@ const createContextValue = (overrides: Record<string, unknown> = {}) => ({
   },
   titleMetadata: null,
   setTitleMetadata: vi.fn(),
+  hasGraphicsTrack: true,
+  setHasGraphicsTrack: vi.fn(),
   perfSummary: null,
   hasTrack: false,
   showTitle: false,
@@ -119,7 +121,9 @@ describe('Framework demo components', () => {
 
     render(<FilePickerRow />);
 
-    const input = screen.getByLabelText('Select a karaoke zip (.zip)');
+    const input = screen.getByLabelText(
+      'Select audio or karaoke zip (audio/*, .zip)',
+    );
     fireEvent.change(input, { target: { files: [] } });
     expect(player.stop).not.toHaveBeenCalled();
 
@@ -253,6 +257,27 @@ describe('Framework demo components', () => {
 
     expect(
       screen.getByText(/does not support CSS Anchor Positioning/i),
+    ).toBeTruthy();
+  });
+
+  it('renders audio-only stage state with hidden canvas and placeholder perf copy', () => {
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        hasGraphicsTrack: false,
+        hasTrack: true,
+        showTitle: false,
+        showPerfDiagnostics: true,
+        perfSummary: null,
+        isStatusVisible: false,
+      }),
+    );
+
+    const { container } = render(<StageDisplay />);
+
+    const canvas = container.querySelector('canvas');
+    expect(canvas?.className).toMatch(/canvasHidden/);
+    expect(
+      screen.getByText('Speed check: play a song to collect samples...'),
     ).toBeTruthy();
   });
 });

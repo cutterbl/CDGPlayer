@@ -24,7 +24,7 @@ const player = createPlayer({
 });
 
 await player.load({
-  input: { kind: 'file', file: selectedZip },
+  input: { kind: 'file', file: selectedFile },
 });
 
 await player.play();
@@ -63,6 +63,8 @@ player.setPitchSemitones({ value: -2 });
 
 - `setTempo` is the preferred singer-facing speed API.
 - `setPlaybackRate` remains available as a compatibility alias.
+- Audio-only tracks are supported; playback state and transport remain functional without a graphics stream.
+- CDG render and sync operations are conditional on graphics availability.
 - Always call `dispose()` on teardown.
 
 ## Docs

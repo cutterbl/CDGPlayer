@@ -6,8 +6,6 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 `@cxing/cdg-player` is the runtime coordinator for playback, timeline sync, rendering, and audio.
 
-Phase status: Phase 4 complete.
-
 Use player when:
 
 - you need a stable playback state machine (`idle`, `loading`, `ready`, `playing`, `paused`, `error`)
@@ -28,7 +26,7 @@ const player = createPlayer({
 });
 
 await player.load({
-  input: { kind: 'file', file: selectedZip },
+  input: { kind: 'file', file: selectedFile },
 });
 
 await player.play();
@@ -45,9 +43,11 @@ player.addEventListener('statechange', () => {
 ## Important Behavior Notes
 
 - Tempo is the preferred singer-facing API via `setTempo`, with `setPlaybackRate` retained for compatibility.
+- Audio-only tracks are supported; when no graphics stream is present, playback still works while CDG render/sync paths are skipped.
 - Player runtime does not emit built-in render performance metric events. Performance monitoring/reporting is local-development tooling concern.
 - Debug trace logging is controlled by `options.debug`.
 - Failure paths use `error()` severity and are not hidden behind debug gating.
+- `statechange` is the primary state event; load failures dispatch `error` with `detail.errorValue`.
 
 ## Common Mistakes
 

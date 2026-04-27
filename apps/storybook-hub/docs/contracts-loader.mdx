@@ -13,7 +13,7 @@ Metadata extraction behavior:
 
 Use loader when:
 
-- you want to load karaoke content from user-selected zip files
+- you want to load browser-supported audio files and karaoke zip bundles
 - you want a consistent parsed payload before passing to player
 - you want metadata (`title`, `artist`, etc.) along with media bytes
 
@@ -32,7 +32,7 @@ import { createLoader } from '@cxing/cdg-loader';
 
 const loader = createLoader();
 const loadedTrack = await loader.load({
-  input: { kind: 'file', file: selectedZip },
+  input: { kind: 'file', file: selectedFile },
   options: { debug: true },
 });
 ```
@@ -43,12 +43,14 @@ const loadedTrack = await loader.load({
 // same shape for framework-agnostic and framework integrations
 loadedTrack.metadata.title;
 loadedTrack.audioBuffer;
+loadedTrack.audioMimeType;
+loadedTrack.hasGraphics;
 loadedTrack.cdgBytes;
 ```
 
 ## Common Mistakes
 
-- Passing non-zip content to `kind: 'file'` without validating selection UX.
+- Treating `hasGraphics` as always true; audio-only tracks return `hasGraphics === false` with `cdgBytes === null`.
 - Assuming metadata fields are always populated; handle empty strings safely because some files have no tags and no parseable filename pattern.
 - Re-loading repeatedly without cancellation logic in your app flow.
 

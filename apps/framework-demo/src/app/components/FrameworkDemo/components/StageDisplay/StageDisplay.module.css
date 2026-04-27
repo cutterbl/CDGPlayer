@@ -1,4 +1,8 @@
 @layer components {
+  /*
+   * These top-level selectors are state/marker classes consumed by TSX.
+   * Visual behavior is defined in nested rules below (for example &.hasTrack).
+   */
   .hasTrack {
   }
 
@@ -18,6 +22,10 @@
   }
 
   .compatibilityWarning {
+  }
+
+  /* Applied to canvas in audio-only mode; rule is scoped under .stage below. */
+  .canvasHidden {
   }
 
   .stageWrap {
@@ -132,6 +140,10 @@
       aspect-ratio: 25 / 18;
       background: var(--cdg-color-stage);
       image-rendering: pixelated;
+    }
+
+    .canvasHidden {
+      display: none;
     }
   }
 

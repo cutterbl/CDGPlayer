@@ -50,11 +50,13 @@ const player = createPlayer({
 });
 
 await player.load({
-  input: { kind: 'file', file: selectedZip },
+  input: { kind: 'file', file: selectedFile },
 });
 
 await player.play();
 ```
+
+For file-picker UX, prefer `accept="audio/*,.zip,application/zip"` so users can load either browser-supported audio or karaoke zip bundles.
 
 ## Minimal Controls Setup
 
