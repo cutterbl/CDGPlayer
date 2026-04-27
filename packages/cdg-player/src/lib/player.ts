@@ -59,7 +59,7 @@ export interface CdgPlayerOptions {
   audioEngineMode?: PlayerAudioEngineMode;
 }
 
-/** Event detail payload for statechange events. */
+/** Event detail payload for `statechange` events. */
 export interface PlayerStateChangeDetail {
   previous: PlayerState;
   next: PlayerState;
@@ -93,7 +93,9 @@ const asMilliseconds = ({ seconds }: { seconds: number }): number =>
   Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds * 1000)) : 0;
 
 /**
- * High-level karaoke player that orchestrates loading, audio, and CDG rendering.
+ * High-level karaoke player that orchestrates loading and audio playback.
+ * CDG rendering/synchronization are enabled only when the loaded track includes
+ * a graphics stream.
  */
 export class CdgPlayer extends EventTarget {
   private readonly canvas: HTMLCanvasElement;
@@ -110,6 +112,7 @@ export class CdgPlayer extends EventTarget {
 
   private state: PlayerState = createInitialState();
   private currentObjectUrl: string | null = null;
+  private hasGraphicsTrack = false;
 
   /**
    * Creates a player bound to canvas/audio elements and optional strategy overrides.
@@ -175,7 +178,8 @@ export class CdgPlayer extends EventTarget {
   }
 
   /**
-   * Loads karaoke assets and prepares playback.
+   * Loads track assets and prepares playback for either karaoke (audio+graphics)
+   * or audio-only content.
    */
   async load({
     input,
@@ -269,20 +273,24 @@ export class CdgPlayer extends EventTarget {
   }
 
   /**
-   * Starts playback and frame advancement.
+   * Starts audio playback and, when graphics exist, advances CDG frame playback.
    */
   async play(): Promise<void> {
     await this.audioEngine.play();
-    this.cdgPlayer.play();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.play();
+    }
     this.applyState({ status: 'playing' });
   }
 
   /**
-   * Pauses playback and frame advancement.
+   * Pauses audio playback and, when graphics exist, pauses CDG frame playback.
    */
   pause(): void {
     this.audioEngine.pause();
-    this.cdgPlayer.stop();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.stop();
+    }
 
     if (this.state.status !== 'error') {
       this.applyState({ status: 'paused' });
@@ -295,7 +303,9 @@ export class CdgPlayer extends EventTarget {
   stop(): void {
     this.pause();
     this.audioEngine.stop();
-    this.cdgPlayer.reset().render();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.reset().render();
+    }
     this.applyState({
       status: this.state.trackId ? 'ready' : 'idle',
       currentTimeMs: 0,
@@ -303,7 +313,8 @@ export class CdgPlayer extends EventTarget {
   }
 
   /**
-   * Seeks by percentage of track duration.
+   * Seeks by percentage of track duration and re-syncs CDG timing when graphics
+   * are present.
    */
   seek({ percentage }: { percentage: number }): void {
     if (!Number.isFinite(this.audio.duration) || this.audio.duration <= 0) {
@@ -313,7 +324,9 @@ export class CdgPlayer extends EventTarget {
     const clampedPercentage = clamp({ value: percentage, min: 0, max: 100 });
     const targetSeconds = (clampedPercentage / 100) * this.audio.duration;
     this.audio.currentTime = targetSeconds;
-    this.cdgPlayer.sync({ ms: asMilliseconds({ seconds: targetSeconds }) });
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.sync({ ms: asMilliseconds({ seconds: targetSeconds }) });
+    }
     this.applyState({
       currentTimeMs: asMilliseconds({ seconds: targetSeconds }),
     });
@@ -381,23 +394,31 @@ export class CdgPlayer extends EventTarget {
     this.logger.debug({
       message: 'attach:start',
       trackId: loadedTrack.trackId,
-      cdgBytes: loadedTrack.cdgBytes.byteLength,
+      hasGraphics: loadedTrack.hasGraphics,
+      cdgBytes: loadedTrack.cdgBytes?.byteLength ?? 0,
       audioBytes: loadedTrack.audioBuffer.byteLength,
     });
 
-    const corePlayer = this.cdgPlayer as CdgCorePlayerAsyncLoad;
-    if (typeof corePlayer.loadAsync === 'function') {
-      this.logger.debug({ message: 'attach:core-loadAsync' });
-      await corePlayer.loadAsync({ data: loadedTrack.cdgBytes });
+    this.hasGraphicsTrack =
+      loadedTrack.hasGraphics && loadedTrack.cdgBytes !== null;
+
+    if (this.hasGraphicsTrack && loadedTrack.cdgBytes) {
+      const corePlayer = this.cdgPlayer as CdgCorePlayerAsyncLoad;
+      if (typeof corePlayer.loadAsync === 'function') {
+        this.logger.debug({ message: 'attach:core-loadAsync' });
+        await corePlayer.loadAsync({ data: loadedTrack.cdgBytes });
+      } else {
+        this.logger.debug({ message: 'attach:core-load-sync' });
+        this.cdgPlayer.load({ data: loadedTrack.cdgBytes });
+      }
+
+      this.cdgPlayer.reset().render();
     } else {
-      this.logger.debug({ message: 'attach:core-load-sync' });
-      this.cdgPlayer.load({ data: loadedTrack.cdgBytes });
+      this.cdgPlayer.reset().render();
     }
 
-    this.cdgPlayer.reset().render();
-
     const audioBlob = new Blob([loadedTrack.audioBuffer], {
-      type: 'audio/mpeg',
+      type: loadedTrack.audioMimeType,
     });
     this.currentObjectUrl = URL.createObjectURL(audioBlob);
     this.audio.src = this.currentObjectUrl;
@@ -455,6 +476,7 @@ export class CdgPlayer extends EventTarget {
     const next = { ...previous, ...nextStatePatch };
     this.state = next;
 
+    // `statechange` is the primary external state notification contract.
     this.dispatchEvent(
       new CustomEvent<PlayerStateChangeDetail>('statechange', {
         detail: {
@@ -468,17 +490,24 @@ export class CdgPlayer extends EventTarget {
   private handleTimeUpdate = (): void => {
     const timeMs = asMilliseconds({ seconds: this.audio.currentTime });
     const durationMs = asMilliseconds({ seconds: this.audio.duration });
-    this.cdgPlayer.sync({ ms: timeMs });
+    // Audio timeline is always tracked; CDG sync is only needed when graphics exist.
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.sync({ ms: timeMs });
+    }
     this.applyState({ currentTimeMs: timeMs, durationMs });
   };
 
   private handlePlay = (): void => {
-    this.cdgPlayer.play();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.play();
+    }
     this.applyState({ status: 'playing' });
   };
 
   private handlePause = (): void => {
-    this.cdgPlayer.stop();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.stop();
+    }
 
     if (this.state.status !== 'error' && this.state.status !== 'idle') {
       this.applyState({ status: 'paused' });
@@ -486,7 +515,9 @@ export class CdgPlayer extends EventTarget {
   };
 
   private handleEnded = (): void => {
-    this.cdgPlayer.stop();
+    if (this.hasGraphicsTrack) {
+      this.cdgPlayer.stop();
+    }
     this.applyState({ status: 'ready', currentTimeMs: 0 });
   };
 }

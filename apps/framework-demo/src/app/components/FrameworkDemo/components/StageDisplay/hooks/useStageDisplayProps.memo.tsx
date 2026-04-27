@@ -14,6 +14,7 @@ export type StageDisplayResolvedProps = {
   isStatusVisible: boolean;
   viewState: ReturnType<typeof useFrameworkDemoContext>['viewState'];
   titleMetadata: ReturnType<typeof useFrameworkDemoContext>['titleMetadata'];
+  hasGraphicsTrack: boolean;
   perfSummary: ReturnType<typeof useFrameworkDemoContext>['perfSummary'];
   hasTrack: boolean;
   showTitle: boolean;
@@ -34,6 +35,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     controlsModel,
     viewState,
     titleMetadata,
+    hasGraphicsTrack,
     perfSummary,
     hasTrack,
     showTitle,
@@ -57,6 +59,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     isStatusVisible,
     viewState,
     titleMetadata,
+    hasGraphicsTrack,
     perfSummary,
     hasTrack,
     showTitle,

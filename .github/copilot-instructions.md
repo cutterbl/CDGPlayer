@@ -53,3 +53,4 @@
 - Run the smallest relevant validation for the change when possible.
 - For documentation changes, prefer `pnpm run ci:docs` and the relevant Storybook build.
 - For broader changes, use the repo validation commands already documented in Storybook contribution guidance.
+- Keep coverage thresholds unchanged, but aim to stay at least 5 percentage points above the enforced minima when practical (currently branch >= 85% and functions >= 95%).

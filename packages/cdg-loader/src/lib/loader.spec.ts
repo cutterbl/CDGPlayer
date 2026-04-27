@@ -26,6 +26,8 @@ describe('createLoader', () => {
       trackId: 'fallback',
       sourceSummary: 'sample.zip',
       audioBuffer: new ArrayBuffer(8),
+      audioMimeType: 'audio/mpeg',
+      hasGraphics: true,
       cdgBytes: new Uint8Array(24),
       metadata: {
         title: 'Title',
@@ -37,6 +39,7 @@ describe('createLoader', () => {
 
     const probe = vi.fn(async () => ({
       karaokeLikely: true,
+      audioLikely: true,
       discoveredEntries: ['song.mp3', 'song.cdg'],
       hasExtraEntries: false,
       extensionCaseIssues: false,
@@ -142,6 +145,8 @@ describe('createLoader', () => {
             trackId: 'worker-track',
             sourceSummary: 'worker.zip',
             audioBuffer: new ArrayBuffer(4),
+            audioMimeType: 'audio/mpeg',
+            hasGraphics: true,
             cdgBytes: new Uint8Array(6),
             metadata: {
               title: 'Title',
@@ -161,6 +166,7 @@ describe('createLoader', () => {
           ok: true,
           result: {
             karaokeLikely: true,
+            audioLikely: true,
             discoveredEntries: ['song.mp3', 'song.cdg'],
             hasExtraEntries: false,
             extensionCaseIssues: false,
@@ -274,6 +280,8 @@ describe('createLoader', () => {
                   trackId: 'ignored',
                   sourceSummary: 'ignored.zip',
                   audioBuffer: new ArrayBuffer(1),
+                  audioMimeType: 'audio/mpeg',
+                  hasGraphics: true,
                   cdgBytes: new Uint8Array([1]),
                   metadata: {
                     title: 'Ignored',
@@ -313,5 +321,172 @@ describe('createLoader', () => {
     controller.abort();
 
     await expect(loadPromise).rejects.toMatchObject({ code: 'ABORTED' });
+  });
+
+  it('serializes worker-safe options and ignores unrelated worker messages', async () => {
+    type MessageListener = (event: MessageEvent<unknown>) => void;
+
+    class MockWorker {
+      static instances: MockWorker[] = [];
+
+      private listeners: Record<string, MessageListener[]> = {
+        message: [],
+        error: [],
+      };
+
+      constructor() {
+        MockWorker.instances.push(this);
+      }
+
+      postMessage = vi.fn((message: { type: string; requestId: string }) => {
+        if (message.type === 'load') {
+          this.emitMessage({
+            type: 'probe-result',
+            requestId: message.requestId,
+            ok: true,
+            result: {
+              karaokeLikely: true,
+              audioLikely: true,
+              discoveredEntries: ['ignored'],
+              hasExtraEntries: false,
+              extensionCaseIssues: false,
+            },
+          });
+          this.emitMessage({
+            type: 'load-result',
+            requestId: 'different-request',
+            ok: true,
+            result: {
+              trackId: 'ignored',
+              sourceSummary: 'ignored.zip',
+              audioBuffer: new ArrayBuffer(1),
+              audioMimeType: 'audio/mpeg',
+              hasGraphics: false,
+              cdgBytes: null,
+              metadata: {
+                title: 'Ignored',
+                artist: 'Ignored',
+                album: 'Ignored',
+              },
+              warnings: [],
+            },
+          });
+          this.emitMessage({
+            type: 'load-result',
+            requestId: message.requestId,
+            ok: true,
+            result: {
+              trackId: 'worker-track',
+              sourceSummary: 'worker.zip',
+              audioBuffer: new ArrayBuffer(4),
+              audioMimeType: 'audio/mpeg',
+              hasGraphics: false,
+              cdgBytes: null,
+              metadata: {
+                title: 'Title',
+                artist: 'Artist',
+                album: 'Album',
+              },
+              warnings: [],
+            },
+          });
+        }
+      });
+
+      addEventListener(type: string, listener: EventListener): void {
+        this.listeners[type] ??= [];
+        this.listeners[type]?.push(listener as MessageListener);
+      }
+
+      removeEventListener(type: string, listener: EventListener): void {
+        this.listeners[type] = (this.listeners[type] ?? []).filter(
+          (item) => item !== (listener as MessageListener),
+        );
+      }
+
+      terminate = vi.fn();
+
+      private emitMessage(data: unknown): void {
+        for (const listener of this.listeners['message'] ?? []) {
+          listener({ data } as MessageEvent<unknown>);
+        }
+      }
+    }
+
+    vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+
+    const loaded = await loadInWorker({
+      input: { kind: 'arrayBuffer', arrayBuffer: new ArrayBuffer(8) },
+      options: {
+        requestId: 'serialized-options',
+        strictValidation: true,
+        debug: true,
+      },
+    });
+
+    expect(loaded.trackId).toBe('worker-track');
+    expect(MockWorker.instances[0]?.postMessage).toHaveBeenCalledWith({
+      type: 'load',
+      requestId: 'serialized-options',
+      input: { kind: 'arrayBuffer', arrayBuffer: expect.any(ArrayBuffer) },
+      options: {
+        requestId: 'serialized-options',
+        strictValidation: true,
+        debug: true,
+      },
+    });
+  });
+
+  it('surfaces worker error-result messages for probe requests', async () => {
+    type MessageListener = (event: MessageEvent<unknown>) => void;
+
+    class MockWorker {
+      private listeners: Record<string, MessageListener[]> = {
+        message: [],
+        error: [],
+      };
+
+      postMessage = vi.fn((message: { requestId: string; type: string }) => {
+        if (message.type === 'probe') {
+          for (const listener of this.listeners['message'] ?? []) {
+            listener({
+              data: {
+                type: 'probe-result',
+                requestId: message.requestId,
+                ok: false,
+                error: {
+                  code: 'INTERNAL',
+                  message: 'probe worker failed',
+                  retriable: true,
+                  context: { source: 'worker' },
+                },
+              },
+            } as MessageEvent<unknown>);
+          }
+        }
+      });
+
+      addEventListener(type: string, listener: EventListener): void {
+        this.listeners[type] ??= [];
+        this.listeners[type]?.push(listener as MessageListener);
+      }
+
+      removeEventListener(type: string, listener: EventListener): void {
+        this.listeners[type] = (this.listeners[type] ?? []).filter(
+          (item) => item !== (listener as MessageListener),
+        );
+      }
+
+      terminate = vi.fn();
+    }
+
+    vi.stubGlobal('Worker', MockWorker as unknown as typeof Worker);
+
+    await expect(
+      probeInWorker({
+        input: { kind: 'arrayBuffer', arrayBuffer: new ArrayBuffer(2) },
+        options: { debug: true },
+      }),
+    ).rejects.toBeInstanceOf(LoaderError);
   });
 });

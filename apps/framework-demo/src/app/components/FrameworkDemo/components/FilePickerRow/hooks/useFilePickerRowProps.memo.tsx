@@ -19,6 +19,7 @@ function useFilePickerRowProps(): FilePickerRowResolvedProps {
   const {
     player,
     setTitleMetadata,
+    setHasGraphicsTrack,
     showPerfDiagnostics,
     perfSummary,
     showStatusMessage,
@@ -37,6 +38,7 @@ function useFilePickerRowProps(): FilePickerRowResolvedProps {
       player.stop();
       resetPlaybackStarted();
       setTitleMetadata(null);
+      setHasGraphicsTrack(true);
       showStatusMessage('Loading track...');
 
       try {
@@ -57,6 +59,8 @@ function useFilePickerRowProps(): FilePickerRowResolvedProps {
           });
         }
 
+        setHasGraphicsTrack(loadedTrack?.hasGraphics ?? false);
+
         showStatusMessage('Track loaded.');
       } catch (errorValue: unknown) {
         // Keep status user-friendly while preserving details through Error.message.
@@ -67,7 +71,13 @@ function useFilePickerRowProps(): FilePickerRowResolvedProps {
         showStatusMessage(`Load failed: ${message}`);
       }
     },
-    [player, resetPlaybackStarted, setTitleMetadata, showStatusMessage],
+    [
+      player,
+      resetPlaybackStarted,
+      setTitleMetadata,
+      setHasGraphicsTrack,
+      showStatusMessage,
+    ],
   );
 
   const handleTrackSelect = useCallback(

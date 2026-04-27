@@ -141,6 +141,8 @@ describe('player', () => {
         trackId: 'track-id',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -189,6 +191,8 @@ describe('player', () => {
         trackId: 'track-id',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -385,6 +389,8 @@ describe('player', () => {
         trackId: 'track-id',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -451,6 +457,8 @@ describe('player', () => {
         trackId: 'main-thread-track',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -548,6 +556,8 @@ describe('player', () => {
         trackId: 'fallback-track',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -601,6 +611,8 @@ describe('player', () => {
         trackId: 'track-id',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -713,6 +725,8 @@ describe('player', () => {
         trackId: 'sync-track',
         sourceSummary: 'sample.zip',
         audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/mpeg',
+        hasGraphics: true,
         cdgBytes: new Uint8Array(24),
         metadata: {
           title: 'Title',
@@ -761,6 +775,64 @@ describe('player', () => {
     });
 
     expect(loadSpy).toHaveBeenCalledOnce();
+
+    player.dispose();
+  });
+
+  it('loads and plays audio-only tracks without graphics bytes', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-audio');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'audio-only-track',
+        sourceSummary: 'song.ogg',
+        audioBuffer: new ArrayBuffer(8),
+        audioMimeType: 'audio/ogg',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Song',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    vi.spyOn(audio, 'load').mockImplementation(() => {
+      return;
+    });
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        loader: mockLoader,
+      },
+    });
+
+    await player.load({
+      input: {
+        kind: 'arrayBuffer',
+        arrayBuffer: new ArrayBuffer(16),
+      },
+    });
+
+    expect(player.getState().status).toBe('ready');
+
+    await player.play();
+    expect(player.getState().status).toBe('playing');
+
+    player.pause();
+    expect(player.getState().status).toBe('paused');
 
     player.dispose();
   });

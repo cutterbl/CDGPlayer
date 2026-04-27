@@ -62,6 +62,7 @@ type ProbeResultMessage =
       ok: true;
       result: {
         karaokeLikely: boolean;
+        audioLikely: boolean;
         discoveredEntries: readonly string[];
         hasExtraEntries: boolean;
         extensionCaseIssues: boolean;
@@ -308,6 +309,7 @@ export const probeInWorker = async ({
   options?: LoaderOptions;
 }): Promise<{
   karaokeLikely: boolean;
+  audioLikely: boolean;
   discoveredEntries: readonly string[];
   hasExtraEntries: boolean;
   extensionCaseIssues: boolean;
@@ -346,6 +348,7 @@ export const probeInWorker = async ({
 
   return runWorkerRequest<{
     karaokeLikely: boolean;
+    audioLikely: boolean;
     discoveredEntries: readonly string[];
     hasExtraEntries: boolean;
     extensionCaseIssues: boolean;

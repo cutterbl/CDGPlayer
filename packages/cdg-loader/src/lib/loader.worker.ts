@@ -98,7 +98,7 @@ const createTransferables = ({
   result: LoadedTrack;
 }): Transferable[] => {
   const transfers: Transferable[] = [result.audioBuffer];
-  if (result.cdgBytes.buffer instanceof ArrayBuffer) {
+  if (result.cdgBytes && result.cdgBytes.buffer instanceof ArrayBuffer) {
     transfers.push(result.cdgBytes.buffer);
   }
   return transfers;
@@ -228,6 +228,7 @@ workerScope.addEventListener(
           message: 'probe:success',
           requestId: message.requestId,
           karaokeLikely: result.karaokeLikely,
+          audioLikely: result.audioLikely,
         });
       } catch (errorValue: unknown) {
         postError({

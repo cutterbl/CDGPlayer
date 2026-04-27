@@ -22,6 +22,7 @@ function StageDisplay({ children }: StageDisplayProps) {
     isStatusVisible,
     viewState,
     titleMetadata,
+    hasGraphicsTrack,
     perfSummary,
     hasTrack,
     showTitle,
@@ -53,7 +54,12 @@ function StageDisplay({ children }: StageDisplayProps) {
             ) : null}
           </div>
         ) : null}
-        <canvas ref={canvasRef} width={300} height={216} />
+        <canvas
+          ref={canvasRef}
+          width={300}
+          height={216}
+          className={hasGraphicsTrack ? undefined : styles.canvasHidden}
+        />
         <div
           className={`${styles.status}${isStatusVisible || compatibilityWarning ? ` ${styles.isVisible}` : ''}`}
         >

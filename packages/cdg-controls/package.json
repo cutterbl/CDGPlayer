@@ -42,6 +42,6 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "lucide": "^1.8.0"
+    "lucide": "^1.11.0"
   }
 }

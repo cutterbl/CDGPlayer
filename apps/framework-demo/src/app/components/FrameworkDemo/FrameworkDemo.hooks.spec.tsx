@@ -17,6 +17,7 @@ const createContextValue = (overrides: Record<string, unknown> = {}) => ({
   player: null,
   controlsModel: null,
   setTitleMetadata: vi.fn(),
+  setHasGraphicsTrack: vi.fn(),
   showPerfDiagnostics: false,
   perfSummary: null,
   showStatusMessage: vi.fn(),
@@ -84,6 +85,40 @@ describe('Framework demo hook edge cases', () => {
     expect(controlsModel.setPitchSemitones).not.toHaveBeenCalled();
   });
 
+  it('parses valid settings values even when no controls model is available', () => {
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        controlsModel: null,
+        viewState: {
+          status: 'ready',
+          trackId: 'track',
+          currentTimeMs: 0,
+          durationMs: 120_000,
+          volume: 0.5,
+          playbackRate: 1,
+          pitchSemitones: 0,
+          isPlayable: true,
+          isPlaying: false,
+          progressPercent: 0,
+        },
+      }),
+    );
+
+    const { result } = renderHook(() => useSettingsPanelProps());
+
+    expect(() => {
+      result.current.handleSetVolume({
+        target: { value: '0.75' },
+      } as never);
+      result.current.handleSetTempo({
+        target: { value: '1.25' },
+      } as never);
+      result.current.handleSetPitchSemitones({
+        target: { value: '-4' },
+      } as never);
+    }).not.toThrow();
+  });
+
   it('ignores transport actions when the model is missing or seek input is invalid', () => {
     mockUseFrameworkDemoContext.mockReturnValue(
       createContextValue({
@@ -135,6 +170,34 @@ describe('Framework demo hook edge cases', () => {
 
     expect(controlsModel.togglePlayPause).not.toHaveBeenCalled();
     expect(controlsModel.seekPercent).not.toHaveBeenCalled();
+  });
+
+  it('parses valid seek input even when the controls model is missing', () => {
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        controlsModel: null,
+        viewState: {
+          status: 'ready',
+          trackId: 'track',
+          currentTimeMs: 15_000,
+          durationMs: 60_000,
+          volume: 1,
+          playbackRate: 1,
+          pitchSemitones: 0,
+          isPlayable: true,
+          isPlaying: false,
+          progressPercent: 25,
+        },
+      }),
+    );
+
+    const { result } = renderHook(() => useTransportBarProps());
+
+    expect(() => {
+      result.current.handleSeekPercent({
+        target: { value: '42.5' },
+      } as never);
+    }).not.toThrow();
   });
 
   it('handles absent players and non-Error load failures in the file picker hook', async () => {

@@ -10,6 +10,87 @@ import type {
   LoaderProbeResult,
 } from './types.js';
 
+const SUPPORTED_AUDIO_EXTENSIONS = new Set([
+  'mp3',
+  'aac',
+  'm4a',
+  'mp4',
+  'ogg',
+  'opus',
+  'wav',
+  'webm',
+  'flac',
+]);
+
+const extensionFromName = ({ name }: { name: string }): string | null => {
+  const dotIndex = name.lastIndexOf('.');
+  if (dotIndex < 0 || dotIndex === name.length - 1) {
+    return null;
+  }
+
+  return name.slice(dotIndex + 1).toLowerCase();
+};
+
+const baseNameFromPath = ({ name }: { name: string }): string => {
+  const slashIndex = Math.max(name.lastIndexOf('/'), name.lastIndexOf('\\'));
+  return slashIndex >= 0 ? name.slice(slashIndex + 1) : name;
+};
+
+const stemFromName = ({ name }: { name: string }): string => {
+  const baseName = baseNameFromPath({ name });
+  const dotIndex = baseName.lastIndexOf('.');
+  return dotIndex > 0 ? baseName.slice(0, dotIndex) : baseName;
+};
+
+const inferMimeTypeFromExtension = ({
+  extension,
+}: {
+  extension: string | null;
+}): string => {
+  switch (extension) {
+    case 'mp3':
+      return 'audio/mpeg';
+    case 'aac':
+      return 'audio/aac';
+    case 'm4a':
+      return 'audio/mp4';
+    case 'mp4':
+      return 'audio/mp4';
+    case 'ogg':
+      return 'audio/ogg';
+    case 'opus':
+      return 'audio/ogg';
+    case 'wav':
+      return 'audio/wav';
+    case 'webm':
+      return 'audio/webm';
+    case 'flac':
+      return 'audio/flac';
+    default:
+      return 'audio/mpeg';
+  }
+};
+
+const isLikelySupportedAudio = ({
+  name,
+  mimeType,
+}: {
+  name: string;
+  mimeType?: string;
+}): boolean => {
+  const normalizedMime = (mimeType ?? '').trim().toLowerCase();
+  if (normalizedMime.startsWith('audio/')) {
+    return true;
+  }
+
+  const extension = extensionFromName({ name });
+  if (!extension) {
+    return false;
+  }
+
+  return SUPPORTED_AUDIO_EXTENSIONS.has(extension);
+};
+
 const fileNameFromInput = ({ input }: { input: LoaderInput }): string => {
   switch (input.kind) {
     case 'url': {
@@ -19,16 +100,18 @@ const fileNameFromInput = ({ input }: { input: LoaderInput }): string => {
     case 'file':
       return input.file.name;
     case 'blob':
-      return 'track.zip';
+      return input.blob.type.startsWith('audio/')
+        ? 'track-audio'
+        : 'track-input';
     case 'arrayBuffer':
-      return 'track.zip';
+      return 'track-input';
     default:
       return 'track.zip';
   }
 };
 
 const metadataFromName = ({ name }: { name: string }): LoaderMetadata => {
-  const baseName = name.replace(/\.[^.]+$/u, '');
+  const baseName = stemFromName({ name });
   const parts = baseName
     .split(' - ')
     .map((part) => part.trim())
@@ -51,11 +134,13 @@ const asTagValue = ({ value }: { value: unknown }): string | null => {
 
 const readMetadataFromAudio = async ({
   audioBuffer,
+  audioMimeType,
 }: {
   audioBuffer: ArrayBuffer;
+  audioMimeType: string;
 }): Promise<Partial<LoaderMetadata>> => {
   return new Promise((resolve) => {
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/mpeg' });
+    const audioBlob = new Blob([audioBuffer], { type: audioMimeType });
 
     readMediaTags(audioBlob, {
       onSuccess: (tagResult) => {
@@ -144,7 +229,7 @@ const asArrayBuffer = async ({
   }
 };
 
-const getKaraokeEntries = ({
+const getTrackEntries = ({
   zip,
   strictValidation,
 }: {
@@ -152,22 +237,23 @@ const getKaraokeEntries = ({
   strictValidation: boolean;
 }): {
   audio: JSZip.JSZipObject;
-  graphics: JSZip.JSZipObject;
+  audioMimeType: string;
+  graphics?: JSZip.JSZipObject;
   warnings: string[];
 } => {
   const allEntries = Object.values(zip.files).filter((entry) => !entry.dir);
   const audioEntries = allEntries.filter((entry) =>
-    /\.mp3$/iu.test(entry.name),
+    isLikelySupportedAudio({ name: entry.name }),
   );
   const graphicsEntries = allEntries.filter((entry) =>
     /\.cdg$/iu.test(entry.name),
   );
   const warnings: string[] = [];
 
-  if (!audioEntries.length || !graphicsEntries.length) {
+  if (!audioEntries.length) {
     throw new LoaderError({
       code: 'KARAOKE_FILES_MISSING',
-      message: 'Expected both mp3 and cdg files in archive.',
+      message: 'Expected at least one supported audio file in archive.',
       retriable: false,
     });
   }
@@ -176,11 +262,12 @@ const getKaraokeEntries = ({
     if (strictValidation) {
       throw new LoaderError({
         code: 'MULTIPLE_AUDIO_TRACKS',
-        message: 'Multiple mp3 files found and strict validation is enabled.',
+        message:
+          'Multiple supported audio files found and strict validation is enabled.',
         retriable: false,
       });
     }
-    warnings.push('Multiple mp3 files found; selected first match.');
+    warnings.push('Multiple supported audio files found; selected best match.');
   }
 
   if (graphicsEntries.length > 1) {
@@ -194,20 +281,38 @@ const getKaraokeEntries = ({
     warnings.push('Multiple cdg files found; selected first match.');
   }
 
-  const audio = audioEntries.at(0);
+  const sortedAudioEntries = [...audioEntries].sort((left, right) =>
+    left.name.localeCompare(right.name),
+  );
+
+  let audio = sortedAudioEntries.at(0);
   const graphics = graphicsEntries.at(0);
 
-  if (!audio || !graphics) {
+  if (graphics) {
+    const graphicsStem = stemFromName({ name: graphics.name });
+    const matchingAudio = sortedAudioEntries.find(
+      (entry) => stemFromName({ name: entry.name }) === graphicsStem,
+    );
+    if (matchingAudio) {
+      audio = matchingAudio;
+    }
+  }
+
+  if (!audio) {
     throw new LoaderError({
-      code: 'KARAOKE_FILES_MISSING',
-      message: 'Expected both mp3 and cdg files in archive.',
+      code: 'AUDIO_UNREADABLE',
+      message: 'Unable to select supported audio payload from archive.',
       retriable: false,
     });
   }
 
+  const extension = extensionFromName({ name: audio.name });
+  const audioMimeType = inferMimeTypeFromExtension({ extension });
+
   return {
     audio,
-    graphics,
+    audioMimeType,
+    ...(graphics ? { graphics } : {}),
     warnings,
   };
 };
@@ -261,58 +366,113 @@ export class CdgLoader {
     }
 
     try {
-      const archiveBuffer = await asArrayBuffer({
+      const sourceSummary = fileNameFromInput({ input });
+      const sourceMimeType =
+        input.kind === 'file'
+          ? input.file.type
+          : input.kind === 'blob'
+            ? input.blob.type
+            : undefined;
+
+      const payloadBuffer = await asArrayBuffer({
         input,
         signal: controller.signal,
       });
       logger.debug({
-        message: 'load:archive-read',
-        bytes: archiveBuffer.byteLength,
+        message: 'load:payload-read',
+        bytes: payloadBuffer.byteLength,
       });
-      const zip = await JSZip.loadAsync(archiveBuffer).catch(
-        (causeValue: unknown) => {
-          throw new LoaderError({
-            code: 'ARCHIVE_INVALID',
-            message: 'Unable to parse archive as zip data.',
-            retriable: false,
-            causeValue,
-          });
-        },
-      );
 
-      const selection = getKaraokeEntries({
+      const zip = await JSZip.loadAsync(payloadBuffer).catch(() => null);
+
+      if (!zip) {
+        if (
+          !isLikelySupportedAudio({
+            name: sourceSummary,
+            ...(sourceMimeType ? { mimeType: sourceMimeType } : {}),
+          })
+        ) {
+          throw new LoaderError({
+            code: 'AUDIO_FORMAT_UNSUPPORTED',
+            message:
+              'Input is neither a valid zip archive nor a supported audio file.',
+            retriable: false,
+            context: {
+              source: sourceSummary,
+              details: sourceMimeType ?? 'unknown-mime',
+            },
+          });
+        }
+
+        const audioMimeType = sourceMimeType?.startsWith('audio/')
+          ? sourceMimeType
+          : inferMimeTypeFromExtension({
+              extension: extensionFromName({ name: sourceSummary }),
+            });
+
+        const fallbackMetadata = metadataFromName({ name: sourceSummary });
+        const embeddedMetadata = await readMetadataFromAudio({
+          audioBuffer: payloadBuffer,
+          audioMimeType,
+        });
+
+        const metadata = mergeMetadata({
+          preferred: embeddedMetadata,
+          fallback: fallbackMetadata,
+        });
+
+        return {
+          trackId: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+          sourceSummary,
+          audioBuffer: payloadBuffer,
+          audioMimeType,
+          hasGraphics: false,
+          cdgBytes: null,
+          metadata,
+          warnings: [],
+        };
+      }
+
+      const selection = getTrackEntries({
         zip,
         strictValidation: options.strictValidation ?? false,
       });
       logger.debug({
         message: 'load:entries-selected',
         audio: selection.audio.name,
-        graphics: selection.graphics.name,
+        graphics: selection.graphics?.name ?? null,
         warnings: selection.warnings,
       });
 
-      const [audioBuffer, cdgBytes] = await Promise.all([
-        selection.audio.async('arraybuffer').catch((causeValue: unknown) => {
+      const audioBuffer = await selection.audio
+        .async('arraybuffer')
+        .catch((causeValue: unknown) => {
           throw new LoaderError({
             code: 'AUDIO_UNREADABLE',
-            message: 'Unable to read mp3 payload from archive.',
+            message: 'Unable to read audio payload from archive.',
             retriable: false,
             causeValue,
           });
-        }),
-        selection.graphics.async('uint8array').catch((causeValue: unknown) => {
-          throw new LoaderError({
-            code: 'GRAPHICS_UNREADABLE',
-            message: 'Unable to read cdg payload from archive.',
-            retriable: false,
-            causeValue,
-          });
-        }),
-      ]);
+        });
 
-      const sourceSummary = fileNameFromInput({ input });
+      const cdgBytes = selection.graphics
+        ? await selection.graphics
+            .async('uint8array')
+            .catch((causeValue: unknown) => {
+              throw new LoaderError({
+                code: 'GRAPHICS_UNREADABLE',
+                message: 'Unable to read cdg payload from archive.',
+                retriable: false,
+                causeValue,
+              });
+            })
+        : null;
+
       const fallbackMetadata = metadataFromName({ name: selection.audio.name });
-      const embeddedMetadata = await readMetadataFromAudio({ audioBuffer });
+      const embeddedMetadata = await readMetadataFromAudio({
+        audioBuffer,
+        audioMimeType: selection.audioMimeType,
+      });
       if (!hasAnyEmbeddedMetadata({ metadata: embeddedMetadata })) {
         logger.info({
           message: 'metadata:fallback-filename',
@@ -329,13 +489,15 @@ export class CdgLoader {
         message: 'load:success',
         sourceSummary,
         audioBytes: audioBuffer.byteLength,
-        cdgBytes: cdgBytes.byteLength,
+        cdgBytes: cdgBytes?.byteLength ?? 0,
         metadata,
       });
       return {
         trackId: `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
         sourceSummary,
         audioBuffer,
+        audioMimeType: selection.audioMimeType,
+        hasGraphics: cdgBytes !== null,
         cdgBytes,
         metadata,
         warnings: selection.warnings,
@@ -417,8 +579,20 @@ export class CdgLoader {
     const zip = await JSZip.loadAsync(archiveBuffer).catch(() => null);
 
     if (!zip) {
+      const inputName = fileNameFromInput({ input });
+      const inputMimeType =
+        input.kind === 'file'
+          ? input.file.type
+          : input.kind === 'blob'
+            ? input.blob.type
+            : undefined;
+
       return {
         karaokeLikely: false,
+        audioLikely: isLikelySupportedAudio({
+          name: inputName,
+          ...(inputMimeType ? { mimeType: inputMimeType } : {}),
+        }),
         discoveredEntries: [],
         hasExtraEntries: false,
         extensionCaseIssues: false,
@@ -429,9 +603,14 @@ export class CdgLoader {
       .filter((entry) => !entry.dir)
       .map((entry) => entry.name);
 
-    const karaokeEntries = names.filter((name) => /\.(mp3|cdg)$/iu.test(name));
-    const lowerCasedMismatches = names.some(
-      (name) => /\.(MP3|CDG)$/u.test(name) && !/\.(mp3|cdg)$/u.test(name),
+    const audioEntries = names.filter((name) =>
+      isLikelySupportedAudio({ name }),
+    );
+    const karaokeEntries = names.filter(
+      (name) => isLikelySupportedAudio({ name }) || /\.cdg$/iu.test(name),
+    );
+    const lowerCasedMismatches = names.some((name) =>
+      /\.(MP3|AAC|M4A|MP4|OGG|OPUS|WAV|WEBM|FLAC|CDG)$/u.test(name),
     );
 
     logger.debug({
@@ -443,6 +622,7 @@ export class CdgLoader {
 
     return {
       karaokeLikely: karaokeEntries.length >= 2,
+      audioLikely: audioEntries.length > 0,
       discoveredEntries: names,
       hasExtraEntries: names.length > karaokeEntries.length,
       extensionCaseIssues: lowerCasedMismatches,

@@ -58,7 +58,7 @@ describe('CdgLoader core behavior', () => {
       options: { requestId: 'req-1' },
     });
 
-    expect(loaded.sourceSummary).toBe('track.zip');
+    expect(loaded.sourceSummary).toBe('track-input');
     expect(loaded.metadata).toEqual({
       album: 'Album',
       artist: 'Artist',
@@ -66,7 +66,9 @@ describe('CdgLoader core behavior', () => {
     });
     expect(loaded.warnings).toEqual([]);
     expect(loaded.audioBuffer.byteLength).toBeGreaterThan(0);
-    expect(loaded.cdgBytes.byteLength).toBeGreaterThan(0);
+    expect(loaded.hasGraphics).toBe(true);
+    expect(loaded.cdgBytes).not.toBeNull();
+    expect(loaded.cdgBytes?.byteLength ?? 0).toBeGreaterThan(0);
   });
 
   it('prefers embedded metadata when tag parser succeeds', async () => {
@@ -177,6 +179,7 @@ describe('CdgLoader core behavior', () => {
     });
 
     expect(result.karaokeLikely).toBe(true);
+    expect(result.audioLikely).toBe(true);
     expect(result.hasExtraEntries).toBe(true);
     expect(result.extensionCaseIssues).toBe(true);
     expect(result.discoveredEntries).toEqual(
@@ -304,9 +307,9 @@ describe('CdgLoader core behavior', () => {
       },
     });
 
-    expect(loaded.sourceSummary).toBe('track.zip');
+    expect(loaded.sourceSummary).toBe('track-input');
     expect(loaded.warnings).toEqual([
-      'Multiple mp3 files found; selected first match.',
+      'Multiple supported audio files found; selected best match.',
     ]);
   });
 
@@ -353,6 +356,178 @@ describe('CdgLoader core behavior', () => {
         input: { kind: 'arrayBuffer', arrayBuffer: archiveBuffer },
       }),
     ).rejects.toMatchObject({ code: 'KARAOKE_FILES_MISSING' });
+  });
+
+  it('loads an audio-only zip without graphics payload', async () => {
+    readMediaTagsMock.mockImplementation(
+      (
+        _blob: unknown,
+        callbacks: {
+          onSuccess?: (value: unknown) => void;
+          onError?: (value: unknown) => void;
+        },
+      ) => {
+        callbacks.onError?.(new Error('no tags'));
+      },
+    );
+
+    const archiveBuffer = await createZipArrayBuffer({
+      entries: [
+        {
+          name: 'Artist - Song.mp3',
+          content: new Uint8Array([1, 2, 3]),
+        },
+      ],
+    });
+
+    const loader = new CdgLoader();
+    const loaded = await loader.load({
+      input: { kind: 'arrayBuffer', arrayBuffer: archiveBuffer },
+    });
+
+    expect(loaded.hasGraphics).toBe(false);
+    expect(loaded.cdgBytes).toBeNull();
+    expect(loaded.audioMimeType).toBe('audio/mpeg');
+    expect(loaded.metadata.title).toBe('Song');
+  });
+
+  it('selects the audio entry whose stem matches the discovered graphics track', async () => {
+    readMediaTagsMock.mockImplementation(
+      (
+        _blob: unknown,
+        callbacks: {
+          onSuccess?: (value: unknown) => void;
+          onError?: (value: unknown) => void;
+        },
+      ) => {
+        callbacks.onError?.(new Error('no tags'));
+      },
+    );
+
+    const archiveBuffer = await createZipArrayBuffer({
+      entries: [
+        { name: 'aaa-intro.mp3', content: new Uint8Array([1]) },
+        { name: 'bbb-main.mp3', content: new Uint8Array([2]) },
+        { name: 'bbb-main.cdg', content: new Uint8Array([3]) },
+      ],
+    });
+
+    const loader = new CdgLoader();
+    const loaded = await loader.load({
+      input: { kind: 'arrayBuffer', arrayBuffer: archiveBuffer },
+    });
+
+    expect(loaded.metadata.title).toBe('bbb-main');
+    expect(loaded.hasGraphics).toBe(true);
+  });
+
+  it('keeps loading when multiple graphics tracks exist in non-strict mode', async () => {
+    readMediaTagsMock.mockImplementation(
+      (
+        _blob: unknown,
+        callbacks: {
+          onSuccess?: (value: unknown) => void;
+          onError?: (value: unknown) => void;
+        },
+      ) => {
+        callbacks.onError?.(new Error('no tags'));
+      },
+    );
+
+    const archiveBuffer = await createZipArrayBuffer({
+      entries: [
+        { name: 'song.mp3', content: new Uint8Array([1]) },
+        { name: 'song-a.cdg', content: new Uint8Array([2]) },
+        { name: 'song-b.cdg', content: new Uint8Array([3]) },
+      ],
+    });
+
+    const loader = new CdgLoader();
+    const loaded = await loader.load({
+      input: { kind: 'arrayBuffer', arrayBuffer: archiveBuffer },
+    });
+
+    expect(loaded.warnings).toEqual([
+      'Multiple cdg files found; selected first match.',
+    ]);
+    expect(loaded.hasGraphics).toBe(true);
+  });
+
+  it('loads raw audio file input when zip parsing fails', async () => {
+    readMediaTagsMock.mockImplementation(
+      (
+        _blob: unknown,
+        callbacks: {
+          onSuccess?: (value: unknown) => void;
+          onError?: (value: unknown) => void;
+        },
+      ) => {
+        callbacks.onError?.(new Error('no tags'));
+      },
+    );
+
+    const file = new File(
+      [new Uint8Array([8, 7, 6])],
+      'Demo - Artist - Song.mp3',
+      {
+        type: 'audio/mpeg',
+      },
+    );
+
+    const loader = new CdgLoader();
+    const loaded = await loader.load({
+      input: { kind: 'file', file },
+    });
+
+    expect(loaded.hasGraphics).toBe(false);
+    expect(loaded.cdgBytes).toBeNull();
+    expect(loaded.audioMimeType).toBe('audio/mpeg');
+    expect(loaded.sourceSummary).toBe('Demo - Artist - Song.mp3');
+  });
+
+  it('loads raw audio when support is inferred from file extension alone', async () => {
+    readMediaTagsMock.mockImplementation(
+      (
+        _blob: unknown,
+        callbacks: {
+          onSuccess?: (value: unknown) => void;
+          onError?: (value: unknown) => void;
+        },
+      ) => {
+        callbacks.onError?.(new Error('no tags'));
+      },
+    );
+
+    const file = new File([new Uint8Array([8, 7, 6])], 'Demo Track.wav', {
+      type: '',
+    });
+
+    const loader = new CdgLoader();
+    const loaded = await loader.load({
+      input: { kind: 'file', file },
+    });
+
+    expect(loaded.audioMimeType).toBe('audio/wav');
+    expect(loaded.hasGraphics).toBe(false);
+  });
+
+  it('probes raw audio blob inputs by mime type when zip parsing fails', async () => {
+    const loader = new CdgLoader();
+
+    await expect(
+      loader.probe({
+        input: {
+          kind: 'blob',
+          blob: new Blob([new Uint8Array([1, 2, 3])], { type: 'audio/ogg' }),
+        },
+      }),
+    ).resolves.toEqual({
+      karaokeLikely: false,
+      audioLikely: true,
+      discoveredEntries: [],
+      hasExtraEntries: false,
+      extensionCaseIssues: false,
+    });
   });
 
   it('throws FETCH_FAILED when url input returns non-ok response', async () => {
@@ -417,14 +592,14 @@ describe('CdgLoader core behavior', () => {
     expect(loaded.sourceSummary).toBe('song-bundle.zip');
   });
 
-  it('maps invalid zip payloads to ARCHIVE_INVALID and probe fallback shape', async () => {
+  it('maps invalid raw payloads to AUDIO_FORMAT_UNSUPPORTED and probe fallback shape', async () => {
     const loader = new CdgLoader();
 
     await expect(
       loader.load({
         input: { kind: 'arrayBuffer', arrayBuffer: new Uint8Array([1]).buffer },
       }),
-    ).rejects.toMatchObject({ code: 'ARCHIVE_INVALID' });
+    ).rejects.toMatchObject({ code: 'AUDIO_FORMAT_UNSUPPORTED' });
 
     await expect(
       loader.probe({
@@ -432,6 +607,7 @@ describe('CdgLoader core behavior', () => {
       }),
     ).resolves.toEqual({
       karaokeLikely: false,
+      audioLikely: false,
       discoveredEntries: [],
       hasExtraEntries: false,
       extensionCaseIssues: false,

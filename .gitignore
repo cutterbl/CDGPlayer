@@ -15,3 +15,5 @@ vitest.config.*.timestamp*
 /coverage
 /artifacts/perf/**
 !/artifacts/perf/README.md
+.nx/polygraph
+.nx/self-healing

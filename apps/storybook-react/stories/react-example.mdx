@@ -88,6 +88,9 @@ const onFileSelected = async (file: File) => {
 };
 ```
 
+For file-picker UX, set `accept="audio/*,.zip,application/zip"`.
+If a loaded track reports no graphics, keep transport controls enabled and hide only the canvas region.
+
 ## Step 3: Bind React Controls to Model Methods
 
 ```tsx

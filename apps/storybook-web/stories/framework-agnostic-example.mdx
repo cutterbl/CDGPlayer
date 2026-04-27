@@ -120,6 +120,9 @@ fileInput.addEventListener('change', () => {
 });
 ```
 
+For picker UX, configure the file input as `accept="audio/*,.zip,application/zip"`.
+When `loadedTrack.hasGraphics` is `false`, keep transport controls active and hide the canvas region because the track is audio-only.
+
 ## Step 4: Optional Stage Click Toggle
 
 ```ts

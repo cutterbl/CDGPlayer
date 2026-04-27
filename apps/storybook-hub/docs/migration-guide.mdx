@@ -53,7 +53,7 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
       <td>
         <code>@cxing/cdg-loader</code>
       </td>
-      <td>Zip/file/url loading with normalized payloads</td>
+      <td>Audio/zip/file/url loading with normalized payloads</td>
     </tr>
     <tr>
       <td>N/A (standalone in legacy)</td>
@@ -100,7 +100,7 @@ const player = createPlayer({
 });
 
 await player.load({
-  input: { kind: 'file', file: selectedZip },
+  input: { kind: 'file', file: selectedFile },
 });
 ```
 
@@ -132,6 +132,7 @@ createVolumeControl({
 - Prefer `setTempo({ value })` for singer-facing speed adjustments.
 - `setPlaybackRate({ value })` is still available as a compatibility alias.
 - Continue using `setPitchSemitones({ value })` for key shift.
+- Loading no longer requires graphics; audio-only tracks are valid and remain fully playable.
 - Keep the control label as `Key`, but use a vertical slider with datalist labels shown as half-step values (`.5`, `1`, `1.5`, etc.) while still writing integer semitone values to `setPitchSemitones`.
 
 ## 5. Lifecycle and Teardown

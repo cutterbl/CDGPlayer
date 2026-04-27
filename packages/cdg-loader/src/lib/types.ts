@@ -13,9 +13,15 @@ export interface LoaderOptions {
   debug?: boolean;
 }
 
-/** Lightweight probe output for archive preflight checks. */
+/**
+ * Lightweight probe output for preflight checks.
+ * `karaokeLikely` indicates a likely audio+graphics karaoke archive shape.
+ * `audioLikely` indicates the input likely contains browser-playable audio,
+ * including raw audio payloads that are not zip archives.
+ */
 export interface LoaderProbeResult {
   karaokeLikely: boolean;
+  audioLikely: boolean;
   discoveredEntries: readonly string[];
   hasExtraEntries: boolean;
   extensionCaseIssues: boolean;
@@ -28,12 +34,19 @@ export interface LoaderMetadata {
   album: string;
 }
 
-/** Successful load payload consumed by player runtime. */
+/**
+ * Successful load payload consumed by player runtime.
+ * `audioMimeType` is used when binding the in-memory audio blob to <audio>.
+ * `hasGraphics` indicates whether a CDG graphics stream is available.
+ * `cdgBytes` is null for audio-only tracks.
+ */
 export interface LoadedTrack {
   trackId: string;
   sourceSummary: string;
   audioBuffer: ArrayBuffer;
-  cdgBytes: Uint8Array;
+  audioMimeType: string;
+  hasGraphics: boolean;
+  cdgBytes: Uint8Array | null;
   metadata: LoaderMetadata;
   warnings: readonly string[];
 }
@@ -46,6 +59,7 @@ export type LoaderErrorCode =
   | 'KARAOKE_FILES_MISSING'
   | 'MULTIPLE_AUDIO_TRACKS'
   | 'MULTIPLE_GRAPHICS_TRACKS'
+  | 'AUDIO_FORMAT_UNSUPPORTED'
   | 'AUDIO_UNREADABLE'
   | 'GRAPHICS_UNREADABLE'
   | 'ABORTED'

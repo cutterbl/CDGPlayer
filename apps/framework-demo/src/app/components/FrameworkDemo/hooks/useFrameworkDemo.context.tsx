@@ -286,6 +286,8 @@ export type FrameworkDemoContextValue = {
   setTitleMetadata: Dispatch<
     SetStateAction<{ title: string; artist: string } | null>
   >;
+  hasGraphicsTrack: boolean;
+  setHasGraphicsTrack: Dispatch<SetStateAction<boolean>>;
   perfSummary: PerfSummary | null;
   hasTrack: boolean;
   showTitle: boolean;
@@ -329,6 +331,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     title: string;
     artist: string;
   } | null>(null);
+  const [hasGraphicsTrack, setHasGraphicsTrack] = useState(true);
   const [perfSummary, setPerfSummary] = useState<PerfSummary | null>(null);
 
   // Turn many raw timing samples into a tiny report we can read at a glance.
@@ -520,6 +523,8 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       viewState,
       titleMetadata,
       setTitleMetadata,
+      hasGraphicsTrack,
+      setHasGraphicsTrack,
       perfSummary,
       hasTrack,
       showTitle,
@@ -536,6 +541,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       controlsModel,
       viewState,
       titleMetadata,
+      hasGraphicsTrack,
       perfSummary,
       hasTrack,
       showTitle,
