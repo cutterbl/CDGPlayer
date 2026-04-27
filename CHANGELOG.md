@@ -1,3 +1,17 @@
+## 1.1.0 (2026-04-27)
+
+### 🚀 Features
+
+- Add audio-only playback support and refresh workspace tooling ([#38](https://github.com/cutterbl/CDGPlayer/pull/38))
+
+### 🩹 Fixes
+
+- **release:** Update workflow actions ([#35](https://github.com/cutterbl/CDGPlayer/pull/35))
+
+### ❤️ Thank You
+
+- Steve 'Cutter' Blades
+
 ## 1.0.1 (2026-04-17)
 
 ### 🩹 Fixes

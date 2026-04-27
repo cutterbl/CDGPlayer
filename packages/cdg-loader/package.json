@@ -1,6 +1,6 @@
 {
   "name": "@cxing/cdg-loader",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "CD+G track loading, archive extraction, and worker transport utilities.",
   "keywords": [
     "cdg",
