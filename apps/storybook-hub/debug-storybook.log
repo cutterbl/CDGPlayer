@@ -1,0 +1,18 @@
+[09:11:35.059] [INFO] storybook v10.3.5
+[09:11:35.633] [DEBUG] Getting package.json info for /Users/47056/Documents/Projects/CDGPlayer/package.json...
+[09:11:35.907] [INFO] Starting...
+[09:11:36.213] [ERROR] [38;2;241;97;97mError: Build failed with 2 errors:
+.storybook/manager.ts:1:30: ERROR: Could not resolve "@storybook/core-events"
+.storybook/manager.ts:2:23: ERROR: Could not resolve "@storybook/manager-api"[39m
+    at failureErrorWithLog (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:15)
+    at /Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25
+    at runOnEndCallbacks (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1588:45)
+    at buildResponseToResult (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1205:7)
+    at /Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1232:16
+    at responseCallbacks.<computed> (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:884:9)
+    at handleIncomingPacket (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:939:12)
+    at Socket.readFromStdout (/Users/47056/Documents/Projects/CDGPlayer/node_modules/.pnpm/esbuild@0.27.7/node_modules/esbuild/lib/main.js:862:7)
+    at Socket.emit (node:events:508:28)
+    at addChunk (node:internal/streams/readable:559:12)
+[09:11:36.215] [WARN] Broken build, fix the error above.
+You may need to refresh the browser.

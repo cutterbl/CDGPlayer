@@ -18,14 +18,16 @@ function FrameworkDemo() {
     // Provider holds shared player/model state so child controls can stay focused.
     <FrameworkDemoProvider>
       <div className={styles.frameworkShell}>
-        <SourceLinkRow
-          href={FRAMEWORK_REACT_SOURCE_URL}
-          label="apps/framework-demo"
-        />
-
-        {/* Top controls: file loading + transport row */}
-        <FilePickerRow />
-        <TransportBar />
+        {/* All controls above the stage grouped in one auto-height container */}
+        <div className={styles.controlsHeader}>
+          <SourceLinkRow
+            href={FRAMEWORK_REACT_SOURCE_URL}
+            label="apps/framework-demo"
+          />
+          {/* Top controls: file loading + transport row */}
+          <FilePickerRow />
+          <TransportBar />
+        </div>
 
         {/* Stage owns visuals; transport now hosts settings popovers in-row. */}
         <StageDisplay />

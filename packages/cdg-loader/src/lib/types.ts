@@ -34,9 +34,13 @@ export interface LoaderMetadata {
   album: string;
 }
 
+/** Primary media category for the loaded track payload. */
+export type LoadedTrackMediaKind = 'audio' | 'video';
+
 /**
  * Successful load payload consumed by player runtime.
- * `audioMimeType` is used when binding the in-memory audio blob to <audio>.
+ * `mediaMimeType` is used when binding the in-memory media blob to <audio>/<video>.
+ * `mediaKind` identifies whether the payload should be attached to audio or video stage output.
  * `hasGraphics` indicates whether a CDG graphics stream is available.
  * `cdgBytes` is null for audio-only tracks.
  */
@@ -44,6 +48,9 @@ export interface LoadedTrack {
   trackId: string;
   sourceSummary: string;
   audioBuffer: ArrayBuffer;
+  mediaKind: LoadedTrackMediaKind;
+  mediaMimeType: string;
+  /** @deprecated Prefer mediaMimeType. Kept for backward compatibility. */
   audioMimeType: string;
   hasGraphics: boolean;
   cdgBytes: Uint8Array | null;

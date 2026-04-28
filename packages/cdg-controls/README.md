@@ -70,6 +70,15 @@ Your player adapter must provide:
 - UI `Key` slider datalist labels are displayed as singer-facing half-step values.
 - Model writes remain integer semitone values through `setPitchSemitones({ value })`.
 
+## Public Constants And Functions
+
+Only the utility functions below are exported from `@cxing/cdg-controls`.
+
+### Utility Functions
+
+- `formatClock({ ms })`
+- `calculateProgress({ currentMs, durationMs })`
+
 ## Docs
 
 - Controls contract: https://cutterscrossing.com/?path=/docs/documentation-api-controls-contract--docs

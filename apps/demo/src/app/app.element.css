@@ -1,20 +1,23 @@
-:host {
+:is(app-root, cdg-storybook-framework-agnostic-demo) {
   display: block;
-  min-height: 100vh;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
   font-family: 'Avenir Next', 'Segoe UI', sans-serif;
   color: #1f2e3a;
   background: linear-gradient(180deg, #f8fafb 0%, #e9eef2 100%);
 }
 
 .app-shell {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  min-height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100dvh;
+  width: 100dvw;
+  overflow: hidden;
 }
 
 .source-link-row {
-  padding: 1rem 1rem 0;
+  padding-top: 1rem;
   text-align: center;
   font-size: 0.88rem;
   color: #31485d;
@@ -36,24 +39,52 @@
 }
 
 .file-select-container {
-  padding: 0.5rem 1rem 0;
+  padding-top: 0.2rem;
   text-align: center;
+}
+
+.file-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-size: 0.92rem;
+  color: #1f2e3a;
+}
+
+.codec-diagnostic {
+  display: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #8d3c12;
+}
+
+.codec-diagnostic.is-visible {
+  display: block;
+  margin-top: 0.4rem;
 }
 
 .file-picker {
   display: inline-block;
-  margin-bottom: 0.5rem;
   font-size: 0.92rem;
 }
 
 #track-input {
   max-width: 520px;
-  width: 100%;
+  width: min(520px, 100%);
+  font: inherit;
+  font-size: 0.92rem;
+}
+
+#track-input::file-selector-button {
+  font: inherit;
+}
+
+#track-input::-webkit-file-upload-button {
   font: inherit;
 }
 
 .perf-export-button {
-  margin-top: 0.5rem;
   padding: 0.3rem 0.6rem;
   border: 1px solid rgba(73, 99, 126, 0.55);
   border-radius: 4px;
@@ -69,19 +100,9 @@
   cursor: not-allowed;
 }
 
-.cdg-player {
-  flex: 1 1 auto;
+.controls-header {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  margin: 0 auto;
-  visibility: visible;
-}
-
-.app-shell.has-track .cdg-player {
-  visibility: visible;
 }
 
 .status {
@@ -142,7 +163,7 @@
   justify-content: center;
   gap: 0.45rem;
   min-height: 40px;
-  padding: 0.35rem 0;
+  padding: 0.35rem 0.5rem;
 }
 
 .settings-panel {
@@ -452,24 +473,32 @@
 }
 
 .stage {
-  flex: 1 1 auto;
+  container-type: size;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-  padding: 0.75rem 0 1rem;
+  overflow: hidden;
   background: #000;
 }
 
 canvas[data-role='canvas'] {
-  width: min(72vw, 72%);
-  max-width: 920px;
   aspect-ratio: 25 / 18;
+  width: min(100%, calc(100cqh * 25 / 18));
   height: auto;
   display: block;
-  margin: 0 auto;
   background: #000;
   image-rendering: pixelated;
+}
+
+video[data-role='video'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: none;
+  background: #000;
 }
 
 .titleImage {
@@ -527,7 +556,10 @@ audio[data-role='audio'] {
 }
 
 @media (max-width: 760px) {
-  canvas[data-role='canvas'],
+  .file-picker-row {
+    flex-wrap: wrap;
+  }
+
   .titleImage {
     width: calc(100% - 1.2rem);
   }

@@ -4,12 +4,12 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Player Contract
 
-`@cxing/cdg-player` is the runtime coordinator for playback, timeline sync, rendering, and audio.
+`@cxing/cdg-player` is the runtime coordinator for playback, timeline sync, rendering, audio, and optional video stage output.
 
 Use player when:
 
 - you need a stable playback state machine (`idle`, `loading`, `ready`, `playing`, `paused`, `error`)
-- you want canvas rendering and audio playback synchronized
+- you want canvas rendering, audio playback, and optional video playback synchronized through one runtime
 - you need a stable runtime API for load, play, pause, seek, tempo, and key changes
 
 ## Minimal Usage
@@ -21,6 +21,7 @@ const player = createPlayer({
   options: {
     canvas,
     audio,
+    video,
     debug: true,
   },
 });
@@ -44,16 +45,30 @@ player.addEventListener('statechange', () => {
 
 - Tempo is the preferred singer-facing API via `setTempo`, with `setPlaybackRate` retained for compatibility.
 - Audio-only tracks are supported; when no graphics stream is present, playback still works while CDG render/sync paths are skipped.
+- Video tracks are supported when you provide `options.video`; the player binds the loaded payload to either the audio or video element based on `loadedTrack.mediaKind`.
+- For broad browser compatibility, prefer MP4 files encoded as H.264 video plus AAC audio. Safari is usually the most permissive; Chrome and Firefox are stricter about codec support inside MP4, QuickTime, AVI, and MKV containers.
+- `canPlayType(...)` is treated only as a preflight hint. The player performs an additional video decode check by waiting for metadata and rejecting video tracks that never expose non-zero dimensions.
 - Player runtime does not emit built-in render performance metric events. Performance monitoring/reporting is local-development tooling concern.
 - Debug trace logging is controlled by `options.debug`.
 - Failure paths use `error()` severity and are not hidden behind debug gating.
 - `statechange` is the primary state event; load failures dispatch `error` with `detail.errorValue`.
 
+## Public Constants And Functions
+
+The following utility functions are publicly exported from `@cxing/cdg-player`.
+
+### Functions
+
+- `asMilliseconds({ seconds })`
+- `canElementPlayMimeType({ media, mimeType })`
+
 ## Common Mistakes
 
 - Forgetting to call `dispose()` when your UI unmounts.
+- Forgetting to provide a `video` element when your UI intends to play video tracks.
 - Updating your UI from stale references instead of reading `player.getState()` on events.
 - Treating `setPlaybackRate` as primary in new code; use `setTempo` first.
+- Assuming every `.mp4` file is browser-compatible; older codecs such as MPEG-4 Part 2 (`mp4v`) may load audio while failing video decode.
 
 ## Cross References
 

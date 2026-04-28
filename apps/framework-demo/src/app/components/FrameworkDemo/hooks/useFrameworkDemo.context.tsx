@@ -33,6 +33,8 @@ const DEFAULT_STATE: ControlsViewState = {
 
 // Keep a short rolling history so our speed check stays helpful and lightweight.
 const PERF_SAMPLE_LIMIT = 120;
+const STORYBOOK_STORY_CHANGE_EVENT = 'cdg:storybook-story-change';
+const STOP_PLAYBACK_MESSAGE_TYPE = 'cdg:stop-playback';
 
 /**
  * One per-frame telemetry sample captured from player render metrics.
@@ -275,6 +277,7 @@ const exportPerfArtifact = (): void => {
 export type FrameworkDemoContextValue = {
   canvasRef: RefObject<HTMLCanvasElement | null>;
   audioRef: RefObject<HTMLAudioElement | null>;
+  videoRef: RefObject<HTMLVideoElement | null>;
   showPerfDiagnostics: boolean;
   compatibilityWarning: string | null;
   statusMessage: string;
@@ -288,6 +291,10 @@ export type FrameworkDemoContextValue = {
   >;
   hasGraphicsTrack: boolean;
   setHasGraphicsTrack: Dispatch<SetStateAction<boolean>>;
+  hasVideoTrack: boolean;
+  setHasVideoTrack: Dispatch<SetStateAction<boolean>>;
+  codecDiagnostic: string | null;
+  setCodecDiagnostic: Dispatch<SetStateAction<string | null>>;
   perfSummary: PerfSummary | null;
   hasTrack: boolean;
   showTitle: boolean;
@@ -314,6 +321,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
   );
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const statusFadeTimeoutRef = useRef<number | null>(null);
   const lastStatusRef = useRef<string | null>(null);
   const hasPlaybackStartedRef = useRef(false);
@@ -332,6 +340,8 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     artist: string;
   } | null>(null);
   const [hasGraphicsTrack, setHasGraphicsTrack] = useState(true);
+  const [hasVideoTrack, setHasVideoTrack] = useState(false);
+  const [codecDiagnostic, setCodecDiagnostic] = useState<string | null>(null);
   const [perfSummary, setPerfSummary] = useState<PerfSummary | null>(null);
 
   // Turn many raw timing samples into a tiny report we can read at a glance.
@@ -404,7 +414,8 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     // Wait until refs are attached, then wire canvas/audio into the player runtime.
     const canvas = canvasRef.current;
     const audio = audioRef.current;
-    if (!canvas || !audio) {
+    const video = videoRef.current;
+    if (!canvas || !audio || !video) {
       return;
     }
 
@@ -412,6 +423,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       options: {
         canvas,
         audio,
+        video,
         debug: true,
       },
     });
@@ -487,6 +499,54 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!player) {
+      return;
+    }
+
+    const stopPlaybackForNavigation = (): void => {
+      player.stop();
+    };
+
+    const handleVisibilityChange = (): void => {
+      if (document.visibilityState === 'hidden') {
+        stopPlaybackForNavigation();
+      }
+    };
+
+    const handleWindowMessage = (event: MessageEvent<unknown>): void => {
+      const payload = event.data;
+      if (
+        typeof payload === 'object' &&
+        payload !== null &&
+        'type' in payload &&
+        payload.type === STOP_PLAYBACK_MESSAGE_TYPE
+      ) {
+        stopPlaybackForNavigation();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', stopPlaybackForNavigation);
+    window.addEventListener('beforeunload', stopPlaybackForNavigation);
+    window.addEventListener(
+      STORYBOOK_STORY_CHANGE_EVENT,
+      stopPlaybackForNavigation,
+    );
+    window.addEventListener('message', handleWindowMessage);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', stopPlaybackForNavigation);
+      window.removeEventListener('beforeunload', stopPlaybackForNavigation);
+      window.removeEventListener(
+        STORYBOOK_STORY_CHANGE_EVENT,
+        stopPlaybackForNavigation,
+      );
+      window.removeEventListener('message', handleWindowMessage);
+    };
+  }, [player]);
+
   const showTitle = useMemo(() => {
     // Show metadata in "ready" state until playback actually starts.
     const showMetadata =
@@ -514,6 +574,7 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
     () => ({
       canvasRef,
       audioRef,
+      videoRef,
       showPerfDiagnostics,
       compatibilityWarning,
       statusMessage,
@@ -525,6 +586,10 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       setTitleMetadata,
       hasGraphicsTrack,
       setHasGraphicsTrack,
+      hasVideoTrack,
+      setHasVideoTrack,
+      codecDiagnostic,
+      setCodecDiagnostic,
       perfSummary,
       hasTrack,
       showTitle,
@@ -542,6 +607,8 @@ export function FrameworkDemoProvider({ children }: PropsWithChildren) {
       viewState,
       titleMetadata,
       hasGraphicsTrack,
+      hasVideoTrack,
+      codecDiagnostic,
       perfSummary,
       hasTrack,
       showTitle,

@@ -1,6 +1,22 @@
 import type { Preview } from '@storybook/react-vite';
 
+const STORYBOOK_STORY_CHANGE_EVENT = 'cdg:storybook-story-change';
+let lastStoryId: string | null = null;
+
+const stopPlaybackOnStoryChange: Preview['decorators'][number] = (
+  Story,
+  context,
+) => {
+  if (context.id !== lastStoryId) {
+    lastStoryId = context.id;
+    window.dispatchEvent(new Event(STORYBOOK_STORY_CHANGE_EVENT));
+  }
+
+  return Story();
+};
+
 const preview: Preview = {
+  decorators: [stopPlaybackOnStoryChange],
   parameters: {
     controls: {
       matchers: {

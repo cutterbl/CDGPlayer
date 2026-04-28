@@ -1,9 +1,14 @@
 @layer components {
   .frameworkShell {
-    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100dvh;
+    width: 100dvw;
+    overflow: hidden;
+  }
+
+  .controlsHeader {
     display: flex;
     flex-direction: column;
-    gap: 0.6rem;
-    padding: 0;
   }
 }

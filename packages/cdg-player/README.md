@@ -1,6 +1,6 @@
 # @cxing/cdg-player
 
-High-level CD+G runtime for loading, playback orchestration, audio sync, and rendering dispatch.
+High-level CD+G runtime for loading, playback orchestration, audio sync, rendering dispatch, and optional stage video playback.
 
 This is the recommended package for most consuming applications.
 
@@ -19,6 +19,7 @@ const player = createPlayer({
   options: {
     canvas,
     audio,
+    video,
     debug: false,
   },
 });
@@ -64,8 +65,20 @@ player.setPitchSemitones({ value: -2 });
 - `setTempo` is the preferred singer-facing speed API.
 - `setPlaybackRate` remains available as a compatibility alias.
 - Audio-only tracks are supported; playback state and transport remain functional without a graphics stream.
+- Video tracks are supported when you provide a `video` element in `options`.
 - CDG render and sync operations are conditional on graphics availability.
+- Best cross-browser video compatibility comes from MP4 files encoded as H.264 video with AAC audio.
+- A container can look supported and still fail decode; the player performs extra runtime checks for video metadata and decoded dimensions.
 - Always call `dispose()` on teardown.
+
+## Public Constants And Functions
+
+Only the utility functions below are exported from `@cxing/cdg-player`.
+
+### Utility Functions
+
+- `asMilliseconds({ seconds })`
+- `canElementPlayMimeType({ media, mimeType })`
 
 ## Docs
 

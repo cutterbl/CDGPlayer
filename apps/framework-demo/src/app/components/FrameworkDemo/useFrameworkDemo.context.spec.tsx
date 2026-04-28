@@ -66,6 +66,7 @@ const createHarness = ({ initialState = DEFAULT_STATE } = {}) => {
         playerListeners.delete(eventName);
       }
     }),
+    stop: vi.fn(),
     dispose: vi.fn(),
   };
 
@@ -118,6 +119,7 @@ function ProviderConsumer() {
     <>
       <canvas ref={context.canvasRef} width={300} height={216} />
       <audio ref={context.audioRef} preload="auto" />
+      <video ref={context.videoRef} preload="auto" playsInline />
       <button
         type="button"
         onClick={() => context.showStatusMessage('Manual status')}
@@ -209,6 +211,62 @@ describe('useFrameworkDemoContext', () => {
     expect(harness.player.dispose).toHaveBeenCalledOnce();
   });
 
+  it('stops playback for navigation events and ignores unrelated visibility or message events', () => {
+    const harness = createHarness();
+    const visibilityStateDescriptor = Object.getOwnPropertyDescriptor(
+      Document.prototype,
+      'visibilityState',
+    );
+    let visibilityState: DocumentVisibilityState = 'visible';
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => visibilityState,
+    });
+
+    try {
+      const { unmount } = render(
+        <FrameworkDemoProvider>
+          <ProviderConsumer />
+        </FrameworkDemoProvider>,
+      );
+
+      fireEvent(document, new Event('visibilitychange'));
+      window.dispatchEvent(new MessageEvent('message', { data: null }));
+      window.dispatchEvent(new MessageEvent('message', { data: 'ignore-me' }));
+      window.dispatchEvent(new MessageEvent('message', { data: {} }));
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: { type: 'not-stop-playback' },
+        }),
+      );
+
+      expect(harness.player.stop).not.toHaveBeenCalled();
+
+      visibilityState = 'hidden';
+      fireEvent(document, new Event('visibilitychange'));
+      window.dispatchEvent(
+        new MessageEvent('message', {
+          data: { type: 'cdg:stop-playback' },
+        }),
+      );
+
+      expect(harness.player.stop).toHaveBeenCalledTimes(2);
+
+      unmount();
+    } finally {
+      if (visibilityStateDescriptor) {
+        Object.defineProperty(
+          Document.prototype,
+          'visibilityState',
+          visibilityStateDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(document, 'visibilityState');
+      }
+    }
+  });
+
   it('throws when consumed outside the provider', () => {
     expect(() => renderHook(() => useFrameworkDemoContext())).toThrow(
       'useFrameworkDemoContext must be used inside FrameworkDemoProvider.',
@@ -260,6 +318,210 @@ describe('useFrameworkDemoContext', () => {
       );
 
       expect(screen.getByTestId('compatibility-warning').textContent).toBe('');
+
+      unmount();
+      expect(harness.unsubscribeMock).toHaveBeenCalledOnce();
+    } finally {
+      if (showPopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'showPopover',
+          showPopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+      }
+
+      if (hidePopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'hidePopover',
+          hidePopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+      }
+
+      if (originalCssDescriptor) {
+        Object.defineProperty(globalThis, 'CSS', originalCssDescriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, 'CSS');
+      }
+    }
+  });
+
+  it('reports popover-specific compatibility warning when popover API is unavailable', () => {
+    const originalCssDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'CSS',
+    );
+    const showPopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'showPopover',
+    );
+    const hidePopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'hidePopover',
+    );
+
+    try {
+      Object.defineProperty(globalThis, 'CSS', {
+        configurable: true,
+        writable: true,
+        value: {
+          supports: vi.fn(() => true),
+        },
+      });
+
+      Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+      Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+
+      const harness = createHarness();
+      const { unmount } = render(
+        <FrameworkDemoProvider>
+          <ProviderConsumer />
+        </FrameworkDemoProvider>,
+      );
+
+      expect(screen.getByTestId('compatibility-warning').textContent).toContain(
+        'does not support the Popover API',
+      );
+
+      unmount();
+      expect(harness.unsubscribeMock).toHaveBeenCalledOnce();
+    } finally {
+      if (showPopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'showPopover',
+          showPopoverDescriptor,
+        );
+      }
+
+      if (hidePopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'hidePopover',
+          hidePopoverDescriptor,
+        );
+      }
+
+      if (originalCssDescriptor) {
+        Object.defineProperty(globalThis, 'CSS', originalCssDescriptor);
+      }
+    }
+  });
+
+  it('reports anchor-positioning warning when popover API exists but CSS anchor support is missing', () => {
+    const originalCssDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'CSS',
+    );
+    const showPopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'showPopover',
+    );
+    const hidePopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'hidePopover',
+    );
+
+    try {
+      Object.defineProperty(globalThis, 'CSS', {
+        configurable: true,
+        writable: true,
+        value: {
+          supports: vi.fn(() => false),
+        },
+      });
+
+      Object.defineProperty(HTMLElement.prototype, 'showPopover', {
+        configurable: true,
+        value: vi.fn(),
+      });
+      Object.defineProperty(HTMLElement.prototype, 'hidePopover', {
+        configurable: true,
+        value: vi.fn(),
+      });
+
+      const harness = createHarness();
+      const { unmount } = render(
+        <FrameworkDemoProvider>
+          <ProviderConsumer />
+        </FrameworkDemoProvider>,
+      );
+
+      expect(screen.getByTestId('compatibility-warning').textContent).toContain(
+        'does not support CSS Anchor Positioning',
+      );
+
+      unmount();
+      expect(harness.unsubscribeMock).toHaveBeenCalledOnce();
+    } finally {
+      if (showPopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'showPopover',
+          showPopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+      }
+
+      if (hidePopoverDescriptor) {
+        Object.defineProperty(
+          HTMLElement.prototype,
+          'hidePopover',
+          hidePopoverDescriptor,
+        );
+      } else {
+        Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+      }
+
+      if (originalCssDescriptor) {
+        Object.defineProperty(globalThis, 'CSS', originalCssDescriptor);
+      } else {
+        Reflect.deleteProperty(globalThis, 'CSS');
+      }
+    }
+  });
+
+  it('reports combined compatibility warning when both popover and anchor support are unavailable', () => {
+    const originalCssDescriptor = Object.getOwnPropertyDescriptor(
+      globalThis,
+      'CSS',
+    );
+    const showPopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'showPopover',
+    );
+    const hidePopoverDescriptor = Object.getOwnPropertyDescriptor(
+      HTMLElement.prototype,
+      'hidePopover',
+    );
+
+    try {
+      Object.defineProperty(globalThis, 'CSS', {
+        configurable: true,
+        writable: true,
+        value: {
+          supports: vi.fn(() => false),
+        },
+      });
+
+      Reflect.deleteProperty(HTMLElement.prototype, 'showPopover');
+      Reflect.deleteProperty(HTMLElement.prototype, 'hidePopover');
+
+      const harness = createHarness();
+      const { unmount } = render(
+        <FrameworkDemoProvider>
+          <ProviderConsumer />
+        </FrameworkDemoProvider>,
+      );
+
+      expect(screen.getByTestId('compatibility-warning').textContent).toContain(
+        'does not support Popover API or CSS Anchor Positioning',
+      );
 
       unmount();
       expect(harness.unsubscribeMock).toHaveBeenCalledOnce();
