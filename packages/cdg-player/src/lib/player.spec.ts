@@ -1219,8 +1219,8 @@ describe('player', () => {
     const video = document.createElement('video');
 
     let readyStateValue = 0;
-    let widthValue = 1280;
-    let heightValue = 720;
+    const widthValue = 1280;
+    const heightValue = 720;
 
     Object.defineProperty(video, 'readyState', {
       configurable: true,
