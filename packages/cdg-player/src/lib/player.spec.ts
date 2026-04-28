@@ -1245,21 +1245,19 @@ describe('player', () => {
     });
 
     const originalAddEventListener = video.addEventListener.bind(video);
-    vi.spyOn(video, 'addEventListener').mockImplementation(
-      ((
-        type: string,
-        listener: EventListenerOrEventListenerObject | null,
-        options?: boolean | AddEventListenerOptions,
-      ): void => {
-        originalAddEventListener(type, listener, options);
+    vi.spyOn(video, 'addEventListener').mockImplementation(((
+      type: string,
+      listener: EventListenerOrEventListenerObject,
+      options?: boolean | AddEventListenerOptions,
+    ): void => {
+      originalAddEventListener(type, listener, options);
 
-        if (type === 'error') {
-          queueMicrotask(() => {
-            video.dispatchEvent(new Event('error'));
-          });
-        }
-      }) as HTMLVideoElement['addEventListener'],
-    );
+      if (type === 'error') {
+        queueMicrotask(() => {
+          video.dispatchEvent(new Event('error'));
+        });
+      }
+    }) as HTMLVideoElement['addEventListener']);
 
     const player = createPlayer({
       options: {

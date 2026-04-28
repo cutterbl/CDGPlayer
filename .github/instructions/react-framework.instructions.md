@@ -22,6 +22,7 @@ applyTo: 'apps/framework-demo/src/**/*.{ts,tsx}, apps/storybook-react/**/*.{ts,t
 - Function files: `name.function.ts`
 - Constant files: `name.constant.ts`
 - Type files: `name.type.ts`
+- Keep constants and pure utilities in dedicated files instead of embedding them in component render files.
 
 ## Folder Structure
 
@@ -75,6 +76,7 @@ export default Example;
 ## Barrel Exports
 
 - Use folder-level `index.ts` barrel exports.
+- Export reusable developer-facing utilities/types intentionally through barrel files after validating naming, tests, and docs.
 
 ```ts
 export { default } from './Example.component';

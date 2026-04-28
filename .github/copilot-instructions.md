@@ -28,9 +28,17 @@
 - Runnable apps live under `apps/`, including `demo`, `framework-demo`, and the Storybook apps.
 - Keep package boundaries intact between `packages/cdg-*`, demo apps, and Storybook apps.
 - Make focused changes; avoid broad refactors unless the task requires them.
+- Prefer clear segmentation: keep constants and pure utilities in dedicated files instead of mixing them into large orchestration modules.
+- Prefer package/module boundaries that separate contracts, capabilities/utilities, and runtime orchestration when expanding scope.
 - Keep implementation guides and example stories aligned with the code they document.
 - Framework-agnostic implementation guidance must align with `apps/demo`.
 - React implementation guidance must align with `apps/framework-demo`.
+
+## Public Exports
+
+- When adding reusable developer-facing resources (types, constants, utilities, helpers), consider promoting them to public exports.
+- Validate public export candidates before exposing them: stable naming, tests, documentation, and compatibility impact.
+- Prefer exporting from package entrypoints (`index.ts` / `exports`) intentionally; avoid accidental deep-import-only APIs.
 
 ## Monorepo Workflow
 
@@ -43,6 +51,9 @@
 
 ## Documentation
 
+- Any code change must include accompanying documentation updates.
+- Acceptable documentation updates include one or more of: Storybook docs, package/app README updates, or inline JSDoc for the touched API/logic.
+- For exported APIs, prefer JSDoc updates in addition to user-facing docs when behavior/contracts change.
 - Update Storybook documentation when public behavior, integration flow, or architecture guidance changes.
 - Keep runtime contracts in `apps/storybook-hub/docs`.
 - Keep framework-specific implementation guides next to their example stories in `apps/storybook-web/stories` and `apps/storybook-react/stories`.
@@ -50,7 +61,9 @@
 
 ## Build and Test
 
+- Any code change must include corresponding test updates or additions.
 - Run the smallest relevant validation for the change when possible.
 - For documentation changes, prefer `pnpm run ci:docs` and the relevant Storybook build.
 - For broader changes, use the repo validation commands already documented in Storybook contribution guidance.
 - Keep coverage thresholds unchanged, but aim to stay at least 5 percentage points above the enforced minima when practical (currently branch >= 85% and functions >= 95%).
+- Do not land code changes that reduce coverage below enforced thresholds; update/add tests to maintain threshold compliance.
