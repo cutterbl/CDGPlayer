@@ -1,3 +1,13 @@
+## 1.2.0 (2026-04-28)
+
+### 🚀 Features
+
+- Add video support and utility export refinements ([#39](https://github.com/cutterbl/CDGPlayer/pull/39))
+
+### ❤️ Thank You
+
+- Steve 'Cutter' Blades
+
 ## 1.1.0 (2026-04-27)
 
 ### 🚀 Features

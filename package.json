@@ -1,7 +1,7 @@
 {
   "name": "cdgplayer",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Package-first Nx monorepo for browser karaoke playback and Storybook documentation.",
   "keywords": [
     "cdg",
