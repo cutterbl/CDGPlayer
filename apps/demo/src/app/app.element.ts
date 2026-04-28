@@ -35,6 +35,45 @@ const isLocalDevelopmentRuntime = (): boolean => {
 const PERF_SAMPLE_LIMIT = 120;
 const FRAMEWORK_AGNOSTIC_SOURCE_URL =
   'https://github.com/cutterbl/CDGPlayer/tree/main/apps/demo';
+const STORYBOOK_STORY_CHANGE_EVENT = 'cdg:storybook-story-change';
+const STOP_PLAYBACK_MESSAGE_TYPE = 'cdg:stop-playback';
+
+const VIDEO_EXTENSION_TO_MIME: Record<string, string> = {
+  mp4: 'video/mp4',
+  webm: 'video/webm',
+  mov: 'video/quicktime',
+  m4v: 'video/mp4',
+  mkv: 'video/x-matroska',
+  avi: 'video/x-msvideo',
+};
+
+const extensionFromName = ({ name }: { name: string }): string | null => {
+  const dotIndex = name.lastIndexOf('.');
+  if (dotIndex < 0 || dotIndex === name.length - 1) {
+    return null;
+  }
+
+  return name.slice(dotIndex + 1).toLowerCase();
+};
+
+const inferVideoMimeType = ({ file }: { file: File }): string | null => {
+  if (file.type.startsWith('video/')) {
+    return file.type.toLowerCase();
+  }
+
+  const extension = extensionFromName({ name: file.name });
+  if (!extension) {
+    return null;
+  }
+
+  return VIDEO_EXTENSION_TO_MIME[extension] ?? null;
+};
+
+const canPlayVideoMimeType = ({ mimeType }: { mimeType: string }): boolean => {
+  const videoElement = document.createElement('video');
+  const supportLevel = videoElement.canPlayType(mimeType);
+  return supportLevel === 'probably' || supportLevel === 'maybe';
+};
 
 /**
  * Builds the reusable DOM template for the custom element shell.
@@ -53,40 +92,44 @@ const createAppTemplate = ({
   const template = document.createElement('template');
   template.innerHTML = `
     <div class="app-shell" data-role="app-shell">
-      <div class="source-link-row" data-role="source-link-row">
-        <span class="source-link-label">View Source:</span>
-        <a
-          class="source-link"
-          href="${FRAMEWORK_AGNOSTIC_SOURCE_URL}"
-          target="_blank"
-          rel="noreferrer"
-        >
-          apps/demo
-        </a>
-      </div>
-      <div class="file-select-container" data-role="file-select-container">
-        <label class="file-picker" for="track-input">Select audio or karaoke zip (audio/*, .zip)</label>
-        <input id="track-input" type="file" accept="audio/*,.zip,application/zip" />
-        ${showPerfDiagnostics ? '<button type="button" class="perf-export-button" data-role="perf-export">Export speed report (.json)</button>' : ''}
-      </div>
-
-      <div class="cdg-player" data-role="player-shell">
-        <div class="transport-bar" data-role="transport-bar"></div>
-        <div class="stage" data-role="stage">
-          <div class="settings-panel" data-role="settings-panel"></div>
-          <div class="titleImage" data-role="title-image" aria-hidden="true">
-            <div class="titleMeta" data-role="title-meta">
-              <div class="titleMetaTitle" data-role="title-meta-title"></div>
-              <div class="titleMetaArtist" data-role="title-meta-artist"></div>
-            </div>
-          </div>
-          <canvas data-role="canvas" width="300" height="216"></canvas>
-          <div class="status" data-role="status">Choose a track to start.</div>
-          ${showPerfDiagnostics ? '<div class="perfHud" data-role="perf-hud">Render: waiting for samples...</div>' : ''}
+      <div class="controls-header">
+        <div class="source-link-row" data-role="source-link-row">
+          <span class="source-link-label">View Source:</span>
+          <a
+            class="source-link"
+            href="${FRAMEWORK_AGNOSTIC_SOURCE_URL}"
+            target="_blank"
+            rel="noreferrer"
+          >
+            apps/demo
+          </a>
         </div>
-
-        <audio data-role="audio" preload="auto"></audio>
+        <div class="file-select-container" data-role="file-select-container">
+          <div class="file-picker-row">
+            <label class="file-picker" for="track-input">Select media or karaoke zip (audio/*, video/*, .zip)</label>
+            <input id="track-input" type="file" accept="audio/*,video/*,.zip,application/zip" />
+            ${showPerfDiagnostics ? '<button type="button" class="perf-export-button" data-role="perf-export">Export speed report (.json)</button>' : ''}
+          </div>
+          <div class="codec-diagnostic" data-role="codec-diagnostic" aria-live="polite"></div>
+        </div>
+        <div class="transport-bar" data-role="transport-bar"></div>
       </div>
+
+      <div class="stage" data-role="stage">
+        <div class="settings-panel" data-role="settings-panel"></div>
+        <div class="titleImage" data-role="title-image" aria-hidden="true">
+          <div class="titleMeta" data-role="title-meta">
+            <div class="titleMetaTitle" data-role="title-meta-title"></div>
+            <div class="titleMetaArtist" data-role="title-meta-artist"></div>
+          </div>
+        </div>
+        <canvas data-role="canvas" width="300" height="216"></canvas>
+        <video data-role="video" playsinline preload="auto"></video>
+        <div class="status" data-role="status">Choose a track to start.</div>
+        ${showPerfDiagnostics ? '<div class="perfHud" data-role="perf-hud">Render: waiting for samples...</div>' : ''}
+      </div>
+
+      <audio data-role="audio" preload="auto"></audio>
     </div>
   `;
 
@@ -148,6 +191,7 @@ export class AppElement extends HTMLElement {
   private controlsParts: DisposableControl[] = [];
   private controlsUnsubscribe: (() => void) | null = null;
   private canvasElement: HTMLCanvasElement | null = null;
+  private videoElement: HTMLVideoElement | null = null;
   private statusElement: HTMLElement | null = null;
   private titleImage: HTMLElement | null = null;
   private titleMeta: HTMLElement | null = null;
@@ -156,10 +200,13 @@ export class AppElement extends HTMLElement {
   private perfElement: HTMLElement | null = null;
   private perfExportButton: HTMLButtonElement | null = null;
   private appShell: HTMLElement | null = null;
+  private codecDiagnosticElement: HTMLElement | null = null;
   private lastStatus: string | null = null;
   private statusFadeTimeoutId: number | null = null;
   private hasPlaybackStarted = false;
   private hasGraphicsTrack = true;
+  private hasVideoTrack = false;
+  private lifecycleAbortController: AbortController | null = null;
   private readonly showPerfDiagnostics = isLocalDevelopmentRuntime();
   private renderSamples: RenderSample[] = [];
 
@@ -167,6 +214,9 @@ export class AppElement extends HTMLElement {
    * Custom element lifecycle teardown: dispose listeners, controls, and player resources.
    */
   disconnectedCallback(): void {
+    this.detachLifecycleStopGuards();
+    this.stopPlaybackForNavigation();
+
     // Custom element teardown: remove listeners/disposables to avoid memory leaks.
     this.controlsUnsubscribe?.();
     this.controlsUnsubscribe = null;
@@ -194,9 +244,85 @@ export class AppElement extends HTMLElement {
       ? perfAppTemplate
       : baseAppTemplate;
     this.replaceChildren(template.content.cloneNode(true));
+    this.attachLifecycleStopGuards();
 
     // Once DOM is present, wire browser elements to player/controls logic.
     this.initializeDemo();
+  }
+
+  /**
+   * Stops active playback when the host page/story is hidden or unloaded.
+   */
+  private attachLifecycleStopGuards(): void {
+    this.detachLifecycleStopGuards();
+
+    const abortController = new AbortController();
+    this.lifecycleAbortController = abortController;
+    const { signal } = abortController;
+
+    const stopPlayback = (): void => {
+      this.stopPlaybackForNavigation();
+    };
+
+    const handleVisibilityChange = (): void => {
+      if (document.visibilityState === 'hidden') {
+        stopPlayback();
+      }
+    };
+
+    const handleWindowMessage = (event: MessageEvent<unknown>): void => {
+      const payload = event.data;
+      if (
+        typeof payload === 'object' &&
+        payload !== null &&
+        'type' in payload &&
+        payload.type === STOP_PLAYBACK_MESSAGE_TYPE
+      ) {
+        stopPlayback();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange, {
+      signal,
+    });
+    window.addEventListener('pagehide', stopPlayback, { signal });
+    window.addEventListener('beforeunload', stopPlayback, { signal });
+    window.addEventListener(STORYBOOK_STORY_CHANGE_EVENT, stopPlayback, {
+      signal,
+    });
+    window.addEventListener('message', handleWindowMessage, { signal });
+  }
+
+  /**
+   * Removes page lifecycle listeners installed for playback teardown.
+   */
+  private detachLifecycleStopGuards(): void {
+    this.lifecycleAbortController?.abort();
+    this.lifecycleAbortController = null;
+  }
+
+  /**
+   * Best-effort stop used when navigating away from the current story/page.
+   */
+  private stopPlaybackForNavigation(): void {
+    if (!this.player) {
+      return;
+    }
+
+    // Storybook/unit-test doubles may not expose the full runtime player API.
+    const playerMaybe = this.player as unknown as {
+      stop?: () => void;
+      pause?: () => void;
+    };
+
+    if (typeof playerMaybe.stop === 'function') {
+      playerMaybe.stop();
+      return;
+    }
+
+    if (typeof playerMaybe.pause === 'function') {
+      playerMaybe.pause();
+    }
   }
 
   /**
@@ -209,6 +335,8 @@ export class AppElement extends HTMLElement {
     );
     this.canvasElement = canvas;
     const audio = this.querySelector<HTMLAudioElement>('[data-role="audio"]');
+    const video = this.querySelector<HTMLVideoElement>('[data-role="video"]');
+    this.videoElement = video;
     const transportContainer = this.querySelector<HTMLElement>(
       '[data-role="transport-bar"]',
     );
@@ -221,6 +349,9 @@ export class AppElement extends HTMLElement {
       '[data-role="status"]',
     );
     this.appShell = this.querySelector<HTMLElement>('[data-role="app-shell"]');
+    this.codecDiagnosticElement = this.querySelector<HTMLElement>(
+      '[data-role="codec-diagnostic"]',
+    );
     this.titleImage = this.querySelector<HTMLElement>(
       '[data-role="title-image"]',
     );
@@ -243,6 +374,7 @@ export class AppElement extends HTMLElement {
     if (
       !canvas ||
       !audio ||
+      !video ||
       !transportContainer ||
       !stage ||
       !settingsContainer ||
@@ -259,6 +391,7 @@ export class AppElement extends HTMLElement {
         options: {
           canvas,
           audio,
+          video,
           debug: true,
         },
       });
@@ -381,6 +514,8 @@ export class AppElement extends HTMLElement {
         this.player.stop();
         this.hasPlaybackStarted = false;
         this.hasGraphicsTrack = true;
+        this.hasVideoTrack = false;
+        this.setCodecDiagnostic(null);
         this.setTitleMetadata(null);
         this.syncStageGraphicsVisibility();
         this.syncTitleImage('loading');
@@ -390,6 +525,17 @@ export class AppElement extends HTMLElement {
           message: 'calling player.load',
           fileName: selectedFile.name,
         });
+
+        const likelyVideoMimeType = inferVideoMimeType({ file: selectedFile });
+        if (
+          likelyVideoMimeType &&
+          !canPlayVideoMimeType({ mimeType: likelyVideoMimeType })
+        ) {
+          this.setCodecDiagnostic(
+            `This browser reports limited support for ${likelyVideoMimeType}. For best compatibility, use MP4 (H.264 video + AAC audio).`,
+          );
+        }
+
         void this.player
           .load({
             input: { kind: 'file', file: selectedFile },
@@ -412,7 +558,14 @@ export class AppElement extends HTMLElement {
               });
             }
 
-            this.hasGraphicsTrack = loadedTrack?.hasGraphics ?? false;
+            this.hasVideoTrack = loadedTrack?.mediaKind === 'video';
+            this.hasGraphicsTrack =
+              !this.hasVideoTrack && (loadedTrack?.hasGraphics ?? false);
+
+            if (this.hasVideoTrack) {
+              this.setCodecDiagnostic(null);
+            }
+
             this.syncStageGraphicsVisibility();
 
             this.hasPlaybackStarted = false;
@@ -425,6 +578,23 @@ export class AppElement extends HTMLElement {
               errorValue instanceof Error
                 ? errorValue.message
                 : 'Unknown load error';
+
+            const likelyVideoMimeType = inferVideoMimeType({
+              file: selectedFile,
+            });
+            const codecLikelyUnsupported =
+              message.includes('cannot play video format') ||
+              message.includes('Unable to load video media in this browser') ||
+              message.includes(
+                'Video track could not be decoded by this browser',
+              );
+
+            if (likelyVideoMimeType && codecLikelyUnsupported) {
+              this.setCodecDiagnostic(
+                `This file appears to use an unsupported video codec for this browser (${likelyVideoMimeType}). Try MP4 with H.264 video + AAC audio.`,
+              );
+            }
+
             logger.debug({
               message: 'player.load rejected',
               file: selectedFile.name,
@@ -433,6 +603,7 @@ export class AppElement extends HTMLElement {
             });
             this.setStatusMessage(`Load failed: ${message}`);
             this.hasGraphicsTrack = true;
+            this.hasVideoTrack = false;
             this.syncStageGraphicsVisibility();
             this.syncTitleImage('error');
             this.syncLayout('error');
@@ -457,6 +628,21 @@ export class AppElement extends HTMLElement {
       this.syncTitleImage('error');
       this.syncLayout('error');
     }
+  }
+
+  /**
+   * Shows or hides persistent codec diagnostics near the picker.
+   */
+  private setCodecDiagnostic(message: string | null): void {
+    if (!this.codecDiagnosticElement) {
+      return;
+    }
+
+    this.codecDiagnosticElement.textContent = message ?? '';
+    this.codecDiagnosticElement.classList.toggle(
+      'is-visible',
+      Boolean(message),
+    );
   }
 
   /**
@@ -568,6 +754,7 @@ export class AppElement extends HTMLElement {
     this.appShell.classList.toggle('show-player', shouldShowPlayer);
     this.appShell.classList.toggle('is-playing', status === 'playing');
     this.appShell.classList.toggle('has-graphics', this.hasGraphicsTrack);
+    this.appShell.classList.toggle('has-video', this.hasVideoTrack);
 
     if (status === 'ready' || status === 'playing' || status === 'paused') {
       this.appShell.classList.add('has-track');
@@ -581,11 +768,12 @@ export class AppElement extends HTMLElement {
    * Hides canvas when the loaded track has no graphics stream.
    */
   private syncStageGraphicsVisibility(): void {
-    if (!this.canvasElement) {
+    if (!this.canvasElement || !this.videoElement) {
       return;
     }
 
     this.canvasElement.style.display = this.hasGraphicsTrack ? 'block' : 'none';
+    this.videoElement.style.display = this.hasVideoTrack ? 'block' : 'none';
   }
 
   /**

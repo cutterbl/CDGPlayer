@@ -5,6 +5,14 @@ import {
 } from './constants.js';
 import { CDGContext } from './cdg-context.js';
 import { CDGParser } from './cdg-parser.js';
+import { DEFAULT_ASYNC_PARSE_CHUNK_PACKETS } from './utils/runtime.constants.js';
+import {
+  cancelFrame,
+  now,
+  requestFrame,
+  resolvePacketsPerChunk,
+  yieldToEventLoop,
+} from './utils/runtime.functions.js';
 import type {
   AnimationFrameHandle,
   ByteLike,
@@ -12,55 +20,6 @@ import type {
   CdgPlayerOptions,
   CdgRenderContext,
 } from './types.js';
-
-/**
- * Monotonic timestamp helper with Date.now fallback.
- */
-const now = (): number => {
-  if (
-    typeof performance !== 'undefined' &&
-    typeof performance.now === 'function'
-  ) {
-    return performance.now();
-  }
-  return Date.now();
-};
-
-/**
- * Animation frame scheduling helper with timeout fallback.
- */
-const requestFrame = ({
-  callback,
-}: {
-  callback: (ts?: number) => void;
-}): AnimationFrameHandle => {
-  if (typeof requestAnimationFrame === 'function') {
-    return requestAnimationFrame(callback);
-  }
-  return setTimeout(() => callback(now()), 25);
-};
-
-/**
- * Cancels a scheduled frame handle regardless of scheduling mechanism.
- */
-const cancelFrame = ({ id }: { id: AnimationFrameHandle | null }): void => {
-  if (id == null) {
-    return;
-  }
-  if (typeof cancelAnimationFrame === 'function' && typeof id === 'number') {
-    cancelAnimationFrame(id);
-    return;
-  }
-  clearTimeout(id as ReturnType<typeof setTimeout>);
-};
-
-/**
- * Cooperative async yield used by chunked parsing flows.
- */
-const yieldToEventLoop = async (): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
 
 /**
  * CDGPlayer executes instruction packets and keeps frame advancement in sync
@@ -145,14 +104,14 @@ export class CDGPlayer {
    */
   async loadAsync({
     data,
-    chunkPackets = 2048,
+    chunkPackets = DEFAULT_ASYNC_PARSE_CHUNK_PACKETS,
   }: {
     data: ByteLike;
     chunkPackets?: number;
   }): Promise<CDGPlayer> {
     const parser = new CDGParser();
     const parsedInstructions: CdgInstructionLike[] = [];
-    const packetsPerChunk = Math.max(256, Math.floor(chunkPackets));
+    const packetsPerChunk = resolvePacketsPerChunk({ chunkPackets });
     let packetsSinceYield = 0;
 
     for (let offset = 0; offset < data.length; offset += PACKET_SIZE) {

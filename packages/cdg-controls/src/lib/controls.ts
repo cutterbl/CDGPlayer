@@ -1,4 +1,19 @@
 import { CirclePause, CirclePlay, createElement } from 'lucide';
+import {
+  MAX_KEY_SEMITONES,
+  MIN_KEY_SEMITONES,
+} from './utils/controls.constants.js';
+import {
+  appendClassName,
+  applyRangeOrientation,
+  clamp,
+  createKeyTickOptions,
+  createRangeDatalist,
+  createVisibleRangeTickLabels,
+  deriveViewState,
+  formatClock,
+  setTempoValue,
+} from './utils/controls.functions.js';
 
 /** Placement options for the composed controls panel. */
 export type ControlsPanelPosition = 'top' | 'bottom';
@@ -68,175 +83,12 @@ export interface RangeControlMountOptions extends ControlMountOptions {
   orientation?: ControlsOrientation;
 }
 
-interface RangeTickOption {
-  value: number;
-  label?: string;
-}
-
-const setTempoValue = ({
-  player,
-  value,
-}: {
-  player: ControlsPlayerAdapter;
-  value: number;
-}): void => {
-  // Tempo is the product-facing concept. The fallback keeps older adapters
-  // working while player internals may still map tempo onto playbackRate.
-  if (typeof player.setTempo === 'function') {
-    player.setTempo({ value });
-    return;
-  }
-
-  player.setPlaybackRate({ value });
-};
-
 /** Construction options for the composed CdgControls class. */
 export interface CdgControlsOptions {
   container: HTMLElement;
   player: ControlsPlayerAdapter;
   position?: ControlsPanelPosition;
 }
-
-const formatClock = ({ ms }: { ms: number }): string => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60)
-    .toString()
-    .padStart(2, '0');
-  const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-  return `${minutes}:${seconds}`;
-};
-
-const clamp = ({
-  value,
-  min,
-  max,
-}: {
-  value: number;
-  min: number;
-  max: number;
-}): number => Math.min(max, Math.max(min, value));
-
-const appendClassName = ({
-  element,
-  className,
-}: {
-  element: HTMLElement;
-  className: string | undefined;
-}): void => {
-  if (!className) {
-    return;
-  }
-
-  element.classList.add(...className.split(/\s+/u).filter(Boolean));
-};
-
-let datalistIdCounter = 0;
-
-const createRangeDatalist = ({
-  input,
-  options,
-}: {
-  input: HTMLInputElement;
-  options: RangeTickOption[];
-}): HTMLDataListElement => {
-  datalistIdCounter += 1;
-
-  const datalist = document.createElement('datalist');
-  datalist.id = `cdg-range-marks-${datalistIdCounter}`;
-
-  for (const optionConfig of options) {
-    const option = document.createElement('option');
-    option.value = optionConfig.value.toString();
-
-    if (optionConfig.label !== undefined) {
-      option.label = optionConfig.label;
-    }
-
-    datalist.appendChild(option);
-  }
-
-  input.setAttribute('list', datalist.id);
-  return datalist;
-};
-
-const createVisibleRangeTickLabels = ({
-  options,
-}: {
-  options: RangeTickOption[];
-}): HTMLDivElement => {
-  const tickLabels = document.createElement('div');
-  tickLabels.dataset['role'] = 'range-tick-labels';
-  tickLabels.setAttribute('aria-hidden', 'true');
-
-  const labelOptions = [...options].reverse();
-
-  for (const optionConfig of labelOptions) {
-    const tickLabel = document.createElement('span');
-    tickLabel.dataset['role'] = 'range-tick-label';
-    tickLabel.dataset['value'] = optionConfig.value.toString();
-    tickLabel.textContent = optionConfig.label ?? '';
-    tickLabels.appendChild(tickLabel);
-  }
-
-  return tickLabels;
-};
-
-const MIN_KEY_SEMITONES = -12;
-const MAX_KEY_SEMITONES = 12;
-
-const formatKeyLabelFromSemitones = ({
-  semitones,
-}: {
-  semitones: number;
-}): string => {
-  if (semitones === 0) {
-    return '0';
-  }
-
-  const halfSteps = semitones / 2;
-  if (Number.isInteger(halfSteps)) {
-    return halfSteps > 0 ? `+${halfSteps}` : halfSteps.toString();
-  }
-
-  const absolute = Math.abs(halfSteps);
-  const whole = Math.trunc(absolute);
-  const fractionalLabel = whole === 0 ? '.5' : `${whole}.5`;
-  return halfSteps < 0 ? `-${fractionalLabel}` : `+${fractionalLabel}`;
-};
-
-const calculateProgress = ({
-  currentMs,
-  durationMs,
-}: {
-  currentMs: number;
-  durationMs: number;
-}): number => {
-  if (!durationMs) {
-    return 0;
-  }
-  return clamp({ value: (currentMs / durationMs) * 100, min: 0, max: 100 });
-};
-
-const isPlayable = ({
-  status,
-}: {
-  status: ControlsPlayerState['status'];
-}): boolean =>
-  status === 'ready' || status === 'playing' || status === 'paused';
-
-const deriveViewState = ({
-  playerState,
-}: {
-  playerState: ControlsPlayerState;
-}): ControlsViewState => ({
-  ...playerState,
-  isPlayable: isPlayable({ status: playerState.status }),
-  isPlaying: playerState.status === 'playing',
-  progressPercent: calculateProgress({
-    currentMs: playerState.currentTimeMs,
-    durationMs: playerState.durationMs,
-  }),
-});
 
 class DefaultCdgControlsModel implements CdgControlsModel {
   private readonly player: ControlsPlayerAdapter;
@@ -493,22 +345,6 @@ export const createProgressControl = ({
   };
 };
 
-const applyRangeOrientation = ({
-  root,
-  input,
-  orientation,
-}: {
-  root: HTMLElement;
-  input: HTMLInputElement;
-  orientation: ControlsOrientation;
-}): void => {
-  root.dataset['orientation'] = orientation;
-  input.setAttribute('aria-orientation', orientation);
-  if (orientation === 'vertical') {
-    input.setAttribute('orient', 'vertical');
-  }
-};
-
 /**
  * Mounts volume slider control.
  */
@@ -667,16 +503,7 @@ export const createKeyControl = ({
   input.setAttribute('aria-label', 'Key shift in semitones');
   applyRangeOrientation({ root, input, orientation });
 
-  const keyTickOptions = Array.from(
-    { length: MAX_KEY_SEMITONES - MIN_KEY_SEMITONES + 1 },
-    (_, index) => {
-      const value = MIN_KEY_SEMITONES + index;
-      return {
-        value,
-        label: formatKeyLabelFromSemitones({ semitones: value }),
-      };
-    },
-  );
+  const keyTickOptions = createKeyTickOptions();
 
   const datalist = createRangeDatalist({
     input,

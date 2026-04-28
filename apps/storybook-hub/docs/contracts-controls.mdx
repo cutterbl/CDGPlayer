@@ -133,6 +133,15 @@ If a future major release removes `setPlaybackRate` from adapter contracts, this
 - The label mapping is a UI representation choice only; it does not change the semitone math used by SoundTouch.
 - Keep adapter and player logic semitone-based; only the UI label representation is transformed.
 
+## Public Constants And Functions
+
+The following utility functions are publicly exported from `@cxing/cdg-controls`.
+
+### Functions
+
+- `formatClock({ ms })`
+- `calculateProgress({ currentMs, durationMs })`
+
 ## Lifecycle Contract
 
 - Call `model.dispose()` during teardown.

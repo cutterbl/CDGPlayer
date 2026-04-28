@@ -8,6 +8,7 @@ import useFrameworkDemoContext from '../../../hooks/useFrameworkDemo.context';
 export type StageDisplayResolvedProps = {
   canvasRef: ReturnType<typeof useFrameworkDemoContext>['canvasRef'];
   audioRef: ReturnType<typeof useFrameworkDemoContext>['audioRef'];
+  videoRef: ReturnType<typeof useFrameworkDemoContext>['videoRef'];
   showPerfDiagnostics: boolean;
   compatibilityWarning: string | null;
   statusMessage: string;
@@ -15,6 +16,7 @@ export type StageDisplayResolvedProps = {
   viewState: ReturnType<typeof useFrameworkDemoContext>['viewState'];
   titleMetadata: ReturnType<typeof useFrameworkDemoContext>['titleMetadata'];
   hasGraphicsTrack: boolean;
+  hasVideoTrack: boolean;
   perfSummary: ReturnType<typeof useFrameworkDemoContext>['perfSummary'];
   hasTrack: boolean;
   showTitle: boolean;
@@ -28,6 +30,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
   const {
     canvasRef,
     audioRef,
+    videoRef,
     showPerfDiagnostics,
     compatibilityWarning,
     statusMessage,
@@ -36,6 +39,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     viewState,
     titleMetadata,
     hasGraphicsTrack,
+    hasVideoTrack,
     perfSummary,
     hasTrack,
     showTitle,
@@ -53,6 +57,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
   return {
     canvasRef,
     audioRef,
+    videoRef,
     showPerfDiagnostics,
     compatibilityWarning,
     statusMessage,
@@ -60,6 +65,7 @@ function useStageDisplayProps(): StageDisplayResolvedProps {
     viewState,
     titleMetadata,
     hasGraphicsTrack,
+    hasVideoTrack,
     perfSummary,
     hasTrack,
     showTitle,

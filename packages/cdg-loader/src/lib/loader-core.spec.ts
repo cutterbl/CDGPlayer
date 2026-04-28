@@ -309,7 +309,7 @@ describe('CdgLoader core behavior', () => {
 
     expect(loaded.sourceSummary).toBe('track-input');
     expect(loaded.warnings).toEqual([
-      'Multiple supported audio files found; selected best match.',
+      'Multiple supported media files found; selected best match.',
     ]);
   });
 

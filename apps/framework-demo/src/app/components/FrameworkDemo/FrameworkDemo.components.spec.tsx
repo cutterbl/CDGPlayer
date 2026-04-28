@@ -16,6 +16,7 @@ import TransportBar from './components/TransportBar';
 const createContextValue = (overrides: Record<string, unknown> = {}) => ({
   canvasRef: { current: null },
   audioRef: { current: null },
+  videoRef: { current: null },
   showPerfDiagnostics: false,
   compatibilityWarning: null,
   statusMessage: 'Choose a track to start.',
@@ -38,6 +39,10 @@ const createContextValue = (overrides: Record<string, unknown> = {}) => ({
   setTitleMetadata: vi.fn(),
   hasGraphicsTrack: true,
   setHasGraphicsTrack: vi.fn(),
+  hasVideoTrack: false,
+  setHasVideoTrack: vi.fn(),
+  codecDiagnostic: null,
+  setCodecDiagnostic: vi.fn(),
   perfSummary: null,
   hasTrack: false,
   showTitle: false,
@@ -122,7 +127,7 @@ describe('Framework demo components', () => {
     render(<FilePickerRow />);
 
     const input = screen.getByLabelText(
-      'Select audio or karaoke zip (audio/*, .zip)',
+      'Select media or karaoke zip (audio/*, video/*, .zip)',
     );
     fireEvent.change(input, { target: { files: [] } });
     expect(player.stop).not.toHaveBeenCalled();

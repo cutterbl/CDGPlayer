@@ -34,11 +34,11 @@ const lastStatusRef = useRef<string | null>(null);
 const hasPlaybackStartedRef = useRef(false);
 
 useEffect(() => {
-  if (!canvas || !audio) {
+  if (!canvas || !audio || !video) {
     return;
   }
 
-  const nextPlayer = createPlayer({ options: { canvas, audio } });
+  const nextPlayer = createPlayer({ options: { canvas, audio, video } });
   const nextModel = createControlsModel({ options: { player: nextPlayer } });
 
   setPlayer(nextPlayer);
@@ -88,8 +88,16 @@ const onFileSelected = async (file: File) => {
 };
 ```
 
-For file-picker UX, set `accept="audio/*,.zip,application/zip"`.
-If a loaded track reports no graphics, keep transport controls enabled and hide only the canvas region.
+For file-picker UX, set `accept="audio/*,video/*,.zip,application/zip"`.
+If a loaded track reports `mediaKind === 'video'`, render the stage video element and hide the canvas.
+If a loaded track reports no graphics and `mediaKind === 'audio'`, keep transport controls enabled and hide only the canvas region.
+
+## Browser Codec Support
+
+- Best cross-browser results come from MP4 files encoded as H.264 video plus AAC audio.
+- WebM often works well in Chrome and Firefox, but Safari support varies by codec and platform version.
+- Containers like AVI, MOV, and MKV are accepted on a best-effort basis only.
+- The React demo surfaces persistent codec diagnostics when the browser looks unlikely to decode the selected video successfully.
 
 ## Step 3: Bind React Controls to Model Methods
 
@@ -151,3 +159,4 @@ The framework demo transport uses Popover API and CSS Anchor Positioning for vol
 - Missing cleanup in `useEffect`, causing duplicate subscriptions.
 - Mixing direct player writes with model writes for the same controls.
 - Updating React state from unmanaged event sources in parallel with model subscription.
+- Assuming the file picker can stay audio-only after adding stage video support.

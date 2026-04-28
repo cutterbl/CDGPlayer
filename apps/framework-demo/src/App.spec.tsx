@@ -232,7 +232,7 @@ describe('App', () => {
     expect(harness.controlsModel.togglePlayPause).toHaveBeenCalledTimes(2);
 
     const fileInput = screen.getByLabelText(
-      'Select audio or karaoke zip (audio/*, .zip)',
+      'Select media or karaoke zip (audio/*, video/*, .zip)',
     );
     const file = new File(['zip-content'], 'demo-track.zip', {
       type: 'application/zip',
@@ -313,7 +313,7 @@ describe('App', () => {
     ).toBe(true);
 
     const fileInput = screen.getByLabelText(
-      'Select audio or karaoke zip (audio/*, .zip)',
+      'Select media or karaoke zip (audio/*, video/*, .zip)',
     );
     const file = new File(['zip-content'], 'broken-track.zip', {
       type: 'application/zip',

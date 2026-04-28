@@ -4,18 +4,26 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Loader Contract
 
-`@cxing/cdg-loader` accepts different input sources and returns one normalized track payload shape.
+`@cxing/cdg-loader` accepts different input sources and returns one normalized track payload shape for audio or video playback.
 
 Metadata extraction behavior:
 
 - First tries embedded audio tags (via `jsmediatags`) for fields like title and artist.
+- Video payloads skip embedded tag extraction and rely on filename fallback metadata.
 - Falls back to filename parsing when tags are missing or unreadable.
 
 Use loader when:
 
-- you want to load browser-supported audio files and karaoke zip bundles
+- you want to load browser-supported media files and karaoke zip bundles
 - you want a consistent parsed payload before passing to player
 - you want metadata (`title`, `artist`, etc.) along with media bytes
+
+## Browser Codec Support
+
+- Best compatibility across Chrome, Firefox, and Safari is `video/mp4` with H.264 video and AAC audio.
+- `video/webm` is usually fine in Chrome and Firefox, but Safari support varies by codec/profile and OS version.
+- Container extensions like `.avi`, `.mkv`, and `.mov` may be accepted by the picker, but playback still depends on the actual codec streams inside the file.
+- The loader uses browser `canPlayType(...)` checks as an initial filter only; runtime decode validation still happens in the player because some browsers report `maybe` for files whose video stream they cannot actually decode.
 
 ## Logging Behavior
 
@@ -43,14 +51,58 @@ const loadedTrack = await loader.load({
 // same shape for framework-agnostic and framework integrations
 loadedTrack.metadata.title;
 loadedTrack.audioBuffer;
+loadedTrack.mediaKind;
+loadedTrack.mediaMimeType;
 loadedTrack.audioMimeType;
 loadedTrack.hasGraphics;
 loadedTrack.cdgBytes;
 ```
 
+`audioMimeType` is retained for backward compatibility. New integrations should prefer `mediaKind` and `mediaMimeType`.
+
+## Public Constants And Functions
+
+Everything listed below is publicly exported from `@cxing/cdg-loader` for direct developer use.
+
+### Loader API Functions
+
+- `createLoader({ debug? })`
+- `loadInWorker({ input, options? })`
+- `CdgLoader#load({ input, options? })`
+- `CdgLoader#probe({ input, options? })`
+- `CdgLoader#cancel({ requestId })`
+- `CdgLoader#dispose()`
+
+### Public Media Constants
+
+- `SUPPORTED_AUDIO_EXTENSIONS`
+- `SUPPORTED_VIDEO_EXTENSIONS`
+- `SUPPORTED_AUDIO_EXTENSION_SET`
+- `SUPPORTED_VIDEO_EXTENSION_SET`
+
+### Public Utility Functions
+
+- `extensionFromName({ name })`
+- `baseNameFromPath({ name })`
+- `stemFromName({ name })`
+- `inferMimeTypeFromExtension({ extension, kind })`
+- `classifyMediaKind({ mimeType?, extension })`
+- `isLikelySupportedMedia({ name, mimeType? })`
+- `canBrowserPlayMedia({ mimeType, kind })`
+- `fileNameFromInput({ input })`
+- `metadataFromName({ name })`
+
+### Utility Function Guidance
+
+- `classifyMediaKind(...)` prioritizes MIME and then falls back to extension-based classification.
+- `canBrowserPlayMedia(...)` is a capability signal, not a final decode guarantee.
+- `inferMimeTypeFromExtension(...)` should be treated as best-effort mapping, especially for container formats.
+
 ## Common Mistakes
 
 - Treating `hasGraphics` as always true; audio-only tracks return `hasGraphics === false` with `cdgBytes === null`.
+- Assuming a supported container means a supported codec; `.mp4` is only broadly safe when the video stream is H.264 and the audio stream is AAC.
+- Assuming video tracks preserve `.cdg` graphics pairing from zip bundles; when video is selected as the primary payload, CDG graphics are ignored.
 - Assuming metadata fields are always populated; handle empty strings safely because some files have no tags and no parseable filename pattern.
 - Re-loading repeatedly without cancellation logic in your app flow.
 

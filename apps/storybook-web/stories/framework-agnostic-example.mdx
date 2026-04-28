@@ -27,6 +27,7 @@ const player = createPlayer({
   options: {
     canvas,
     audio,
+    video,
   },
 });
 
@@ -120,8 +121,17 @@ fileInput.addEventListener('change', () => {
 });
 ```
 
-For picker UX, configure the file input as `accept="audio/*,.zip,application/zip"`.
-When `loadedTrack.hasGraphics` is `false`, keep transport controls active and hide the canvas region because the track is audio-only.
+For picker UX, configure the file input as `accept="audio/*,video/*,.zip,application/zip"`.
+When `loadedTrack.mediaKind === 'video'`, show the stage `<video>` element and hide the canvas.
+When `loadedTrack.hasGraphics` is `false` and `loadedTrack.mediaKind === 'audio'`, keep transport controls active and hide only the canvas region because the track is audio-only.
+If the selected file looks like video but the browser reports weak support, show a persistent codec diagnostic near the picker instead of waiting for playback to fail silently.
+
+## Browser Codec Support
+
+- Recommended: MP4 container with H.264 video and AAC audio.
+- Chrome and Firefox are stricter than Safari about older MP4-family codecs.
+- A file can pass `canPlayType(...)` and still fail actual decode; the demo keeps a user-facing warning path for that case.
+- AVI, MOV, and MKV are treated as best-effort inputs only.
 
 ## Step 4: Optional Stage Click Toggle
 
@@ -164,4 +174,5 @@ const dispose = () => {
 - Updating status/layout from ad-hoc event handlers instead of a single `model.subscribe(...)` path.
 - Not resetting file input after a load attempt.
 - Forgetting to handle load errors in UI status messaging.
+- Not clearing codec diagnostics after a successfully loaded supported video.
 - Leaving controls mounted while replacing the player instance.

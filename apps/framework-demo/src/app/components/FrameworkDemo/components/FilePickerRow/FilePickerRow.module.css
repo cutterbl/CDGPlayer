@@ -21,4 +21,12 @@
       cursor: not-allowed;
     }
   }
+
+  .codecDiagnostic {
+    margin: 0.4rem 0 0;
+    text-align: center;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #8d3c12;
+  }
 }

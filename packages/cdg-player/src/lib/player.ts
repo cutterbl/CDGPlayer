@@ -10,6 +10,7 @@ import {
   type CdgLoader,
   LoaderError,
   type LoadedTrack,
+  type LoadedTrackMediaKind,
   type LoaderInput,
   type LoaderOptions,
   loadInWorker,
@@ -20,6 +21,22 @@ import {
   type CdgAudioEngine,
   type PlayerAudioEngineMode,
 } from './audio-engine.js';
+import {
+  MAX_PITCH_SEMITONES,
+  MAX_SEEK_PERCENT,
+  MAX_TEMPO,
+  MAX_VOLUME,
+  MIN_PITCH_SEMITONES,
+  MIN_SEEK_PERCENT,
+  MIN_TEMPO,
+  MIN_VOLUME,
+} from './utils/player.constants.js';
+import {
+  asMilliseconds,
+  canElementPlayMimeType,
+  clamp,
+  createInitialState,
+} from './utils/player.functions.js';
 
 /** Playback lifecycle states for high-level player consumers. */
 export type PlayerStatus =
@@ -52,6 +69,7 @@ export interface PlayerLoadOptions {
 export interface CdgPlayerOptions {
   canvas: HTMLCanvasElement;
   audio: HTMLAudioElement;
+  video?: HTMLVideoElement;
   loader?: CdgLoader;
   debug?: boolean;
   renderMode?: 'auto' | 'main-thread' | 'worker';
@@ -69,29 +87,6 @@ type CdgCorePlayerAsyncLoad = CDGPlayer & {
   loadAsync?: (args: { data: Uint8Array }) => Promise<CDGPlayer>;
 };
 
-const createInitialState = (): PlayerState => ({
-  status: 'idle',
-  trackId: null,
-  currentTimeMs: 0,
-  durationMs: 0,
-  volume: 1,
-  playbackRate: 1,
-  pitchSemitones: 0,
-});
-
-const clamp = ({
-  value,
-  min,
-  max,
-}: {
-  value: number;
-  min: number;
-  max: number;
-}): number => Math.min(max, Math.max(min, value));
-
-const asMilliseconds = ({ seconds }: { seconds: number }): number =>
-  Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds * 1000)) : 0;
-
 /**
  * High-level karaoke player that orchestrates loading and audio playback.
  * CDG rendering/synchronization are enabled only when the loaded track includes
@@ -101,6 +96,7 @@ export class CdgPlayer extends EventTarget {
   private readonly canvas: HTMLCanvasElement;
   private readonly ctx: CanvasRenderingContext2D;
   private readonly audio: HTMLAudioElement;
+  private readonly video: HTMLVideoElement | null;
   private readonly loader: CdgLoader;
   private readonly ownsLoader: boolean;
   private readonly logger: ReturnType<typeof createScopedLogger>;
@@ -108,7 +104,11 @@ export class CdgPlayer extends EventTarget {
   private readonly loadTransport: 'auto' | 'main-thread' | 'worker';
   private readonly cdgPlayer: CDGPlayer;
   private readonly renderer: CdgRenderer;
-  private readonly audioEngine: CdgAudioEngine;
+  private readonly audioEngineMode: PlayerAudioEngineMode;
+
+  private audioEngine: CdgAudioEngine;
+  private activeMedia: HTMLMediaElement;
+  private activeMediaKind: LoadedTrackMediaKind = 'audio';
 
   private state: PlayerState = createInitialState();
   private currentObjectUrl: string | null = null;
@@ -120,6 +120,7 @@ export class CdgPlayer extends EventTarget {
   constructor({
     canvas,
     audio,
+    video,
     loader,
     debug = false,
     renderMode = 'auto',
@@ -129,11 +130,14 @@ export class CdgPlayer extends EventTarget {
     super();
     this.canvas = canvas;
     this.audio = audio;
+    this.video = video ?? null;
     this.debug = debug;
     this.logger = createScopedLogger({ scope: 'cdg-player', debug });
     this.loader = loader ?? createLoader({ debug });
     this.ownsLoader = !loader;
     this.loadTransport = loadTransport;
+    this.audioEngineMode = audioEngineMode;
+    this.activeMedia = this.audio;
 
     this.canvas.width = WIDTH;
     this.canvas.height = HEIGHT;
@@ -153,7 +157,7 @@ export class CdgPlayer extends EventTarget {
     });
 
     this.audioEngine = createAudioEngine({
-      audio: this.audio,
+      media: this.activeMedia,
       mode: audioEngineMode,
     });
 
@@ -164,10 +168,13 @@ export class CdgPlayer extends EventTarget {
     });
 
     this.audio.preload = 'auto';
-    this.audio.addEventListener('timeupdate', this.handleTimeUpdate);
-    this.audio.addEventListener('play', this.handlePlay);
-    this.audio.addEventListener('pause', this.handlePause);
-    this.audio.addEventListener('ended', this.handleEnded);
+    if (this.video) {
+      this.video.preload = 'auto';
+      this.video.controls = false;
+      this.video.playsInline = true;
+    }
+
+    this.bindMediaListeners({ media: this.activeMedia });
   }
 
   /**
@@ -273,7 +280,7 @@ export class CdgPlayer extends EventTarget {
   }
 
   /**
-   * Starts audio playback and, when graphics exist, advances CDG frame playback.
+   * Starts media playback and, when graphics exist, advances CDG frame playback.
    */
   async play(): Promise<void> {
     await this.audioEngine.play();
@@ -284,7 +291,7 @@ export class CdgPlayer extends EventTarget {
   }
 
   /**
-   * Pauses audio playback and, when graphics exist, pauses CDG frame playback.
+   * Pauses media playback and, when graphics exist, pauses CDG frame playback.
    */
   pause(): void {
     this.audioEngine.pause();
@@ -317,13 +324,20 @@ export class CdgPlayer extends EventTarget {
    * are present.
    */
   seek({ percentage }: { percentage: number }): void {
-    if (!Number.isFinite(this.audio.duration) || this.audio.duration <= 0) {
+    if (
+      !Number.isFinite(this.activeMedia.duration) ||
+      this.activeMedia.duration <= 0
+    ) {
       return;
     }
 
-    const clampedPercentage = clamp({ value: percentage, min: 0, max: 100 });
-    const targetSeconds = (clampedPercentage / 100) * this.audio.duration;
-    this.audio.currentTime = targetSeconds;
+    const clampedPercentage = clamp({
+      value: percentage,
+      min: MIN_SEEK_PERCENT,
+      max: MAX_SEEK_PERCENT,
+    });
+    const targetSeconds = (clampedPercentage / 100) * this.activeMedia.duration;
+    this.activeMedia.currentTime = targetSeconds;
     if (this.hasGraphicsTrack) {
       this.cdgPlayer.sync({ ms: asMilliseconds({ seconds: targetSeconds }) });
     }
@@ -336,7 +350,11 @@ export class CdgPlayer extends EventTarget {
    * Sets playback output volume.
    */
   setVolume({ value }: { value: number }): void {
-    const nextVolume = clamp({ value, min: 0, max: 1 });
+    const nextVolume = clamp({
+      value,
+      min: MIN_VOLUME,
+      max: MAX_VOLUME,
+    });
     this.audioEngine.setVolume({ value: nextVolume });
     this.applyState({ volume: nextVolume });
   }
@@ -352,7 +370,11 @@ export class CdgPlayer extends EventTarget {
    * Sets tempo multiplier.
    */
   setTempo({ value }: { value: number }): void {
-    const nextTempo = clamp({ value, min: 0.5, max: 2 });
+    const nextTempo = clamp({
+      value,
+      min: MIN_TEMPO,
+      max: MAX_TEMPO,
+    });
     this.audioEngine.setTempo({ value: nextTempo });
     this.applyState({ playbackRate: nextTempo });
   }
@@ -361,7 +383,13 @@ export class CdgPlayer extends EventTarget {
    * Sets key shift in semitones.
    */
   setPitchSemitones({ value }: { value: number }): void {
-    const nextPitchSemitones = Math.round(clamp({ value, min: -24, max: 24 }));
+    const nextPitchSemitones = Math.round(
+      clamp({
+        value,
+        min: MIN_PITCH_SEMITONES,
+        max: MAX_PITCH_SEMITONES,
+      }),
+    );
     this.audioEngine.setPitchSemitones({ value: nextPitchSemitones });
     this.applyState({ pitchSemitones: nextPitchSemitones });
   }
@@ -371,10 +399,7 @@ export class CdgPlayer extends EventTarget {
    */
   dispose(): void {
     this.stop();
-    this.audio.removeEventListener('timeupdate', this.handleTimeUpdate);
-    this.audio.removeEventListener('play', this.handlePlay);
-    this.audio.removeEventListener('pause', this.handlePause);
-    this.audio.removeEventListener('ended', this.handleEnded);
+    this.unbindMediaListeners({ media: this.activeMedia });
     this.releaseObjectUrl();
 
     if (this.ownsLoader) {
@@ -390,10 +415,31 @@ export class CdgPlayer extends EventTarget {
   }: {
     loadedTrack: LoadedTrack;
   }): Promise<void> {
+    const resolvedMediaKind: LoadedTrackMediaKind =
+      loadedTrack.mediaKind ?? 'audio';
+    const resolvedMediaMimeType =
+      loadedTrack.mediaMimeType ?? loadedTrack.audioMimeType;
+
+    const nextMedia = this.resolveMediaElementForTrack({ loadedTrack });
+
+    if (this.activeMedia !== nextMedia) {
+      this.unbindMediaListeners({ media: this.activeMedia });
+      this.audioEngine.dispose();
+      this.activeMedia = nextMedia;
+      this.audioEngine = createAudioEngine({
+        media: this.activeMedia,
+        mode: this.audioEngineMode,
+      });
+      this.bindMediaListeners({ media: this.activeMedia });
+    }
+
+    this.activeMediaKind = resolvedMediaKind;
     this.releaseObjectUrl();
     this.logger.debug({
       message: 'attach:start',
       trackId: loadedTrack.trackId,
+      mediaKind: resolvedMediaKind,
+      mediaMimeType: resolvedMediaMimeType,
       hasGraphics: loadedTrack.hasGraphics,
       cdgBytes: loadedTrack.cdgBytes?.byteLength ?? 0,
       audioBytes: loadedTrack.audioBuffer.byteLength,
@@ -417,14 +463,48 @@ export class CdgPlayer extends EventTarget {
       this.cdgPlayer.reset().render();
     }
 
-    const audioBlob = new Blob([loadedTrack.audioBuffer], {
-      type: loadedTrack.audioMimeType,
+    const mediaBlob = new Blob([loadedTrack.audioBuffer], {
+      type: resolvedMediaMimeType,
     });
-    this.currentObjectUrl = URL.createObjectURL(audioBlob);
-    this.audio.src = this.currentObjectUrl;
-    this.audio.load();
+
+    if (
+      resolvedMediaKind === 'video' &&
+      !canElementPlayMimeType({
+        media: this.activeMedia,
+        mimeType: resolvedMediaMimeType,
+      })
+    ) {
+      throw new Error(
+        `This browser cannot play ${resolvedMediaKind} format ${resolvedMediaMimeType}.`,
+      );
+    }
+
+    this.currentObjectUrl = URL.createObjectURL(mediaBlob);
+    this.activeMedia.src = this.currentObjectUrl;
+    this.activeMedia.load();
+
+    if (resolvedMediaKind === 'video') {
+      await this.waitForMediaCanPlay({
+        media: this.activeMedia,
+        mediaKind: resolvedMediaKind,
+      });
+    }
+
+    if (this.activeMedia === this.audio && this.video) {
+      this.video.pause();
+      this.video.removeAttribute('src');
+      this.video.load();
+    }
+
+    if (this.activeMedia === this.video) {
+      this.audio.pause();
+      this.audio.removeAttribute('src');
+      this.audio.load();
+    }
+
     this.logger.debug({
-      message: 'attach:audio-bound',
+      message: 'attach:media-bound',
+      mediaKind: this.activeMediaKind,
       objectUrl: this.currentObjectUrl,
     });
   }
@@ -436,6 +516,112 @@ export class CdgPlayer extends EventTarget {
 
     URL.revokeObjectURL(this.currentObjectUrl);
     this.currentObjectUrl = null;
+  }
+
+  private resolveMediaElementForTrack({
+    loadedTrack,
+  }: {
+    loadedTrack: LoadedTrack;
+  }): HTMLMediaElement {
+    const resolvedMediaKind: LoadedTrackMediaKind =
+      loadedTrack.mediaKind ?? 'audio';
+
+    if (resolvedMediaKind === 'video') {
+      if (!this.video) {
+        throw new Error(
+          'Loaded video media but no video element was provided to the player.',
+        );
+      }
+
+      return this.video;
+    }
+
+    return this.audio;
+  }
+
+  private async waitForMediaCanPlay({
+    media,
+    mediaKind,
+  }: {
+    media: HTMLMediaElement;
+    mediaKind: LoadedTrackMediaKind;
+  }): Promise<void> {
+    if (mediaKind === 'video' && media instanceof HTMLVideoElement) {
+      await this.waitForVideoMetadata({ video: media });
+      if (media.videoWidth <= 0 || media.videoHeight <= 0) {
+        throw new Error('Video track could not be decoded by this browser.');
+      }
+    }
+
+    if (media.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const onCanPlay = (): void => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = (): void => {
+        cleanup();
+        reject(new Error(`Unable to load ${mediaKind} media in this browser.`));
+      };
+
+      const cleanup = (): void => {
+        media.removeEventListener('canplay', onCanPlay);
+        media.removeEventListener('error', onError);
+      };
+
+      media.addEventListener('canplay', onCanPlay, { once: true });
+      media.addEventListener('error', onError, { once: true });
+    });
+  }
+
+  private async waitForVideoMetadata({
+    video,
+  }: {
+    video: HTMLVideoElement;
+  }): Promise<void> {
+    if (video.readyState >= HTMLMediaElement.HAVE_METADATA) {
+      return;
+    }
+
+    await new Promise<void>((resolve, reject) => {
+      const onLoadedMetadata = (): void => {
+        cleanup();
+        resolve();
+      };
+
+      const onError = (): void => {
+        cleanup();
+        reject(new Error('Unable to read video metadata in this browser.'));
+      };
+
+      const cleanup = (): void => {
+        video.removeEventListener('loadedmetadata', onLoadedMetadata);
+        video.removeEventListener('error', onError);
+      };
+
+      video.addEventListener('loadedmetadata', onLoadedMetadata, {
+        once: true,
+      });
+      video.addEventListener('error', onError, { once: true });
+    });
+  }
+
+  private bindMediaListeners({ media }: { media: HTMLMediaElement }): void {
+    media.addEventListener('timeupdate', this.handleTimeUpdate);
+    media.addEventListener('play', this.handlePlay);
+    media.addEventListener('pause', this.handlePause);
+    media.addEventListener('ended', this.handleEnded);
+  }
+
+  private unbindMediaListeners({ media }: { media: HTMLMediaElement }): void {
+    media.removeEventListener('timeupdate', this.handleTimeUpdate);
+    media.removeEventListener('play', this.handlePlay);
+    media.removeEventListener('pause', this.handlePause);
+    media.removeEventListener('ended', this.handleEnded);
   }
 
   private shouldUseWorkerLoader(): boolean {
@@ -488,8 +674,8 @@ export class CdgPlayer extends EventTarget {
   }
 
   private handleTimeUpdate = (): void => {
-    const timeMs = asMilliseconds({ seconds: this.audio.currentTime });
-    const durationMs = asMilliseconds({ seconds: this.audio.duration });
+    const timeMs = asMilliseconds({ seconds: this.activeMedia.currentTime });
+    const durationMs = asMilliseconds({ seconds: this.activeMedia.duration });
     // Audio timeline is always tracked; CDG sync is only needed when graphics exist.
     if (this.hasGraphicsTrack) {
       this.cdgPlayer.sync({ ms: timeMs });

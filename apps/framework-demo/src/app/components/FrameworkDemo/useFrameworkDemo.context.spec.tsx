@@ -118,6 +118,7 @@ function ProviderConsumer() {
     <>
       <canvas ref={context.canvasRef} width={300} height={216} />
       <audio ref={context.audioRef} preload="auto" />
+      <video ref={context.videoRef} preload="auto" playsInline />
       <button
         type="button"
         onClick={() => context.showStatusMessage('Manual status')}

@@ -42,30 +42,30 @@ const loadSoundTouchNodeModule = async (): Promise<SoundTouchNodeModule> =>
 class NativeAudioEngine implements CdgAudioEngine {
   readonly mode = 'native' as const;
 
-  private readonly audio: HTMLAudioElement;
+  private readonly media: HTMLMediaElement;
 
-  constructor({ audio }: { audio: HTMLAudioElement }) {
-    this.audio = audio;
+  constructor({ media }: { media: HTMLMediaElement }) {
+    this.media = media;
   }
 
   async play(): Promise<void> {
-    await this.audio.play();
+    await this.media.play();
   }
 
   pause(): void {
-    this.audio.pause();
+    this.media.pause();
   }
 
   stop(): void {
-    this.audio.currentTime = 0;
+    this.media.currentTime = 0;
   }
 
   setVolume({ value }: { value: number }): void {
-    this.audio.volume = value;
+    this.media.volume = value;
   }
 
   setTempo({ value }: { value: number }): void {
-    this.audio.playbackRate = value;
+    this.media.playbackRate = value;
   }
 
   setPlaybackRate({ value }: { value: number }): void {
@@ -85,7 +85,7 @@ class NativeAudioEngine implements CdgAudioEngine {
 class WorkletAudioEngine implements CdgAudioEngine {
   readonly mode = 'worklet' as const;
 
-  private readonly audio: HTMLAudioElement;
+  private readonly media: HTMLMediaElement;
   private readonly fallback: NativeAudioEngine;
 
   private context: AudioContext | null = null;
@@ -94,9 +94,9 @@ class WorkletAudioEngine implements CdgAudioEngine {
   private workletNode: SoundTouchNodeLike | null = null;
   private initPromise: Promise<void> | null = null;
 
-  constructor({ audio }: { audio: HTMLAudioElement }) {
-    this.audio = audio;
-    this.fallback = new NativeAudioEngine({ audio });
+  constructor({ media }: { media: HTMLMediaElement }) {
+    this.media = media;
+    this.fallback = new NativeAudioEngine({ media });
   }
 
   async play(): Promise<void> {
@@ -106,26 +106,26 @@ class WorkletAudioEngine implements CdgAudioEngine {
       await this.context.resume();
     }
 
-    await this.audio.play();
+    await this.media.play();
   }
 
   pause(): void {
-    this.audio.pause();
+    this.media.pause();
   }
 
   stop(): void {
-    this.audio.currentTime = 0;
+    this.media.currentTime = 0;
   }
 
   setVolume({ value }: { value: number }): void {
-    this.audio.volume = value;
+    this.media.volume = value;
     if (this.gainNode) {
       this.gainNode.gain.value = value;
     }
   }
 
   setTempo({ value }: { value: number }): void {
-    this.audio.playbackRate = value;
+    this.media.playbackRate = value;
 
     if (this.workletNode) {
       this.workletNode.playbackRate.setValueAtTime(
@@ -201,16 +201,16 @@ class WorkletAudioEngine implements CdgAudioEngine {
       );
       await SoundTouchNode.register(context, processorUrl);
 
-      const sourceNode = context.createMediaElementSource(this.audio);
+      const sourceNode = context.createMediaElementSource(this.media);
       const gainNode = context.createGain();
-      gainNode.gain.value = this.audio.volume;
+      gainNode.gain.value = this.media.volume;
       const workletNode = new SoundTouchNode(context);
 
       sourceNode.connect(workletNode);
       workletNode.connect(gainNode);
       gainNode.connect(context.destination);
 
-      const mediaElement = this.audio as HTMLAudioElement & {
+      const mediaElement = this.media as HTMLMediaElement & {
         preservesPitch?: boolean;
         mozPreservesPitch?: boolean;
         webkitPreservesPitch?: boolean;
@@ -227,7 +227,7 @@ class WorkletAudioEngine implements CdgAudioEngine {
       }
 
       workletNode.playbackRate.setValueAtTime(
-        this.audio.playbackRate,
+        this.media.playbackRate,
         context.currentTime,
       );
       workletNode.pitch.setValueAtTime(1, context.currentTime);
@@ -238,8 +238,8 @@ class WorkletAudioEngine implements CdgAudioEngine {
       this.gainNode = gainNode;
       this.workletNode = workletNode;
     } catch {
-      this.fallback.setVolume({ value: this.audio.volume });
-      this.fallback.setPlaybackRate({ value: this.audio.playbackRate });
+      this.fallback.setVolume({ value: this.media.volume });
+      this.fallback.setPlaybackRate({ value: this.media.playbackRate });
       void context.close();
     }
   }
@@ -252,23 +252,31 @@ const supportsWorkletAudioEngine = (): boolean =>
  * Creates an audio engine, selecting worklet/native mode based on preference and support.
  */
 export const createAudioEngine = ({
+  media,
   audio,
   mode,
 }: {
-  audio: HTMLAudioElement;
+  media?: HTMLMediaElement;
+  audio?: HTMLAudioElement;
   mode: PlayerAudioEngineMode;
 }): CdgAudioEngine => {
+  const resolvedMedia = media ?? audio;
+
+  if (!resolvedMedia) {
+    throw new Error('createAudioEngine requires a media element.');
+  }
+
   if (mode === 'native') {
-    return new NativeAudioEngine({ audio });
+    return new NativeAudioEngine({ media: resolvedMedia });
   }
 
   if (mode === 'worklet') {
     return supportsWorkletAudioEngine()
-      ? new WorkletAudioEngine({ audio })
-      : new NativeAudioEngine({ audio });
+      ? new WorkletAudioEngine({ media: resolvedMedia })
+      : new NativeAudioEngine({ media: resolvedMedia });
   }
 
   return supportsWorkletAudioEngine()
-    ? new WorkletAudioEngine({ audio })
-    : new NativeAudioEngine({ audio });
+    ? new WorkletAudioEngine({ media: resolvedMedia })
+    : new NativeAudioEngine({ media: resolvedMedia });
 };

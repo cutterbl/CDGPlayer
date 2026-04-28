@@ -16,6 +16,7 @@ function StageDisplay({ children }: StageDisplayProps) {
   const {
     canvasRef,
     audioRef,
+    videoRef,
     showPerfDiagnostics,
     compatibilityWarning,
     statusMessage,
@@ -23,6 +24,7 @@ function StageDisplay({ children }: StageDisplayProps) {
     viewState,
     titleMetadata,
     hasGraphicsTrack,
+    hasVideoTrack,
     perfSummary,
     hasTrack,
     showTitle,
@@ -58,7 +60,15 @@ function StageDisplay({ children }: StageDisplayProps) {
           ref={canvasRef}
           width={300}
           height={216}
-          className={hasGraphicsTrack ? undefined : styles.canvasHidden}
+          className={
+            hasGraphicsTrack && !hasVideoTrack ? undefined : styles.canvasHidden
+          }
+        />
+        <video
+          ref={videoRef}
+          className={hasVideoTrack ? styles.videoSurface : styles.videoHidden}
+          playsInline
+          preload="auto"
         />
         <div
           className={`${styles.status}${isStatusVisible || compatibilityWarning ? ` ${styles.isVisible}` : ''}`}

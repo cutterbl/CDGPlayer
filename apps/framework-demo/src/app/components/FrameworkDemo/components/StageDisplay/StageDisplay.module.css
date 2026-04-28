@@ -28,7 +28,14 @@
   .canvasHidden {
   }
 
+  .videoSurface {
+  }
+
+  .videoHidden {
+  }
+
   .stageWrap {
+    height: 100%;
     --cdg-panel-opacity: 0;
     --cdg-panel-visibility: hidden;
     --cdg-panel-pointer-events: none;
@@ -126,23 +133,40 @@
   }
 
   .stage {
+    container-type: size;
     position: relative;
-    flex: 1 1 auto;
+    flex: 1 1 0;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
     background: var(--cdg-color-stage);
-    min-height: 420px;
     cursor: pointer;
 
     canvas {
-      width: min(74vw, 920px);
       aspect-ratio: 25 / 18;
+      width: min(100%, calc(100cqh * 25 / 18));
+      height: auto;
       background: var(--cdg-color-stage);
       image-rendering: pixelated;
     }
 
+    .videoSurface,
+    .videoHidden {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--cdg-color-stage);
+    }
+
     .canvasHidden {
+      display: none;
+    }
+
+    .videoHidden {
       display: none;
     }
   }
