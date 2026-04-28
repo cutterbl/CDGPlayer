@@ -252,4 +252,92 @@ describe('Framework demo hook edge cases', () => {
       'Load failed: Unknown load error',
     );
   });
+
+  it('shows proactive codec warning when browser reports weak support for selected video mime type', async () => {
+    const setCodecDiagnostic = vi.fn();
+    const showStatusMessage = vi.fn();
+    const player = {
+      stop: vi.fn(),
+      load: vi.fn(async () => ({
+        mediaKind: 'video',
+        hasGraphics: false,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+        },
+      })),
+    };
+
+    vi.spyOn(HTMLMediaElement.prototype, 'canPlayType').mockReturnValue('');
+
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        player,
+        setTitleMetadata: vi.fn(),
+        setHasGraphicsTrack: vi.fn(),
+        setHasVideoTrack: vi.fn(),
+        setCodecDiagnostic,
+        showStatusMessage,
+        resetPlaybackStarted: vi.fn(),
+      }),
+    );
+
+    const { result } = renderHook(() => useFilePickerRowProps());
+    const videoFile = new File(['video-content'], 'sample-video.mp4', {
+      type: 'video/mp4',
+    });
+
+    result.current.handleTrackSelect({
+      target: { files: [videoFile] },
+    } as never);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(setCodecDiagnostic).toHaveBeenCalledWith(
+      'This browser reports limited support for video/mp4. For best compatibility, use MP4 (H.264 video + AAC audio).',
+    );
+  });
+
+  it('shows unsupported codec guidance when player rejects video decode in catch path', async () => {
+    const setCodecDiagnostic = vi.fn();
+    const showStatusMessage = vi.fn();
+    const player = {
+      stop: vi.fn(),
+      load: vi.fn(async () => {
+        throw new Error('Unable to load video media in this browser');
+      }),
+    };
+
+    mockUseFrameworkDemoContext.mockReturnValue(
+      createContextValue({
+        player,
+        setTitleMetadata: vi.fn(),
+        setHasGraphicsTrack: vi.fn(),
+        setHasVideoTrack: vi.fn(),
+        setCodecDiagnostic,
+        showStatusMessage,
+        resetPlaybackStarted: vi.fn(),
+      }),
+    );
+
+    const { result } = renderHook(() => useFilePickerRowProps());
+    const videoFile = new File(['video-content'], 'unsupported.avi', {
+      type: 'video/x-msvideo',
+    });
+
+    result.current.handleTrackSelect({
+      target: { files: [videoFile] },
+    } as never);
+
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(setCodecDiagnostic).toHaveBeenCalledWith(
+      'This file appears to use an unsupported video codec for this browser (video/x-msvideo). Try MP4 with H.264 video + AAC audio.',
+    );
+    expect(showStatusMessage).toHaveBeenCalledWith(
+      'Load failed: Unable to load video media in this browser',
+    );
+  });
 });

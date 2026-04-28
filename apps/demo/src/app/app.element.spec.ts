@@ -62,6 +62,8 @@ const createDemoHarness = ({
           title: string;
           artist: string;
         };
+        mediaKind?: 'audio' | 'video';
+        hasGraphics?: boolean;
       }
     | undefined;
   loadError?: Error;
@@ -641,6 +643,107 @@ describe('AppElement', () => {
 
     expect(harness.player.stop).toHaveBeenCalledOnce();
     expect(status?.textContent).toBe('Load failed: Unknown load error');
+
+    document.body.removeChild(app);
+  });
+
+  it('stops playback when visibility changes to hidden', () => {
+    const harness = createDemoHarness({
+      playerState: { status: 'playing' },
+    });
+
+    const visibilityDescriptor = Object.getOwnPropertyDescriptor(
+      document,
+      'visibilityState',
+    );
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      get: () => 'hidden',
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    document.dispatchEvent(new Event('visibilitychange'));
+
+    expect(harness.player.stop).toHaveBeenCalled();
+
+    document.body.removeChild(app);
+
+    if (visibilityDescriptor) {
+      Object.defineProperty(document, 'visibilityState', visibilityDescriptor);
+    } else {
+      Reflect.deleteProperty(document, 'visibilityState');
+    }
+  });
+
+  it('stops playback when receiving stop-playback window message', () => {
+    const harness = createDemoHarness({
+      playerState: { status: 'playing' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: { type: 'cdg:stop-playback' },
+      }),
+    );
+
+    expect(harness.player.stop).toHaveBeenCalled();
+
+    document.body.removeChild(app);
+  });
+
+  it('shows codec diagnostics for unsupported video paths', async () => {
+    vi.spyOn(HTMLMediaElement.prototype, 'canPlayType').mockReturnValue('');
+
+    const harness = createDemoHarness({
+      loadError: new Error('Unable to load video media in this browser'),
+      playerState: { status: 'error' },
+    });
+
+    registerAppElement();
+
+    const app = document.createElement('cdgplayer-demo-app') as AppElement;
+    document.body.appendChild(app);
+
+    const input = app.querySelector<HTMLInputElement>('#track-input');
+    const codecDiagnostic = app.querySelector<HTMLElement>(
+      '[data-role="codec-diagnostic"]',
+    );
+    const file = new File(['video-content'], 'unsupported.mp4', {
+      type: 'video/mp4',
+    });
+
+    if (!input) {
+      throw new Error('Expected file input to exist.');
+    }
+
+    Object.defineProperty(input, 'files', {
+      configurable: true,
+      value: {
+        item: (index: number) => (index === 0 ? file : null),
+        length: 1,
+        0: file,
+      },
+    });
+
+    input.dispatchEvent(new Event('change'));
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(codecDiagnostic?.textContent).toContain(
+      'unsupported video codec for this browser',
+    );
+    expect(codecDiagnostic?.classList.contains('is-visible')).toBe(true);
+    expect(harness.player.stop).toHaveBeenCalledOnce();
 
     document.body.removeChild(app);
   });

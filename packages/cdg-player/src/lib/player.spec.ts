@@ -852,4 +852,433 @@ describe('player', () => {
 
     player.dispose();
   });
+
+  it('throws when video media is loaded but no video element is configured', async () => {
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        loader: mockLoader,
+      },
+    });
+
+    await expect(
+      player.load({
+        input: {
+          kind: 'arrayBuffer',
+          arrayBuffer: new ArrayBuffer(16),
+        },
+      }),
+    ).rejects.toThrow(
+      'Loaded video media but no video element was provided to the player.',
+    );
+
+    expect(player.getState().status).toBe('error');
+    player.dispose();
+  });
+
+  it('rejects video tracks when media element cannot play the mime type', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-video');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    const video = document.createElement('video');
+    vi.spyOn(video, 'canPlayType').mockReturnValue('');
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        video,
+        loader: mockLoader,
+      },
+    });
+
+    await expect(
+      player.load({
+        input: {
+          kind: 'arrayBuffer',
+          arrayBuffer: new ArrayBuffer(16),
+        },
+      }),
+    ).rejects.toThrow('This browser cannot play video format video/mp4.');
+
+    player.dispose();
+  });
+
+  it('loads a playable video track and deactivates the audio element source', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-video');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    const video = document.createElement('video');
+
+    Object.defineProperty(video, 'readyState', {
+      configurable: true,
+      value: HTMLMediaElement.HAVE_ENOUGH_DATA,
+    });
+    Object.defineProperty(video, 'videoWidth', {
+      configurable: true,
+      value: 1280,
+    });
+    Object.defineProperty(video, 'videoHeight', {
+      configurable: true,
+      value: 720,
+    });
+
+    vi.spyOn(video, 'canPlayType').mockReturnValue('probably');
+    const audioPauseSpy = vi.spyOn(audio, 'pause').mockImplementation(() => {
+      return;
+    });
+    const audioLoadSpy = vi.spyOn(audio, 'load').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(video, 'load').mockImplementation(() => {
+      return;
+    });
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        video,
+        loader: mockLoader,
+      },
+    });
+
+    await player.load({
+      input: {
+        kind: 'arrayBuffer',
+        arrayBuffer: new ArrayBuffer(16),
+      },
+    });
+
+    expect(player.getState().status).toBe('ready');
+    expect(audioPauseSpy).toHaveBeenCalled();
+    expect(audioLoadSpy).toHaveBeenCalled();
+
+    player.dispose();
+  });
+
+  it('waits for video metadata and canplay events when readyState is not yet available', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-video');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track-pending',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    const video = document.createElement('video');
+
+    let readyStateValue = 0;
+    let widthValue = 0;
+    let heightValue = 0;
+
+    Object.defineProperty(video, 'readyState', {
+      configurable: true,
+      get: () => readyStateValue,
+    });
+    Object.defineProperty(video, 'videoWidth', {
+      configurable: true,
+      get: () => widthValue,
+    });
+    Object.defineProperty(video, 'videoHeight', {
+      configurable: true,
+      get: () => heightValue,
+    });
+
+    vi.spyOn(video, 'canPlayType').mockReturnValue('probably');
+    vi.spyOn(video, 'load').mockImplementation(() => {
+      queueMicrotask(() => {
+        readyStateValue = HTMLMediaElement.HAVE_METADATA;
+        widthValue = 1280;
+        heightValue = 720;
+        video.dispatchEvent(new Event('loadedmetadata'));
+
+        queueMicrotask(() => {
+          readyStateValue = HTMLMediaElement.HAVE_FUTURE_DATA;
+          video.dispatchEvent(new Event('canplay'));
+        });
+      });
+    });
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        video,
+        loader: mockLoader,
+      },
+    });
+
+    await player.load({
+      input: {
+        kind: 'arrayBuffer',
+        arrayBuffer: new ArrayBuffer(16),
+      },
+    });
+
+    expect(player.getState().status).toBe('ready');
+    player.dispose();
+  });
+
+  it('fails video load when metadata event emits an error', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-video');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track-error',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    const video = document.createElement('video');
+
+    let readyStateValue = 0;
+    Object.defineProperty(video, 'readyState', {
+      configurable: true,
+      get: () => readyStateValue,
+    });
+
+    vi.spyOn(video, 'canPlayType').mockReturnValue('probably');
+    vi.spyOn(video, 'load').mockImplementation(() => {
+      queueMicrotask(() => {
+        readyStateValue = HTMLMediaElement.HAVE_METADATA;
+        video.dispatchEvent(new Event('error'));
+      });
+    });
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        video,
+        loader: mockLoader,
+      },
+    });
+
+    await expect(
+      player.load({
+        input: {
+          kind: 'arrayBuffer',
+          arrayBuffer: new ArrayBuffer(16),
+        },
+      }),
+    ).rejects.toThrow('Unable to read video metadata in this browser.');
+
+    player.dispose();
+  });
+
+  it('fails video load when canplay wait emits an error event', async () => {
+    vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock-video');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {
+      return;
+    });
+
+    const mockLoader = {
+      load: vi.fn(async () => ({
+        trackId: 'video-track-canplay-error',
+        sourceSummary: 'video.mp4',
+        audioBuffer: new ArrayBuffer(8),
+        mediaKind: 'video',
+        mediaMimeType: 'video/mp4',
+        audioMimeType: 'video/mp4',
+        hasGraphics: false,
+        cdgBytes: null,
+        metadata: {
+          title: 'Video',
+          artist: 'Artist',
+          album: 'Album',
+        },
+        warnings: [],
+      })),
+      probe: vi.fn(),
+      cancel: vi.fn(),
+      dispose: vi.fn(),
+    } as unknown as loaderModule.CdgLoader;
+
+    const canvas = document.createElement('canvas');
+    const audio = document.createElement('audio');
+    const video = document.createElement('video');
+
+    let readyStateValue = 0;
+    let widthValue = 1280;
+    let heightValue = 720;
+
+    Object.defineProperty(video, 'readyState', {
+      configurable: true,
+      get: () => readyStateValue,
+    });
+    Object.defineProperty(video, 'videoWidth', {
+      configurable: true,
+      get: () => widthValue,
+    });
+    Object.defineProperty(video, 'videoHeight', {
+      configurable: true,
+      get: () => heightValue,
+    });
+
+    vi.spyOn(video, 'canPlayType').mockReturnValue('probably');
+    readyStateValue = HTMLMediaElement.HAVE_METADATA;
+    vi.spyOn(audio, 'load').mockImplementation(() => {
+      return;
+    });
+    vi.spyOn(video, 'load').mockImplementation(() => {
+      return;
+    });
+
+    const originalAddEventListener = video.addEventListener.bind(video);
+    vi.spyOn(video, 'addEventListener').mockImplementation(
+      ((
+        type: string,
+        listener: EventListenerOrEventListenerObject | null,
+        options?: boolean | AddEventListenerOptions,
+      ): void => {
+        originalAddEventListener(type, listener, options);
+
+        if (type === 'error') {
+          queueMicrotask(() => {
+            video.dispatchEvent(new Event('error'));
+          });
+        }
+      }) as HTMLVideoElement['addEventListener'],
+    );
+
+    const player = createPlayer({
+      options: {
+        canvas,
+        audio,
+        video,
+        loader: mockLoader,
+      },
+    });
+
+    await expect(
+      player.load({
+        input: {
+          kind: 'arrayBuffer',
+          arrayBuffer: new ArrayBuffer(16),
+        },
+      }),
+    ).rejects.toThrow('Unable to load video media in this browser.');
+
+    player.dispose();
+  });
 });
