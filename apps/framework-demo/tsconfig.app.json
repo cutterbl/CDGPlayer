@@ -24,19 +24,10 @@
   ],
   "references": [
     {
-      "path": "../../packages/logger/tsconfig.lib.json"
+      "path": "../../packages/media-playback-controls/tsconfig.lib.json"
     },
     {
-      "path": "../../packages/cdg-controls/tsconfig.lib.json"
-    },
-    {
-      "path": "../../packages/cdg-player/tsconfig.lib.json"
-    },
-    {
-      "path": "../../packages/cdg-core/tsconfig.lib.json"
-    },
-    {
-      "path": "../../packages/cdg-loader/tsconfig.lib.json"
+      "path": "../../packages/media-player/tsconfig.lib.json"
     }
   ]
 }

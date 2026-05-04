@@ -1,6 +1,6 @@
 import './app.element.css';
 import { createScopedLogger } from '@cxing/logger';
-import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
+import { createPlayer, type CdgPlayer } from '@cxing/media-player';
 import {
   createControlsModel,
   createCurrentTimeDisplay,
@@ -12,7 +12,7 @@ import {
   createVolumeControl,
   type CdgControlsModel,
   type DisposableControl,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const logger = createScopedLogger({ scope: 'demo', debug: true });
 

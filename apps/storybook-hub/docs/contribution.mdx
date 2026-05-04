@@ -44,6 +44,16 @@ This gate is enforced per covered package or app. The overall summary row is inf
 - Use cross-reference links to connect loader/player/controls and example pages
 - Keep both integration styles represented in code examples
 
+## Static Hub Build Notes
+
+The composed static hub build (`pnpm nx run storybook-hub:site`) embeds the two referenced Storybooks under:
+
+- `apps/storybook-hub/.dist/storybook-web`
+- `apps/storybook-hub/.dist/storybook-react`
+
+Storybook 10 emits `index.json` for these references. During static hosting, some composition clients may still request `stories.json` and `metadata.json`.
+The site assembly step mirrors `index.json` into those legacy filenames for each embedded ref so static hosts do not emit `404` noise for reference manifests.
+
 ## Local Performance Monitoring And Reporting
 
 Performance monitoring and reporting are local-development workflows only.

@@ -1,6 +1,9 @@
 import type { StorybookConfig } from '@storybook/web-components-vite';
-import { resolve } from 'node:path';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const storybookDir = dirname(fileURLToPath(import.meta.url));
+const appRoot = resolve(storybookDir, '..');
 
 const config: StorybookConfig = {
   stories: ['../stories/**/*.stories.@(ts|tsx)', '../stories/**/*.mdx'],
@@ -15,22 +18,18 @@ const config: StorybookConfig = {
   viteFinal: async (viteConfig) => {
     return {
       ...viteConfig,
-      root: resolve(import.meta.dirname, '..'),
+      root: appRoot,
       resolve: {
         ...(viteConfig.resolve ?? {}),
         alias: {
           ...((viteConfig.resolve && viteConfig.resolve.alias) || {}),
-          '@shared-assets': resolve(
-            import.meta.dirname,
-            '../../../assets/branding',
-          ),
+          '@shared-assets': resolve(storybookDir, '../../../assets/branding'),
           'react-native-fs': resolve(
-            import.meta.dirname,
+            storybookDir,
             './shims/react-native-fs.ts',
           ),
         },
       },
-      plugins: [...(viteConfig.plugins ?? []), nxViteTsPaths()],
     };
   },
 };
