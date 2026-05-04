@@ -43,10 +43,11 @@
   "release": {
     "projects": [
       "logger",
-      "cdg-core",
-      "cdg-loader",
-      "cdg-player",
-      "cdg-controls"
+      "media-core",
+      "media-parser-cdg",
+      "media-loader",
+      "media-player",
+      "media-playback-controls"
     ],
     "projectsRelationship": "fixed",
     "conventionalCommits": {

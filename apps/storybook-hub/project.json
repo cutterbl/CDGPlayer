@@ -18,6 +18,18 @@
         "cwd": "apps/storybook-hub",
         "command": "STORYBOOK_BUILD=true storybook build --config-dir .storybook --output-dir .dist --disable-telemetry"
       }
+    },
+    "site": {
+      "executor": "nx:run-commands",
+      "options": {
+        "commands": [
+          "pnpm nx run storybook-web:build",
+          "pnpm nx run storybook-react:build",
+          "STORYBOOK_BUILD=true storybook build --config-dir apps/storybook-hub/.storybook --output-dir apps/storybook-hub/.dist --disable-telemetry",
+          "pnpm exec node scripts/ci/assemble-storybook-site.mjs"
+        ],
+        "parallel": false
+      }
     }
   }
 }

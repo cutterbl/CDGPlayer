@@ -12,11 +12,11 @@ const { createPlayerMock, createControlsModelMock } = vi.hoisted(() => ({
   createControlsModelMock: vi.fn(),
 }));
 
-vi.mock('@cxing/cdg-player', () => ({
+vi.mock('@cxing/media-player', () => ({
   createPlayer: createPlayerMock,
 }));
 
-vi.mock('@cxing/cdg-controls', () => ({
+vi.mock('@cxing/media-playback-controls', () => ({
   createControlsModel: createControlsModelMock,
 }));
 

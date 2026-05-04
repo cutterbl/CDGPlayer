@@ -1,6 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
 import { resolve } from 'node:path';
-import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 const config: StorybookConfig = {
   stories: ['../stories/**/*.stories.@(ts|tsx)', '../stories/**/*.mdx'],
@@ -11,6 +10,7 @@ const config: StorybookConfig = {
   },
   docs: {
     defaultName: 'Documentation',
+    autodocs: true,
   },
   viteFinal: async (viteConfig) => {
     const existingAlias = viteConfig.resolve?.alias;
@@ -28,11 +28,10 @@ const config: StorybookConfig = {
           ),
           'react-native-fs': resolve(
             import.meta.dirname,
-            '../../../packages/cdg-loader/src/lib/shims/react-native-fs.ts',
+            '../../../packages/media-loader/src/lib/shims/react-native-fs.ts',
           ),
         },
       },
-      plugins: [...(viteConfig.plugins ?? []), nxViteTsPaths()],
     };
   },
 };

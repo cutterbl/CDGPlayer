@@ -1,25 +1,45 @@
 {
   "extends": "./tsconfig.base.json",
+  // Ensure no CJS fallback
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext"
+  },
   "compileOnSave": false,
   "files": [],
   "references": [
     {
-      "path": "./packages/cdg-controls"
+      "path": "./packages/media-playback-controls"
     },
     {
-      "path": "./packages/cdg-loader"
+      "path": "./packages/media-loader"
     },
     {
-      "path": "./packages/cdg-player"
+      "path": "./packages/media-player"
     },
     {
-      "path": "./packages/cdg-core"
+      "path": "./packages/media-core"
+    },
+    {
+      "path": "./packages/media-parser-cdg"
     },
     {
       "path": "./apps/demo"
     },
     {
       "path": "./apps/framework-demo"
+    },
+    {
+      "path": "./apps/storybook-react"
+    },
+    {
+      "path": "./apps/storybook-hub"
+    },
+    {
+      "path": "./apps/storybook-web"
+    },
+    {
+      "path": "./packages/logger"
     }
   ]
 }

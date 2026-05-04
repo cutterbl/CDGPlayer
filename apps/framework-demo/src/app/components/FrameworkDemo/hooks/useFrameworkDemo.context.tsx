@@ -11,12 +11,12 @@ import {
   type RefObject,
   type SetStateAction,
 } from 'react';
-import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
+import { createPlayer, type CdgPlayer } from '@cxing/media-player';
 import {
   createControlsModel,
   type CdgControlsModel,
   type ControlsViewState,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const DEFAULT_STATE: ControlsViewState = {
   status: 'idle',
