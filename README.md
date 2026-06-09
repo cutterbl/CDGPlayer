@@ -4,26 +4,32 @@
 	<img src="./assets/branding/CDGPlayer.svg" alt="CDGPlayer logo" height="250" width="auto" />
 </p>
 
-CDGPlayer provides browser karaoke playback libraries under the `@cxing/cdg-\*` package family.
+CDGPlayer provides browser karaoke playback libraries under the `@cxing/media-*` package family.
 
 **BREAKING CHANGE**: The legacy `CDGPlayer` and `CDGControls` monolithic packages have been deprecated and replaced with a modular package architecture. See the [migration guide](https://cutterscrossing.com/?path=/docs/documentation-migration-guide--docs) for details.
 
 ## Packages
 
-- `@cxing/cdg-core`: CD+G parsing, instruction execution, and frame rendering primitives.
-- `@cxing/cdg-loader`: zip/file/url loading with normalized track payloads and metadata.
-- `@cxing/cdg-player`: high-level playback orchestration, audio sync, and rendering dispatch.
-- `@cxing/cdg-controls`: framework-agnostic controls model and UI control builders.
+- `@cxing/media-core`: shared media contracts, parser interfaces, and runtime primitives.
+- `@cxing/media-parser-cdg`: CD+G parsing, instruction execution, and frame rendering primitives.
+- `@cxing/media-loader`: zip/file/url loading with normalized track payloads and metadata.
+- `@cxing/media-player`: high-level playback orchestration, audio sync, and rendering dispatch.
+- `@cxing/media-playback-controls`: framework-agnostic controls model and UI control builders.
 - `@cxing/logger`: standalone scoped logging utility shared across runtime packages.
 
 ## Install
 
 Install the packages your app needs.
 
-- Minimal playback setup: `@cxing/cdg-player`
-- Loader-only integrations: `@cxing/cdg-loader`
-- UI control integrations: `@cxing/cdg-controls`
+- Minimal playback setup: `@cxing/media-player`
+- Loader-only integrations: `@cxing/media-loader`
+- UI control integrations: `@cxing/media-playback-controls`
 - Runtime logging integrations: `@cxing/logger`
+
+## Toolchain Baseline
+
+- `pnpm` is pinned via `packageManager` in `package.json`.
+- TypeScript baseline is `6.x` for workspace development and CI.
 
 ## Documentation
 
@@ -39,3 +45,9 @@ Install the packages your app needs.
 ## Repository Contribution
 
 Repository setup, CI/CD workflows, and branch protection policy are documented in [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## Storybook Hub Static Build
+
+The composed hub build (`pnpm nx run storybook-hub:site`) embeds the framework-specific Storybooks under `apps/storybook-hub/.dist`.
+
+Storybook 10 emits `index.json` for references. During static hosting, compatibility files (`stories.json`, `metadata.json`) are mirrored from `index.json` for each embedded ref to avoid 404 requests from composition clients that still probe legacy manifest names.

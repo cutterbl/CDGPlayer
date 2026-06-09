@@ -1,0 +1,67 @@
+/// <reference types='vitest' />
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
+import * as path from 'path';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import { nxCopyAssetsPlugin } from '@nx/vite/plugins/nx-copy-assets.plugin';
+
+export default defineConfig(() => ({
+  root: import.meta.dirname,
+  cacheDir: '../../node_modules/.vite/packages/media-player',
+  plugins: [
+    nxViteTsPaths(),
+    nxCopyAssetsPlugin(['*.md']),
+    dts({
+      entryRoot: 'src',
+      tsconfigPath: path.join(import.meta.dirname, 'tsconfig.lib.json'),
+      pathsToAliases: false,
+      skipDiagnostics: true,
+      logDiagnostics: false,
+    }),
+  ],
+  // Uncomment this if you are using workers.
+  // worker: {
+  //   plugins: () => [ nxViteTsPaths() ],
+  // },
+  // Configuration for building your library.
+  // See: https://vite.dev/guide/build.html#library-mode
+  build: {
+    outDir: '.dist',
+    emptyOutDir: true,
+    reportCompressedSize: true,
+    commonjsOptions: {
+      transformMixedEsModules: true,
+    },
+    lib: {
+      // Could also be a dictionary or array of multiple entry points.
+      entry: 'src/index.ts',
+      name: 'media-player',
+      fileName: 'index',
+      // Change this to the formats you want to support.
+      // Don't forget to update your package.json as well.
+      formats: ['es' as const],
+    },
+    rollupOptions: {
+      // External packages that should not be bundled into your library.
+      external: [
+        '@cxing/media-parser-cdg',
+        '@cxing/media-loader',
+        '@soundtouchjs/audio-worklet',
+      ],
+    },
+  },
+  test: {
+    name: 'media-player',
+    watch: false,
+    globals: true,
+    environment: 'jsdom',
+    include: ['{src,tests}/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    reporters: ['default'],
+    coverage: {
+      enabled: process.env.CI_COVERAGE === '1',
+      reportsDirectory: '../../coverage/packages/media-player',
+      reporter: ['text-summary', 'json-summary', 'lcov'],
+      provider: 'v8' as const,
+    },
+  },
+}));

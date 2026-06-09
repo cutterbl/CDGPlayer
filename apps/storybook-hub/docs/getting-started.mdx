@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Getting Started
 
-This page is for developers using published `@cxing/cdg-*` packages in their own application.
+This page is for developers using published `@cxing/media-*` packages in their own application.
 
 If you are looking for repository contributor commands (`pnpm dev`, `pnpm storybook:dev`, etc.), see [Contribution Guidelines](/?path=/docs/documentation-contribution-guidelines--docs).
 
@@ -16,19 +16,19 @@ If you are looking for repository contributor commands (`pnpm dev`, `pnpm storyb
 ## Install Packages In Your App
 
 ```bash
-pnpm add @cxing/cdg-player @cxing/cdg-controls
+pnpm add @cxing/media-player @cxing/media-playback-controls
 ```
 
 Using npm instead:
 
 ```bash
-npm install @cxing/cdg-player @cxing/cdg-controls
+npm install @cxing/media-player @cxing/media-playback-controls
 ```
 
 Optional, when you want direct loader usage:
 
 ```bash
-pnpm add @cxing/cdg-loader
+pnpm add @cxing/media-loader
 ```
 
 Optional, when you want direct scoped logger usage in your app/runtime wrappers:
@@ -40,7 +40,7 @@ pnpm add @cxing/logger
 ## Minimal Player Setup
 
 ```ts
-import { createPlayer } from '@cxing/cdg-player';
+import { createPlayer } from '@cxing/media-player';
 
 const player = createPlayer({
   options: {
@@ -70,7 +70,7 @@ import {
   createVolumeControl,
   createTempoControl,
   createKeyControl,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const model = createControlsModel({ options: { player } });
 

@@ -1,0 +1,49 @@
+{
+  "name": "media-core",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/media-core/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "."],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-core",
+        "command": "vite build"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-core",
+        "command": "vitest"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-core",
+        "command": "eslint . --ignore-pattern 'node_modules/**' --ignore-pattern '.dist/**' --ignore-pattern '.tsbuild/**'"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-core",
+        "command": "tsc --build --emitDeclarationOnly"
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "{projectRoot}"
+      }
+    }
+  }
+}

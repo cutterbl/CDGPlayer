@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Controls Contract
 
-`@cxing/cdg-controls` is split into three layers:
+`@cxing/media-playback-controls` is split into three layers:
 
 - adapter contract (`ControlsPlayerAdapter`)
 - shared headless model (`createControlsModel`)
@@ -59,7 +59,7 @@ import {
   createControlsModel,
   createPlayPauseControl,
   createProgressControl,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const model = createControlsModel({ options: { player } });
 createPlayPauseControl({ container: transportEl, model });
@@ -135,7 +135,7 @@ If a future major release removes `setPlaybackRate` from adapter contracts, this
 
 ## Public Constants And Functions
 
-The following utility functions are publicly exported from `@cxing/cdg-controls`.
+The following utility functions are publicly exported from `@cxing/media-playback-controls`.
 
 ### Functions
 

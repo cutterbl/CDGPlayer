@@ -10,7 +10,7 @@ Source of truth for this guide: `apps/framework-demo/src/App.tsx`.
 
 React integration is intentionally headless for controls UI:
 
-- `@cxing/cdg-controls` provides model and state contracts.
+- `@cxing/media-playback-controls` provides model and state contracts.
 - React renders buttons and sliders.
 - React handlers call model methods.
 
@@ -18,12 +18,12 @@ React integration is intentionally headless for controls UI:
 
 ```tsx
 import { useEffect, useRef, useState } from 'react';
-import { createPlayer, type CdgPlayer } from '@cxing/cdg-player';
+import { createPlayer, type CdgPlayer } from '@cxing/media-player';
 import {
   createControlsModel,
   type CdgControlsModel,
   type ControlsViewState,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const [viewState, setViewState] = useState<ControlsViewState>(DEFAULT_STATE);
 const [player, setPlayer] = useState<CdgPlayer | null>(null);

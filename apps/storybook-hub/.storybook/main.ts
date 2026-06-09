@@ -15,10 +15,12 @@ const config: StorybookConfig = {
         'framework-agnostic': {
           title: 'Framework-agnostic Examples',
           url: './storybook-web',
+          index: './storybook-web/index.json',
         },
         react: {
           title: 'React Examples',
           url: './storybook-react',
+          index: './storybook-react/index.json',
         },
       }
     : {

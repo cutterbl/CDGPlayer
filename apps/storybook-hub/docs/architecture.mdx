@@ -10,17 +10,18 @@ CDGPlayer is package-first. Think of the system as a pipeline:
 
 Each package has a single responsibility:
 
-- `@cxing/cdg-core`: parser, instructions, render context
-- `@cxing/cdg-loader`: audio/zip/file/url loading + metadata (embedded audio tags first, filename fallback); normalized payload may include optional graphics
-- `@cxing/cdg-player`: playback orchestration + render dispatch
-- `@cxing/cdg-controls`: UI controls model and adapters
+- `@cxing/media-core`: shared contracts, parser interfaces, and runtime primitives
+- `@cxing/media-parser-cdg`: CD+G format parser, instruction execution, and frame rendering engine
+- `@cxing/media-loader`: audio/zip/file/url loading + metadata (embedded audio tags first, filename fallback); normalized payload may include optional graphics
+- `@cxing/media-player`: playback orchestration + render dispatch
+- `@cxing/media-playback-controls`: UI controls model and adapters
 - `@cxing/logger`: scope-prefixed runtime logging with severity methods and debug gating
 
 ## Mental Model
 
-- `cdg-loader` turns user input into a normalized track payload.
-- `cdg-player` owns playback state, timeline, rendering, and audio behavior.
-- `cdg-controls` binds UI widgets to player actions/state.
+- `media-loader` turns user input into a normalized track payload.
+- `media-player` owns playback state, timeline, rendering, and audio behavior.
+- `media-playback-controls` binds UI widgets to player actions/state.
 - your app composes these pieces in either plain DOM code or a framework wrapper.
 
 ## Runtime Split

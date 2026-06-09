@@ -11,7 +11,7 @@ Source of truth for this guide: `apps/demo/src/app/app.element.ts`.
 ## Step 1: Create Player and Controls Model
 
 ```ts
-import { createPlayer } from '@cxing/cdg-player';
+import { createPlayer } from '@cxing/media-player';
 import {
   createControlsModel,
   createPlayPauseControl,
@@ -21,7 +21,7 @@ import {
   createVolumeControl,
   createTempoControl,
   createKeyControl,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const player = createPlayer({
   options: {

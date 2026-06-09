@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Migration Guide
 
-This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`, `CDGControls`) to the modular `@cxing/cdg-*` package family.
+This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`, `CDGControls`) to the modular `@cxing/media-*` package family.
 
 ## What Changed
 
@@ -28,7 +28,7 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
         <code>CDGPlayer</code>
       </td>
       <td>
-        <code>@cxing/cdg-player</code>
+        <code>@cxing/media-player</code>
       </td>
       <td>High-level playback orchestration</td>
     </tr>
@@ -37,23 +37,30 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
         <code>CDGControls</code>
       </td>
       <td>
-        <code>@cxing/cdg-controls</code>
+        <code>@cxing/media-playback-controls</code>
       </td>
       <td>Controls model and DOM control builders</td>
     </tr>
     <tr>
       <td>Internal decoding/runtime pieces</td>
       <td>
-        <code>@cxing/cdg-core</code>
+        <code>@cxing/media-parser-cdg</code>
       </td>
-      <td>Low-level parser and frame rendering primitives</td>
+      <td>CD+G format parser and frame rendering engine</td>
     </tr>
     <tr>
       <td>N/A (standalone in legacy)</td>
       <td>
-        <code>@cxing/cdg-loader</code>
+        <code>@cxing/media-loader</code>
       </td>
       <td>Audio/zip/file/url loading with normalized payloads</td>
+    </tr>
+    <tr>
+      <td>N/A (standalone in legacy)</td>
+      <td>
+        <code>@cxing/media-core</code>
+      </td>
+      <td>Shared contracts, parser interfaces, and runtime primitives</td>
     </tr>
     <tr>
       <td>N/A (standalone in legacy)</td>
@@ -70,13 +77,13 @@ This guide helps teams migrate from the legacy monolithic packages (`CDGPlayer`,
 Install the packages your application needs:
 
 ```bash
-pnpm add @cxing/cdg-player @cxing/cdg-controls
+pnpm add @cxing/media-player @cxing/media-playback-controls
 ```
 
 Optional direct loader usage:
 
 ```bash
-pnpm add @cxing/cdg-loader
+pnpm add @cxing/media-loader
 ```
 
 Optional direct logger usage:
@@ -87,10 +94,10 @@ pnpm add @cxing/logger
 
 ## 2. Replace Player Initialization
 
-Use `createPlayer` from `@cxing/cdg-player` with explicit `canvas` and `audio` elements.
+Use `createPlayer` from `@cxing/media-player` with explicit `canvas` and `audio` elements.
 
 ```ts
-import { createPlayer } from '@cxing/cdg-player';
+import { createPlayer } from '@cxing/media-player';
 
 const player = createPlayer({
   options: {
@@ -114,7 +121,7 @@ import {
   createPlayPauseControl,
   createProgressControl,
   createVolumeControl,
-} from '@cxing/cdg-controls';
+} from '@cxing/media-playback-controls';
 
 const model = createControlsModel({ options: { player } });
 
@@ -143,7 +150,7 @@ createVolumeControl({
 
 ## Migration Checklist
 
-1. Replace legacy dependencies with `@cxing/cdg-player` and `@cxing/cdg-controls`.
+1. Replace legacy dependencies with `@cxing/media-player` and `@cxing/media-playback-controls`.
 2. Swap legacy initialization for `createPlayer` and `player.load({ input })`.
 3. Build controls via `createControlsModel` and control builders.
 4. Update tempo calls to `setTempo` where product copy refers to tempo.

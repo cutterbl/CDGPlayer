@@ -1,0 +1,49 @@
+{
+  "name": "@cxing/media-loader",
+  "version": "2.0.0",
+  "description": "Media track loading, archive extraction, and worker transport utilities.",
+  "keywords": [
+    "cdg",
+    "cd+g",
+    "karaoke",
+    "loader"
+  ],
+  "author": {
+    "name": "Stephen G Blades, Jr (AKA 'Cutter')",
+    "url": "http://cutterscrossing.com"
+  },
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cutterbl/CDGPlayer.git"
+  },
+  "homepage": "https://cutterscrossing.com",
+  "bugs": {
+    "url": "https://github.com/cutterbl/CDGPlayer/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "type": "module",
+  "main": "./.dist/index.js",
+  "types": "./.dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./.dist/index.d.ts",
+      "import": "./.dist/index.js",
+      "default": "./.dist/index.js"
+    }
+  },
+  "files": [
+    ".dist"
+  ],
+  "sideEffects": false,
+  "dependencies": {
+    "@cxing/logger": "workspace:*",
+    "jsmediatags": "^3.9.7",
+    "jszip": "^3.10.1"
+  }
+}

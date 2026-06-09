@@ -13,16 +13,17 @@ export default defineConfig(() => ({
       '@shared-assets': path.join(import.meta.dirname, '../../assets/branding'),
       'react-native-fs': path.join(
         import.meta.dirname,
-        '../../packages/cdg-loader/src/lib/shims/react-native-fs.ts',
+        '../../packages/media-loader/src/lib/shims/react-native-fs.ts',
       ),
     },
   },
   optimizeDeps: {
     exclude: [
-      '@cxing/cdg-core',
-      '@cxing/cdg-loader',
-      '@cxing/cdg-player',
-      '@cxing/cdg-controls',
+      '@cxing/media-core',
+      '@cxing/media-parser-cdg',
+      '@cxing/media-loader',
+      '@cxing/media-player',
+      '@cxing/media-playback-controls',
     ],
   },
   server: {

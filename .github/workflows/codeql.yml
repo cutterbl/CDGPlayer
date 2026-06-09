@@ -5,7 +5,7 @@ on:
     branches: [ main, master ]
     types: [ opened, reopened, synchronize, ready_for_review ]
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   schedule:
     - cron: "23 4 * * 1"
 
@@ -38,9 +38,9 @@ jobs:
           languages: ${{ matrix.language }}
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
         with:
-          version: 10.33.0
+          version: 10.33.2
 
       - name: Setup Node
         uses: actions/setup-node@v6

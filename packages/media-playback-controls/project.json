@@ -1,0 +1,49 @@
+{
+  "name": "media-playback-controls",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/media-playback-controls/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "manifestRootsToUpdate": ["{projectRoot}", "."],
+      "currentVersionResolver": "git-tag",
+      "fallbackCurrentVersionResolver": "disk"
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-playback-controls",
+        "command": "vite build"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-playback-controls",
+        "command": "vitest"
+      }
+    },
+    "lint": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-playback-controls",
+        "command": "eslint . --ignore-pattern 'node_modules/**' --ignore-pattern '.dist/**' --ignore-pattern '.tsbuild/**'"
+      }
+    },
+    "typecheck": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "packages/media-playback-controls",
+        "command": "tsc --build --emitDeclarationOnly"
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "{projectRoot}"
+      }
+    }
+  }
+}

@@ -4,7 +4,7 @@ import { Meta } from '@storybook/addon-docs/blocks';
 
 # Loader Contract
 
-`@cxing/cdg-loader` accepts different input sources and returns one normalized track payload shape for audio or video playback.
+`@cxing/media-loader` accepts different input sources and returns one normalized track payload shape for audio or video playback.
 
 Metadata extraction behavior:
 
@@ -27,7 +27,7 @@ Use loader when:
 
 ## Logging Behavior
 
-- Loader internals emit scope-prefixed logs (for example `[cdg-loader-core]`, `[cdg-loader]`, `[cdg-loader-worker]`).
+- Loader internals emit scope-prefixed logs (for example `[media-loader-core]`, `[media-loader]`, `[media-loader-worker]`).
 - `options.debug` enables debug trace output only.
 - `info()` and `error()` events are not debug-gated:
   - metadata filename fallback is logged at `info`
@@ -36,7 +36,7 @@ Use loader when:
 ## Minimal Usage
 
 ```ts
-import { createLoader } from '@cxing/cdg-loader';
+import { createLoader } from '@cxing/media-loader';
 
 const loader = createLoader();
 const loadedTrack = await loader.load({
@@ -62,7 +62,7 @@ loadedTrack.cdgBytes;
 
 ## Public Constants And Functions
 
-Everything listed below is publicly exported from `@cxing/cdg-loader` for direct developer use.
+Everything listed below is publicly exported from `@cxing/media-loader` for direct developer use.
 
 ### Loader API Functions
 
