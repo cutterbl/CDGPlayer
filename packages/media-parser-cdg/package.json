@@ -1,6 +1,6 @@
 {
   "name": "@cxing/media-parser-cdg",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "CD+G format parser, instruction execution, and frame rendering engine.",
   "keywords": [
     "cdg",

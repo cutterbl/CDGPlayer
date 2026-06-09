@@ -1,6 +1,6 @@
 {
   "name": "@cxing/media-core",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Shared media contracts, parser interfaces, and runtime primitives.",
   "keywords": [
     "cdg",

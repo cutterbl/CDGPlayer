@@ -1,6 +1,6 @@
 {
   "name": "@cxing/media-player",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Media playback orchestration, timeline sync, and renderer dispatch.",
   "keywords": [
     "cdg",

@@ -1,3 +1,14 @@
+## 2.0.1 (2026-06-09)
+
+### 🩹 Fixes
+
+- **deps:** Update workspace dependencies and SoundTouchJS v2.0.4 in… ([#41](https://github.com/cutterbl/CDGPlayer/pull/41))
+
+### ❤️ Thank You
+
+- Stephen Blades
+- Steve 'Cutter' Blades
+
 # 2.0.0 (2026-06-09)
 
 ### 🚀 Features
