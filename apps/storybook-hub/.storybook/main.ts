@@ -1,13 +1,15 @@
+import { fileURLToPath } from "node:url";
 import type { StorybookConfig } from '@storybook/web-components-vite';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 const isStaticBuild = process.env.STORYBOOK_BUILD === 'true';
 
 const config: StorybookConfig = {
   stories: ['../docs/**/*.mdx'],
-  addons: ['@storybook/addon-links', '@storybook/addon-docs'],
+  addons: [getAbsolutePath("@storybook/addon-links"), getAbsolutePath("@storybook/addon-docs")],
   framework: {
-    name: '@storybook/web-components-vite',
+    name: getAbsolutePath("@storybook/web-components-vite"),
     options: {},
   },
   refs: isStaticBuild
@@ -41,6 +43,7 @@ const config: StorybookConfig = {
 
     return {
       ...viteConfig,
+      plugins: [...(viteConfig.plugins ?? []), nxViteTsPaths()],
       root: resolve(import.meta.dirname, '..'),
       resolve: {
         ...viteConfig.resolve,
@@ -57,3 +60,7 @@ const config: StorybookConfig = {
 };
 
 export default config;
+
+function getAbsolutePath(value: string): string {
+  return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
+}

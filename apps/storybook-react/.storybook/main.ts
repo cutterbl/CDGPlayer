@@ -1,22 +1,24 @@
+import { fileURLToPath } from "node:url";
 import type { StorybookConfig } from '@storybook/react-vite';
-import { resolve } from 'node:path';
+import { resolve, dirname } from 'node:path';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 const config: StorybookConfig = {
   stories: ['../stories/**/*.stories.@(ts|tsx)', '../stories/**/*.mdx'],
-  addons: ['@storybook/addon-links', '@storybook/addon-docs'],
+  addons: [getAbsolutePath("@storybook/addon-links"), getAbsolutePath("@storybook/addon-docs")],
   framework: {
-    name: '@storybook/react-vite',
+    name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
   docs: {
-    defaultName: 'Documentation',
-    autodocs: true,
+    defaultName: 'Documentation'
   },
   viteFinal: async (viteConfig) => {
     const existingAlias = viteConfig.resolve?.alias;
 
     return {
       ...viteConfig,
+      plugins: [...(viteConfig.plugins ?? []), nxViteTsPaths()],
       root: resolve(import.meta.dirname, '..'),
       resolve: {
         ...viteConfig.resolve,
@@ -37,3 +39,7 @@ const config: StorybookConfig = {
 };
 
 export default config;
+
+function getAbsolutePath(value: string): string {
+  return dirname(fileURLToPath(import.meta.resolve(`${value}/package.json`)));
+}

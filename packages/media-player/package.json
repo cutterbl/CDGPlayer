@@ -42,9 +42,9 @@
   ],
   "sideEffects": false,
   "dependencies": {
-    "@cxing/media-parser-cdg": "workspace:*",
-    "@cxing/media-loader": "workspace:*",
     "@cxing/logger": "workspace:*",
-    "@soundtouchjs/audio-worklet": "^1.0.10"
+    "@cxing/media-loader": "workspace:*",
+    "@cxing/media-parser-cdg": "workspace:*",
+    "@soundtouchjs/audio-worklet": "^2.0.4"
   }
 }

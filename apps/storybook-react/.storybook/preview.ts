@@ -17,6 +17,7 @@ const stopPlaybackOnStoryChange: Preview['decorators'][number] = (
 
 const preview: Preview = {
   decorators: [stopPlaybackOnStoryChange],
+
   parameters: {
     controls: {
       matchers: {
@@ -30,6 +31,8 @@ const preview: Preview = {
       },
     },
   },
+
+  tags: ['autodocs']
 };
 
 export default preview;
