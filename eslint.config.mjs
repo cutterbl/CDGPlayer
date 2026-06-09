@@ -1,59 +1,55 @@
+// For more info, see https://github.com/storybookjs/eslint-plugin-storybook#configuration-flat-config-format
+import storybook from "eslint-plugin-storybook";
+
 import nxPlugin from '@nx/eslint-plugin';
 
-export default [
-  {
-    ignores: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/.dist/**',
-      '**/.tsbuild/**',
-      '**/coverage/**',
-      '.nx/**',
-      '**/vite.config.*.timestamp*',
-      '**/vitest.config.*.timestamp*',
+export default [{
+  ignores: [
+    '**/node_modules/**',
+    '**/dist/**',
+    '**/.dist/**',
+    '**/.tsbuild/**',
+    '**/coverage/**',
+    '.nx/**',
+    '**/vite.config.*.timestamp*',
+    '**/vitest.config.*.timestamp*',
+  ],
+}, ...nxPlugin.configs['flat/base'], ...nxPlugin.configs['flat/typescript'], ...nxPlugin.configs['flat/javascript'], {
+  files: ['**/*.{ts,tsx,js,jsx}'],
+  plugins: {
+    '@nx': nxPlugin,
+  },
+  rules: {
+    '@nx/enforce-module-boundaries': [
+      'error',
+      {
+        enforceBuildableLibDependency: true,
+        allow: [
+          '@cxing/framework-demo-app',
+          '@cxing/framework-demo-styles',
+          '@cxing/demo-app-element',
+        ],
+        depConstraints: [
+          {
+            sourceTag: '*',
+            onlyDependOnLibsWithTags: ['*'],
+          },
+        ],
+      },
+    ],
+    '@typescript-eslint/no-explicit-any': 'error',
+  },
+}, {
+  files: ['**/*.{spec,test}.{ts,tsx,js,jsx}'],
+  rules: {
+    '@typescript-eslint/no-non-null-assertion': 'off',
+    '@typescript-eslint/no-unused-vars': [
+      'warn',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrorsIgnorePattern: '^_',
+      },
     ],
   },
-  ...nxPlugin.configs['flat/base'],
-  ...nxPlugin.configs['flat/typescript'],
-  ...nxPlugin.configs['flat/javascript'],
-  {
-    files: ['**/*.{ts,tsx,js,jsx}'],
-    plugins: {
-      '@nx': nxPlugin,
-    },
-    rules: {
-      '@nx/enforce-module-boundaries': [
-        'error',
-        {
-          enforceBuildableLibDependency: true,
-          allow: [
-            '@cxing/framework-demo-app',
-            '@cxing/framework-demo-styles',
-            '@cxing/demo-app-element',
-          ],
-          depConstraints: [
-            {
-              sourceTag: '*',
-              onlyDependOnLibsWithTags: ['*'],
-            },
-          ],
-        },
-      ],
-      '@typescript-eslint/no-explicit-any': 'error',
-    },
-  },
-  {
-    files: ['**/*.{spec,test}.{ts,tsx,js,jsx}'],
-    rules: {
-      '@typescript-eslint/no-non-null-assertion': 'off',
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-    },
-  },
-];
+}, ...storybook.configs["flat/recommended"]];

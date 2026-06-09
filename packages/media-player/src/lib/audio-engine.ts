@@ -20,7 +20,10 @@ export interface CdgAudioEngine {
 }
 
 type SoundTouchNodeConstructor = new (
-  context: BaseAudioContext,
+  args: {
+    context: BaseAudioContext;
+    outputChannelCount?: 1 | 2;
+  },
 ) => SoundTouchNodeLike;
 
 type SoundTouchNodeModule = {
@@ -39,7 +42,7 @@ type SoundTouchNodeLike = AudioNode & {
 };
 
 const loadSoundTouchNodeModule = async (): Promise<SoundTouchNodeModule> =>
-  import('@soundtouchjs/audio-worklet') as Promise<SoundTouchNodeModule>;
+  import('@soundtouchjs/audio-worklet');
 
 class NativeAudioEngine implements CdgAudioEngine {
   readonly mode = 'native' as const;
@@ -270,7 +273,7 @@ class WorkletAudioEngine implements CdgAudioEngine {
       const sourceNode = context.createMediaElementSource(this.media);
       const gainNode = context.createGain();
       gainNode.gain.value = this.media.volume;
-      const workletNode = new SoundTouchNode(context);
+      const workletNode = new SoundTouchNode({ context });
 
       sourceNode.connect(workletNode);
       workletNode.connect(gainNode);

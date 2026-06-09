@@ -11,8 +11,11 @@ const soundTouchMocks = vi.hoisted(() => {
     connect = vi.fn();
     disconnect = vi.fn();
 
-    constructor(context: BaseAudioContext) {
-      void context;
+    constructor(args: {
+      context: BaseAudioContext;
+      outputChannelCount?: 1 | 2;
+    }) {
+      void args;
     }
   }
 
