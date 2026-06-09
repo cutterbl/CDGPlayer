@@ -1,3 +1,18 @@
+# 2.0.0 (2026-06-09)
+
+### 🚀 Features
+
+- ⚠️  Migrate to media packages and refresh CI tooling ([#40](https://github.com/cutterbl/CDGPlayer/pull/40))
+
+### ⚠️  Breaking Changes
+
+- Migrate to media packages and refresh CI tooling  ([#40](https://github.com/cutterbl/CDGPlayer/pull/40))
+  Legacy cdg-* package names and import paths are replaced by media-* packages.
+
+### ❤️ Thank You
+
+- Steve 'Cutter' Blades
+
 ## 1.2.0 (2026-04-28)
 
 ### 🚀 Features
