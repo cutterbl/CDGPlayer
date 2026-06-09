@@ -112,6 +112,7 @@ This is intentional, not accidental legacy.
 
 - UX language is `tempo` for singers and product docs.
 - SoundTouchJS worklet examples drive source speed via `playbackRate` to keep the processing pipeline stable.
+- SoundTouchJS v2+ requires creating `SoundTouchNode` with an options object (`new SoundTouchNode({ context })`) after calling `SoundTouchNode.register(...)`.
 - Controls preserve both names so adapters can migrate without breaking.
 
 ## Integration Guidance
